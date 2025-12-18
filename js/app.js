@@ -82,6 +82,15 @@ const initAdmin = () => {
 
     if (!form) return;
 
+    // Visual confirmation that JS is running
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> System Ready (Siap)';
+        setTimeout(() => {
+            submitBtn.innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
+        }, 2000);
+    }
+
     const renderHistory = (filterText = '') => {
         const data = DataStore.getAll();
         const filteredData = data.filter(item =>

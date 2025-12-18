@@ -16,79 +16,34 @@
         <div style="font-size: 1.5rem; font-weight: 700;">SnaDaily<span class="text-gradient">Cheker</span> Dashboard
         </div>
         <div style="display: flex; gap: 1rem; align-items: center;">
-            <button onclick="window.backupData()" class="action-btn" title="Backup Data (Download)"
-                style="color: var(--primary); border-color: var(--primary);">
-                <i class="ri-download-cloud-line"></i>
-            </button>
-            <label for="restoreInput" class="action-btn" title="Restore Data (Upload)"
-                style="color: var(--secondary); border-color: var(--secondary); cursor: pointer; margin: 0;">
-                <i class="ri-upload-cloud-line"></i>
-            </label>
-            <input type="file" id="restoreInput" accept=".json" style="display: none;"
-                onchange="window.restoreData(this)">
+        </div>
 
-            <span style="font-size: 0.9rem; color: var(--text-muted);">Admin Panel</span>
-            <div
-                style="width: 35px; height: 35px; background: var(--gradient-main); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--primary);">
-                <i class="ri-user-settings-line"></i>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="input-group">
+                <label class="input-label">Berat (kg)</label>
+                <input type="number" step="0.1" id="weight" class="glass-input" placeholder="0.0" required>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Metode</label>
+                <select id="method" class="glass-input" style="background-color: #0a0e17;">
+                    <option>Ternak sendiri</option>
+                    <option>Import dari luar negri</option>
+                    <option>Import dari luar pulau</option>
+                </select>
             </div>
         </div>
-    </nav>
 
-    <div class="container admin-grid">
+        <div class="input-group" id="importDateContainer" style="display: none; margin-top: 1rem;">
+            <label class="input-label">Tanggal Import</label>
+            <input type="date" id="importDate" class="glass-input">
+        </div>
 
-        <!-- Input Section -->
-        <div>
-            <div class="glass-panel animate-fade-in" style="padding: 2rem;">
-                <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-file-add-line" style="color: var(--secondary);"></i>
-                    Input Data Ikan
-                </h2>
-
-                <form id="fishForm">
-                    <input type="hidden" id="editId">
-                    <div class="input-group">
-                        <label class="input-label">Spesies Ikan</label>
-                        <input type="text" id="species" class="glass-input" placeholder="Contoh: Tuna Bluefin" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">Asal (Origin)</label>
-                        <input type="text" id="origin" class="glass-input" placeholder="Contoh: Maluku, Indonesia"
-                            required>
-                    </div>
-
-                    <div class="input-group" id="hatchDateContainer">
-                        <label class="input-label">Tanggal Menetas</label>
-                        <input type="date" id="catchDate" class="glass-input" required>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="input-group">
-                            <label class="input-label">Berat (kg)</label>
-                            <input type="number" step="0.1" id="weight" class="glass-input" placeholder="0.0" required>
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">Metode</label>
-                            <select id="method" class="glass-input" style="background-color: #0a0e17;">
-                                <option>Ternak sendiri</option>
-                                <option>Import dari luar negri</option>
-                                <option>Import dari luar pulau</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="input-group" id="importDateContainer" style="display: none; margin-top: 1rem;">
-                        <label class="input-label">Tanggal Import</label>
-                        <input type="date" id="importDate" class="glass-input">
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-                        <i class="ri-qr-code-line" style="margin-right: 8px;"></i>
-                        Generate ID & Simpan
-                    </button>
-                </form>
-            </div>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+            <i class="ri-qr-code-line" style="margin-right: 8px;"></i>
+            Generate ID & Simpan
+        </button>
+        </form>
+        </div>
         </div>
 
         <!-- History/Preview Section -->
@@ -115,9 +70,9 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 
-    <script src="js/app.js"></script>
+        <script src="js/app.js?v=2"></script>
 </body>
 
 </html>
