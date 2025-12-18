@@ -6,15 +6,6 @@
 // Storage Keys
 const DB_KEY = 'fish_auth_db';
 
-// Global Error Handler
-window.onerror = function (msg, url, line, col, error) {
-    const extra = !col ? '' : '\ncolumn: ' + col;
-    const err = !error ? '' : '\nerror: ' + error;
-    const detail = "Error: " + msg + "\nurl: " + url + "\nline: " + line + extra + err;
-    alert("Terjadi Kesalahan Aplikasi:\n" + detail);
-    return false;
-};
-
 // Utils
 const generateId = () => {
     return 'FISH-' + Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -28,15 +19,8 @@ const formatDate = (dateString) => {
 // Data Layer
 const DataStore = {
     getAll: () => {
-        try {
-            const data = localStorage.getItem(DB_KEY);
-            return data ? JSON.parse(data) : [];
-        } catch (e) {
-            console.error(e);
-            alert("Database corrupt, resetting data local.");
-            localStorage.setItem(DB_KEY, '[]');
-            return [];
-        }
+        const data = localStorage.getItem(DB_KEY);
+        return data ? JSON.parse(data) : [];
     },
 
     save: (fishData) => {
@@ -81,15 +65,6 @@ const initAdmin = () => {
     const historyContainer = document.getElementById('historyList');
 
     if (!form) return;
-
-    // Visual confirmation that JS is running
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> System Ready (Siap)';
-        setTimeout(() => {
-            submitBtn.innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
-        }, 2000);
-    }
 
     const renderHistory = (filterText = '') => {
         const data = DataStore.getAll();
@@ -153,11 +128,8 @@ const initAdmin = () => {
         const data = DataStore.find(id);
         if (!data) return;
 
-        const editIdEl = document.getElementById('editId');
-        if (editIdEl) editIdEl.value = data.id;
-
-        const speciesEl = document.getElementById('species');
-        if (speciesEl) speciesEl.value = data.species;
+        document.getElementById('editId').value = data.id;
+        document.getElementById('species').value = data.species;
         document.getElementById('origin').value = data.origin;
         document.getElementById('weight').value = data.weight;
 
@@ -300,40 +272,34 @@ const initAdmin = () => {
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        try {
 
-            const formData = {
-                species: document.getElementById('species').value,
-                origin: document.getElementById('origin').value,
-                catchDate: document.getElementById('catchDate').value,
-                weight: document.getElementById('weight').value,
-                method: document.getElementById('method').value,
-                importDate: document.getElementById('importDate').value
-            };
+        const formData = {
+            species: document.getElementById('species').value,
+            origin: document.getElementById('origin').value,
+            catchDate: document.getElementById('catchDate').value,
+            weight: document.getElementById('weight').value,
+            method: document.getElementById('method').value,
+            importDate: document.getElementById('importDate').value
+        };
 
-            const editIdEl = document.getElementById('editId');
-            const editId = editIdEl ? editIdEl.value : null;
-            if (editId) {
-                formData.id = editId;
-                DataStore.save(formData);
-                alert('Data Berhasil Diupdate!');
+        const editId = document.getElementById('editId').value;
+        if (editId) {
+            formData.id = editId;
+            DataStore.save(formData);
+            alert('Data Berhasil Diupdate!');
 
-                // Reset state
-                if (editIdEl) editIdEl.value = '';
-                document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
-            } else {
-                const result = DataStore.save(formData);
-                alert(`Data Tersimpan!\nID Batch: ${result.id}`);
-            }
-
-            form.reset();
-            // Reset hiding logic
-            methodSelect.dispatchEvent(new Event('change'));
-            renderHistory();
-        } catch (e) {
-            alert("Gagal menyimpan: " + e.message);
-            console.error(e);
+            // Reset state
+            document.getElementById('editId').value = '';
+            document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
+        } else {
+            const result = DataStore.save(formData);
+            alert(`Data Tersimpan!\nID Batch: ${result.id}`);
         }
+
+        form.reset();
+        // Reset hiding logic
+        methodSelect.dispatchEvent(new Event('change'));
+        renderHistory();
     });
 
     renderHistory();
