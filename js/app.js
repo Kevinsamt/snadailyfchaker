@@ -194,6 +194,45 @@ const initAdmin = () => {
         printWindow.document.close();
     };
 
+    // Backup & Restore
+    window.backupData = () => {
+        const data = DataStore.getAll();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "fish_data_backup_" + new Date().toISOString().split('T')[0] + ".json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    };
+
+    window.restoreData = (input) => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (Array.isArray(data)) {
+                    if (confirm(`Ditemukan ${data.length} data. Apakah anda yakin ingin me-restore (menimpa) data saat ini?`)) {
+                        localStorage.setItem(DB_KEY, JSON.stringify(data));
+                        alert('Data berhasil dipulihkan!');
+                        renderHistory(''); // Refresh
+                    }
+                } else {
+                    alert('Format file tidak valid!');
+                }
+            } catch (err) {
+                alert('Gagal membaca file backup.');
+                console.error(err);
+            }
+        };
+        reader.readAsText(file);
+        // Reset input so chance event fires again for same file
+        input.value = '';
+    };
+
     window.deleteFish = (id) => {
         if (confirm('Apakah anda yakin ingin menghapus data ini?')) {
             DataStore.delete(id);
@@ -204,6 +243,7 @@ const initAdmin = () => {
     // Handle Method Change
     const methodSelect = document.getElementById('method');
     const importDateContainer = document.getElementById('importDateContainer');
+
     const importDateInput = document.getElementById('importDate');
     const hatchDateContainer = document.getElementById('hatchDateContainer');
     const hatchDateInput = document.getElementById('catchDate');

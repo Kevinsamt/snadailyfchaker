@@ -16,6 +16,17 @@
         <div style="font-size: 1.5rem; font-weight: 700;">SnaDaily<span class="text-gradient">Cheker</span> Dashboard
         </div>
         <div style="display: flex; gap: 1rem; align-items: center;">
+            <button onclick="window.backupData()" class="action-btn" title="Backup Data (Download)"
+                style="color: var(--primary); border-color: var(--primary);">
+                <i class="ri-download-cloud-line"></i>
+            </button>
+            <label for="restoreInput" class="action-btn" title="Restore Data (Upload)"
+                style="color: var(--secondary); border-color: var(--secondary); cursor: pointer; margin: 0;">
+                <i class="ri-upload-cloud-line"></i>
+            </label>
+            <input type="file" id="restoreInput" accept=".json" style="display: none;"
+                onchange="window.restoreData(this)">
+
             <span style="font-size: 0.9rem; color: var(--text-muted);">Admin Panel</span>
             <div
                 style="width: 35px; height: 35px; background: var(--gradient-main); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--primary);">
