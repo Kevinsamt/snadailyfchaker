@@ -22,9 +22,21 @@ const DataStore = {
         const data = localStorage.getItem(DB_KEY);
         return data ? JSON.parse(data) : [];
     },
-    
+
     save: (fishData) => {
         const currentData = DataStore.getAll();
+
+        if (fishData.id) {
+            // Update existing
+            const index = currentData.findIndex(item => item.id === fishData.id);
+            if (index !== -1) {
+                currentData[index] = { ...currentData[index], ...fishData, timestamp: new Date().toISOString() }; // Update timestamp on edit? Maybe keep original? Let's update.
+                localStorage.setItem(DB_KEY, JSON.stringify(currentData));
+                return currentData[index];
+            }
+        }
+
+        // Create new
         const newEntry = {
             id: generateId(),
             timestamp: new Date().toISOString(),
@@ -34,10 +46,16 @@ const DataStore = {
         localStorage.setItem(DB_KEY, JSON.stringify(currentData));
         return newEntry;
     },
-    
+
     find: (id) => {
         const data = DataStore.getAll();
         return data.find(item => item.id === id);
+    },
+
+    delete: (id) => {
+        const data = DataStore.getAll();
+        const newData = data.filter(item => item.id !== id);
+        localStorage.setItem(DB_KEY, JSON.stringify(newData));
     }
 };
 
@@ -48,38 +66,199 @@ const initAdmin = () => {
 
     if (!form) return;
 
-    const renderHistory = () => {
+    const renderHistory = (filterText = '') => {
         const data = DataStore.getAll();
-        historyContainer.innerHTML = data.map(item => `
-            <div class="history-item animate-fade-in">
+        const filteredData = data.filter(item =>
+            item.species.toLowerCase().includes(filterText.toLowerCase()) ||
+            item.id.toLowerCase().includes(filterText.toLowerCase())
+        );
+
+        historyContainer.innerHTML = filteredData.map(item => `
+            <div class="history-item animate-fade-in" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <div style="font-weight: bold;">${item.species}</div>
                     <div style="font-size: 0.8rem; color: #a0aec0;">${item.id}</div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 0.9rem;">${item.origin}</div>
-                    <div style="font-size: 0.8rem; color: var(--secondary);">${formatDate(item.catchDate)}</div>
+                <div style="text-align: right; display: flex; align-items: center; gap: 1rem;">
+                    <div>
+                        <div style="font-size: 0.9rem;">${item.origin}</div>
+                        ${item.catchDate ? `<div style="font-size: 0.8rem; color: var(--secondary);">${formatDate(item.catchDate)}</div>` : ''}
+                        ${item.importDate ? `<div style="font-size: 0.8rem; color: #fbbf24;">Import: ${formatDate(item.importDate)}</div>` : ''}
+                    </div>
+                    <div style="display: flex;">
+                        <button class="action-btn btn-edit" onclick="window.editFish('${item.id}')" title="Edit Data">
+                            <i class="ri-pencil-line"></i>
+                        </button>
+                        <button class="action-btn btn-print" onclick="window.printCertificate('${item.id}')" title="Print Sertifikat">
+                            <i class="ri-printer-line"></i>
+                        </button>
+                        <button class="action-btn btn-delete" onclick="window.deleteFish('${item.id}')" title="Hapus Data">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         `).join('');
     };
 
+    // Search Handler
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            renderHistory(val);
+            if (clearSearchBtn) {
+                clearSearchBtn.style.display = val ? 'block' : 'none';
+            }
+        });
+    }
+
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            renderHistory('');
+            clearSearchBtn.style.display = 'none';
+        });
+    }
+
+    // Expose actions globally
+    window.editFish = (id) => {
+        const data = DataStore.find(id);
+        if (!data) return;
+
+        document.getElementById('editId').value = data.id;
+        document.getElementById('species').value = data.species;
+        document.getElementById('origin').value = data.origin;
+        document.getElementById('weight').value = data.weight;
+
+        const methodSelect = document.getElementById('method');
+        methodSelect.value = data.method;
+        // Trigger change to toggle fields
+        methodSelect.dispatchEvent(new Event('change'));
+
+        if (data.catchDate) document.getElementById('catchDate').value = data.catchDate;
+        if (data.importDate) document.getElementById('importDate').value = data.importDate;
+
+        // Visual cue
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const btn = document.querySelector('button[type="submit"]');
+        btn.innerHTML = '<i class="ri-save-line" style="margin-right: 8px;"></i> Update Data';
+        btn.classList.add('pulse-animation'); // Optional visual cue
+    };
+
+    window.printCertificate = (id) => {
+        const data = DataStore.find(id);
+        if (!data) return;
+
+        const printWindow = window.open('', '', 'width=800,height=600');
+        const certHtml = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Certificate of Authenticity - ${data.id}</title>
+                <style>
+                    body { font-family: 'Times New Roman', serif; padding: 40px; text-align: center; background: #fff; }
+                    .border { border: 10px double #1a365d; padding: 40px; height: 90%; position: relative; }
+                    .header { font-size: 40px; font-weight: bold; margin-bottom: 10px; color: #1a365d; text-transform: uppercase; letter-spacing: 2px; }
+                    .sub-header { font-size: 20px; font-style: italic; color: #718096; margin-bottom: 40px; }
+                    .content { font-size: 18px; line-height: 1.6; margin-bottom: 40px; }
+                    .fish-name { font-size: 32px; font-weight: bold; color: #2b6cb0; margin: 20px 0; }
+                    .footer { margin-top: 60px; display: flex; justify-content: space-around; }
+                    .signature { border-top: 1px solid #000; padding-top: 10px; width: 200px; }
+                    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; font-size: 100px; pointer-events: none; z-index: -1; }
+                </style>
+            </head>
+            <body>
+                <div class="border">
+                    <div class="watermark">ORIGINAL</div>
+                    <div class="header">Sertifikat Keaslian</div>
+                    <div class="sub-header">Certificate of Authenticity</div>
+
+                    <div class="content">
+                        Ini adalah sertifikasi bahwa produk di bawah ini adalah asli dan terverifikasi oleh sistem SnaDaily Tracking.
+                        <div class="fish-name">${data.species}</div>
+                        <div style="font-family: monospace; letter-spacing: 2px; margin-bottom: 20px;">ID: ${data.id}</div>
+                    </div>
+
+                    <div class="footer"></div>
+                </div>
+                <script>
+                    window.onload = function() { window.print(); }
+                </script>
+            </body>
+            </html>
+        `;
+        printWindow.document.write(certHtml);
+        printWindow.document.close();
+    };
+
+    window.deleteFish = (id) => {
+        if (confirm('Apakah anda yakin ingin menghapus data ini?')) {
+            DataStore.delete(id);
+            renderHistory(document.getElementById('searchInput').value);
+        }
+    };
+
+    // Handle Method Change
+    const methodSelect = document.getElementById('method');
+    const importDateContainer = document.getElementById('importDateContainer');
+    const importDateInput = document.getElementById('importDate');
+    const hatchDateContainer = document.getElementById('hatchDateContainer');
+    const hatchDateInput = document.getElementById('catchDate');
+
+    if (methodSelect && importDateContainer && importDateInput && hatchDateContainer && hatchDateInput) {
+        methodSelect.addEventListener('change', () => {
+            if (methodSelect.value.toLowerCase().includes('import')) {
+                // Show Import, Hide Hatch
+                importDateContainer.style.display = 'block';
+                importDateInput.required = true;
+
+                hatchDateContainer.style.display = 'none';
+                hatchDateInput.required = false;
+                hatchDateInput.value = '';
+            } else {
+                // Hide Import, Show Hatch
+                importDateContainer.style.display = 'none';
+                importDateInput.required = false;
+                importDateInput.value = '';
+
+                hatchDateContainer.style.display = 'block';
+                hatchDateInput.required = true;
+            }
+        });
+    }
+
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        
+
         const formData = {
             species: document.getElementById('species').value,
             origin: document.getElementById('origin').value,
             catchDate: document.getElementById('catchDate').value,
             weight: document.getElementById('weight').value,
-            method: document.getElementById('method').value
+            method: document.getElementById('method').value,
+            importDate: document.getElementById('importDate').value
         };
 
-        const result = DataStore.save(formData);
-        
-        // Show success
-        alert(`Data Tersimpan!\nID Batch: ${result.id}`);
+        const editId = document.getElementById('editId').value;
+        if (editId) {
+            formData.id = editId;
+            DataStore.save(formData);
+            alert('Data Berhasil Diupdate!');
+
+            // Reset state
+            document.getElementById('editId').value = '';
+            document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
+        } else {
+            const result = DataStore.save(formData);
+            alert(`Data Tersimpan!\nID Batch: ${result.id}`);
+        }
+
         form.reset();
+        // Reset hiding logic
+        methodSelect.dispatchEvent(new Event('change'));
         renderHistory();
     });
 
@@ -92,7 +271,7 @@ const initCustomer = () => {
     const input = document.getElementById('batchIdInput');
     const resultCard = document.getElementById('resultCard');
     const errorMsg = document.getElementById('errorMsg');
-    
+
     if (!searchBtn) return;
 
     const showResult = (data) => {
@@ -102,10 +281,28 @@ const initCustomer = () => {
 
         document.getElementById('res-species').textContent = data.species;
         document.getElementById('res-origin').textContent = data.origin;
-        document.getElementById('res-date').textContent = formatDate(data.catchDate);
+
+        const resDateEl = document.getElementById('res-date');
+        if (data.catchDate) {
+            resDateEl.parentElement.style.display = 'block';
+            resDateEl.textContent = formatDate(data.catchDate);
+        } else {
+            resDateEl.parentElement.style.display = 'none';
+        }
+
         document.getElementById('res-weight').textContent = data.weight + ' kg';
         document.getElementById('res-method').textContent = data.method;
         document.getElementById('res-id').textContent = data.id;
+
+        const importDateContainer = document.getElementById('res-import-date-container');
+        const importDateEl = document.getElementById('res-import-date');
+
+        if (data.importDate) {
+            importDateContainer.style.display = 'block';
+            importDateEl.textContent = formatDate(data.importDate);
+        } else {
+            importDateContainer.style.display = 'none';
+        }
     };
 
     const showError = () => {
@@ -120,11 +317,11 @@ const initCustomer = () => {
 
         // Simulate loading
         searchBtn.textContent = 'Verifying...';
-        
+
         setTimeout(() => {
             const data = DataStore.find(id);
             searchBtn.textContent = 'Check Authenticity';
-            
+
             if (data) {
                 showResult(data);
             } else {

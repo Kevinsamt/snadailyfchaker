@@ -162,7 +162,50 @@ body {
     display: grid;
     grid-template-columns: 1fr 1.5fr;
     gap: 2rem;
-    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.action-btn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-color);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.action-btn.btn-edit:hover {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.action-btn.btn-print {
+    color: #db2777;
+    border-color: #db2777;
+}
+
+/* Default pink tint */
+.action-btn.btn-print:hover {
+    background: #db2777;
+    border-color: #db2777;
+    color: white;
+}
+
+.action-btn.btn-delete:hover {
+    background: #ef4444;
+    border-color: #ef4444;
 }
 
 @media (max-width: 768px) {

@@ -35,6 +35,7 @@
                 </h2>
 
                 <form id="fishForm">
+                    <input type="hidden" id="editId">
                     <div class="input-group">
                         <label class="input-label">Spesies Ikan</label>
                         <input type="text" id="species" class="glass-input" placeholder="Contoh: Tuna Bluefin" required>
@@ -46,9 +47,8 @@
                             required>
                     </div>
 
-                    <div class="input-group">
-                        <label class="input-label">Tanggal Menetas <span style="font-size: 0.8em; opacity: 0.7;">(5 hari
-                                setelah keluar telur)</span></label>
+                    <div class="input-group" id="hatchDateContainer">
+                        <label class="input-label">Tanggal Menetas</label>
                         <input type="date" id="catchDate" class="glass-input" required>
                     </div>
 
@@ -67,6 +67,11 @@
                         </div>
                     </div>
 
+                    <div class="input-group" id="importDateContainer" style="display: none; margin-top: 1rem;">
+                        <label class="input-label">Tanggal Import</label>
+                        <input type="date" id="importDate" class="glass-input">
+                    </div>
+
                     <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
                         <i class="ri-qr-code-line" style="margin-right: 8px;"></i>
                         Generate ID & Simpan
@@ -78,10 +83,18 @@
         <!-- History/Preview Section -->
         <div>
             <div class="glass-panel animate-fade-in" style="padding: 2rem; height: 100%;">
-                <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-history-line" style="color: var(--primary);"></i>
-                    Riwayat Input
-                </h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ri-history-line" style="color: var(--primary);"></i>
+                        Riwayat
+                    </div>
+                    <div class="input-group" style="margin-bottom: 0; width: 60%; position: relative;">
+                        <input type="text" id="searchInput" class="glass-input" placeholder="Cari..."
+                            style="padding: 0.5rem 1rem; padding-right: 2rem; border-color: var(--primary); font-size: 0.9rem;">
+                        <i class="ri-close-line" id="clearSearchBtn"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); display: none;"></i>
+                    </div>
+                </div>
 
                 <div id="historyList" style="max-height: 500px; overflow-y: auto; padding-right: 0.5rem;">
                     <!-- Items will be injected here by JS -->
