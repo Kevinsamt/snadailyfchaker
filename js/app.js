@@ -128,8 +128,11 @@ const initAdmin = () => {
         const data = DataStore.find(id);
         if (!data) return;
 
-        document.getElementById('editId').value = data.id;
-        document.getElementById('species').value = data.species;
+        const editIdEl = document.getElementById('editId');
+        if (editIdEl) editIdEl.value = data.id;
+
+        const speciesEl = document.getElementById('species');
+        if (speciesEl) speciesEl.value = data.species;
         document.getElementById('origin').value = data.origin;
         document.getElementById('weight').value = data.weight;
 
@@ -282,14 +285,15 @@ const initAdmin = () => {
             importDate: document.getElementById('importDate').value
         };
 
-        const editId = document.getElementById('editId').value;
+        const editIdEl = document.getElementById('editId');
+        const editId = editIdEl ? editIdEl.value : null;
         if (editId) {
             formData.id = editId;
             DataStore.save(formData);
             alert('Data Berhasil Diupdate!');
 
             // Reset state
-            document.getElementById('editId').value = '';
+            if (editIdEl) editIdEl.value = '';
             document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
         } else {
             const result = DataStore.save(formData);
