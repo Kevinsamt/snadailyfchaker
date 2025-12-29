@@ -36,19 +36,42 @@ async function initDb() {
         console.log("Database connection error (might need env vars):", err.message);
     }
 }
+// Initialize Table Route (Manual Trigger)
+app.get('/api/init', async (req, res) => {
+    try {
+        await pool.query(`CREATE TABLE IF NOT EXISTS fish (
+            id TEXT PRIMARY KEY,
+            species TEXT,
+            origin TEXT,
+            weight REAL,
+            method TEXT,
+            "catchDate" TEXT,
+            "importDate" TEXT,
+            timestamp TEXT
+        )`);
+        res.json({ message: "Database initialized successfully (Table 'fish' checked/created)." });
+    } catch (err) {
+        console.error("Init Error:", err);
+        res.status(500).json({ error: err.message, stack: err.stack });
+    }
+});
+
 initDb();
 
 // Routes
 
 // Get all fish
 app.get('/api/fish', async (req, res) => {
+    console.log("GET /api/fish called");
     try {
         const result = await pool.query("SELECT * FROM fish ORDER BY timestamp DESC");
+        console.log("Query success, rows:", result.rows.length);
         res.json({
             "message": "success",
             "data": result.rows
         });
     } catch (err) {
+        console.error("GET Error:", err);
         res.status(400).json({ "error": err.message });
     }
 });
