@@ -323,7 +323,7 @@ const initAdmin = () => {
                     <div class="accent-bar"></div>
                     <div class="top-header">
                         <div class="brand">SnaDaily.</div>
-                        <div class="doc-name">Authenticity Card</div>
+                        <div class="doc-name">Certificate of Authenticity</div>
                     </div>
 
                     <div class="main-body">
