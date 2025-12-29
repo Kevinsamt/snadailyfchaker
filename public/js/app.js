@@ -579,9 +579,23 @@ const initCustomer = () => {
         const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
             (data.importDate && data.importDate.length > 0);
 
+        // Reset animation
+        resultCard.classList.remove('animate-reveal');
+        void resultCard.offsetWidth; // Trigger reflow
+
         if (isPremium) {
             resultCard.classList.add('premium-card');
+            resultCard.classList.add('animate-reveal'); // Trigger entrance animation
+
             document.querySelector('#resultCard h2').innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
+
+            // Play Sound
+            const audio = document.getElementById('premiumSound');
+            if (audio) {
+                audio.volume = 0.5;
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log("Audio autoplay blocked:", e));
+            }
 
             // Override Origin for Premium
             document.getElementById('res-origin-label').textContent = 'Variety / Species';
