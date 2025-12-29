@@ -178,29 +178,50 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
             const err = document.getElementById('errorMsg');
+            const btn = document.querySelector('.btn-login');
+            const originalBtnText = btn.innerHTML;
 
-            // Hardcoded Credentials (Requested by User)
-            if (u === 'bettatumedan' && p === 'snadailybetta') {
-                // Set Session Token
-                sessionStorage.setItem('sna_admin_token', 'valid');
+            // Loading State
+            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Memeriksa...';
+            btn.disabled = true;
 
-                // Animasi Sukses
-                const btn = document.querySelector('.btn-login');
-                btn.innerHTML = '<i class="ri-check-line"></i> Berhasil';
-                btn.style.background = '#10b981';
+            try {
+                // Server-Side Check
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
 
-                setTimeout(() => {
-                    window.location.href = 'admin.html';
-                }, 800);
-            } else {
+                const data = await response.json();
+
+                if (data.success) {
+                    // Set Session Token from Server
+                    sessionStorage.setItem('sna_admin_token', data.token);
+
+                    // Success Animation
+                    btn.innerHTML = '<i class="ri-check-line"></i> Berhasil';
+                    btn.style.background = '#10b981';
+
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 800);
+                } else {
+                    throw new Error('Invalid credentials');
+                }
+            } catch (error) {
                 // Error Animation
                 err.style.display = 'block';
+                // Reset Button
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+
                 document.querySelector('.login-card').animate([
                     { transform: 'translateX(0)' },
                     { transform: 'translateX(-10px)' },

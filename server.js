@@ -73,6 +73,21 @@ app.get('/api/init', async (req, res) => {
     }
 });
 
+// LOGIN ROUTE (Server-Side Security)
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // Secure Credentials (Hidden on Server)
+    const VALID_USER = 'bettatumedan';
+    const VALID_PASS = 'snadailybetta';
+
+    if (username === VALID_USER && password === VALID_PASS) {
+        res.json({ success: true, token: 'secure_server_token_' + Date.now() });
+    } else {
+        res.status(401).json({ success: false, message: 'Invalid Credentials' });
+    }
+});
+
 initDb();
 
 // Routes
