@@ -13,8 +13,15 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public folder
 
 // Database Setup
+// Fix SSL for Supabase/Vercel
+let connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+if (connectionString && connectionString.includes('sslmode=require')) {
+    connectionString = connectionString.replace('?sslmode=require', '');
+    connectionString = connectionString.replace('&sslmode=require', '');
+}
+
 const pool = new Pool({
-    connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+    connectionString,
     ssl: {
         rejectUnauthorized: false
     }
