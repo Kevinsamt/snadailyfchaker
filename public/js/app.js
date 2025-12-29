@@ -223,7 +223,8 @@ const initAdmin = () => {
                 .inner-border {
                     width: calc(100% - 60px); height: calc(100% - 60px);
                     border: 2px solid #d4af37; position: relative;
-                    display: flex; flex-direction: column; justify-content: center; align-items: center;
+                    display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+                    padding-top: 40px;
                 }
                 .corner-ornament {
                     position: absolute; width: 100px; height: 100px;
@@ -238,22 +239,38 @@ const initAdmin = () => {
                     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
                     font-size: 15rem; opacity: 0.03; color: #d4af37; font-family: 'Cinzel', serif; white-space: nowrap; pointer-events: none;
                 }
+                
+                .brand-logo-premium {
+                    width: 150px; margin-bottom: 20px;
+                    border-radius: 50%; /* Optional: nice round look if square image */
+                    border: 2px solid #d4af37;
+                }
+
                 .header-title { font-family: 'Cinzel', serif; font-size: 3.5rem; letter-spacing: 5px; margin-bottom: 10px; text-shadow: 2px 2px 4px #000; }
-                .header-subtitle { font-size: 1.2rem; letter-spacing: 3px; border-bottom: 1px solid #d4af37; padding-bottom: 20px; margin-bottom: 40px; font-style: italic; }
+                .header-subtitle { font-size: 1.2rem; letter-spacing: 3px; border-bottom: 1px solid #d4af37; padding-bottom: 20px; margin-bottom: 30px; font-style: italic; }
                 
-                .main-content { text-align: center; max-width: 80%; }
+                .main-content { text-align: center; max-width: 80%; flex-grow: 1; }
                 .cert-text { font-size: 1.2rem; margin-bottom: 20px; color: #ccc; }
-                .fish-name { font-size: 4rem; font-weight: 700; margin: 10px 0 30px 0; color: #fff; text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); font-style: italic;}
+                .fish-name { font-size: 4rem; font-weight: 700; margin: 10px 0 20px 0; color: #fff; text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); font-style: italic;}
                 
-                .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; text-align: left; border-top: 1px solid #333; border-bottom: 1px solid #333; padding: 20px; }
+                .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; text-align: left; border-top: 1px solid #333; border-bottom: 1px solid #333; padding: 20px; }
                 .detail-item { font-size: 1.1rem; }
                 .detail-label { color: #888; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
                 .detail-value { color: #d4af37; font-weight: bold; font-family: 'Cinzel', serif; }
 
-                .seal-area { margin-top: 40px; position: relative; width: 150px; height: 150px; border: 3px solid #d4af37; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #d4af37; margin-left: auto; margin-right: auto;}
-                .seal-text { font-family: 'Cinzel', serif; font-size: 0.8rem; text-align: center; transform: rotate(-5deg); font-weight: bold; letter-spacing: 2px;}
+                .footer-area {
+                    display: flex; justify-content: space-between; align-items: center; width: 80%; margin-bottom: 30px;
+                }
+                .seal-area { position: relative; width: 120px; height: 120px; border: 3px solid #d4af37; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #d4af37; }
+                .seal-text { font-family: 'Cinzel', serif; font-size: 0.7rem; text-align: center; transform: rotate(-5deg); font-weight: bold; letter-spacing: 2px;}
+
+                .partner-logo {
+                    width: 80px;
+                    border-radius: 50%;
+                    border: 1px solid #d4af37;
+                }
                 
-                .footer-id { margin-top: 30px; font-family: 'Courier New', monospace; letter-spacing: 5px; color: #555; font-size: 0.9rem; }
+                .footer-id { font-family: 'Courier New', monospace; letter-spacing: 5px; color: #555; font-size: 0.9rem; position: absolute; bottom: 10px; }
             `;
 
             contentHtml = `
@@ -265,11 +282,13 @@ const initAdmin = () => {
                         <div class="corner-ornament bottom-right"></div>
                         <div class="corner-ornament bottom-left"></div>
 
+                        <img src="/img/bettatumedan.jpg" class="brand-logo-premium" alt="BettatuMedan">
+
                         <div class="header-title">CERTIFICATE</div>
                         <div class="header-subtitle">OF AUTHENTICITY & LINEAGE</div>
 
                         <div class="main-content">
-                            <div class="cert-text">This document certifies that the specimen described below is a genuine, high-quality export grade fish from the prestigious farms of Thailand.</div>
+                            <div class="cert-text">This document certifies that the specimen described below is a genuine, high-quality export grade fish.</div>
                             <div class="fish-name">${data.species}</div>
                             
                             <div class="details-grid">
@@ -280,8 +299,20 @@ const initAdmin = () => {
                             </div>
                         </div>
 
-                        <div class="seal-area">
-                            <div class="seal-text">SNADAILY<br>OFFICIAL<br>VERIFIED</div>
+                        <div class="footer-area">
+                            <div style="text-align: center;">
+                                <div style="border-bottom: 1px solid #d4af37; width: 200px; margin-bottom: 10px;"></div>
+                                <div style="font-family: 'Cinzel', serif; color: #d4af37;">Authorized Signature</div>
+                            </div>
+                            
+                            <div class="seal-area">
+                                <div class="seal-text">SNADAILY<br>OFFICIAL<br>VERIFIED</div>
+                            </div>
+
+                            <div style="text-align: center;">
+                                <img src="/img/fishkinian.jpg" class="partner-logo" alt="Fishkinian">
+                                <div style="color: #666; font-size: 0.8rem; margin-top: 5px;">Powered By Fishkinian</div>
+                            </div>
                         </div>
 
                         <div class="footer-id">ID: ${data.id}</div>
@@ -302,8 +333,8 @@ const initAdmin = () => {
                 }
                 .accent-bar { position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: linear-gradient(90deg, #10b981, #059669); }
                 .top-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
-                .brand { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700; color: #059669; letter-spacing: -1px; }
-                .doc-name { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; color: #6b7280; font-weight: 600; }
+                .brand-img { width: 100px; }
+                .doc-name { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; color: #6b7280; font-weight: 600; margin-top: 10px;}
 
                 .main-body { margin-bottom: 50px; }
                 .label-text { font-size: 0.9rem; color: #6b7280; margin-bottom: 5px; }
@@ -323,7 +354,7 @@ const initAdmin = () => {
                 <div class="cert-card">
                     <div class="accent-bar"></div>
                     <div class="top-header">
-                        <div class="brand">SnaDaily.</div>
+                        <img src="/img/bettatumedan.jpg" class="brand-img" alt="BettatuMedan">
                         <div class="doc-name">Certificate of Authenticity</div>
                     </div>
 
