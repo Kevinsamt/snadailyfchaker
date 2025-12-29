@@ -207,6 +207,9 @@ const initAdmin = () => {
         const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
             (data.importDate && data.importDate.toLowerCase().includes('thailand'));
 
+        const verificationUrl = `https://snadailyfchaker.vercel.app/?id=${data.id}`;
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verificationUrl)}`;
+
         const printWindow = window.open('', '', 'width=800,height=600');
 
         // CSS Styles based on Type
@@ -273,6 +276,7 @@ const initAdmin = () => {
                     border-radius: 50%;
                     border: 1px solid #d4af37;
                 }
+                .qr-code { border: 2px solid #d4af37; border-radius: 8px; }
                 
                 .footer-id { font-family: 'Courier New', monospace; letter-spacing: 5px; color: #555; font-size: 0.9rem; position: absolute; bottom: 10px; }
             `;
@@ -305,8 +309,8 @@ const initAdmin = () => {
 
                         <div class="footer-area">
                             <div style="text-align: center;">
-                                <div style="border-bottom: 1px solid #d4af37; width: 200px; margin-bottom: 10px;"></div>
-                                <div style="font-family: 'Cinzel', serif; color: #d4af37;">Authorized Signature</div>
+                                <img src="${qrCodeUrl}" class="qr-code" width="100" height="100" alt="Scan Me">
+                                <div style="font-family: 'Cinzel', serif; color: #d4af37; margin-top:5px; font-size: 0.7rem;">SCAN VALIDATION</div>
                             </div>
                             
                             <div class="seal-area">
@@ -351,7 +355,7 @@ const initAdmin = () => {
 
                 .footer { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; }
                 .sign-area { border-top: 1px solid #d1d5db; width: 200px; padding-top: 10px; font-size: 0.9rem; color: #4b5563; }
-                .qr-placeholder { width: 60px; height: 60px; background: #f3f4f6; display: flex; justify-content: center; align-items: center; color: #9ca3af; font-size: 0.7rem; border-radius: 8px;}
+                .qr-placeholder { width: 80px; height: 80px;}
             `;
 
             contentHtml = `
@@ -385,7 +389,7 @@ const initAdmin = () => {
 
                     <div class="footer">
                         <div class="sign-area">Authorized Signature</div>
-                        <div class="qr-placeholder">SCAN ME</div>
+                        <img src="${qrCodeUrl}" class="qr-placeholder" alt="Scan Me">
                     </div>
                 </div>
             `;
@@ -608,11 +612,23 @@ const initCustomer = () => {
 
             if (data) {
                 showResult(data);
+                // Update URL without reload to make it shareable
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('id', id);
+                window.history.pushState({}, '', newUrl);
             } else {
                 showError();
             }
         }, 800);
     });
+
+    // Auto-Search if ID is in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const idFromUrl = urlParams.get('id');
+    if (idFromUrl) {
+        input.value = idFromUrl;
+        searchBtn.click();
+    }
 };
 
 // Initialize based on page
