@@ -322,7 +322,7 @@ const initAdmin = () => {
                             
                             <div style="text-align: right;">
                                 <img src="/img/fishkinian.jpg" class="partner-logo" alt="Fishkinian">
-                                <div style="color: #666; font-size: 0.6rem; margin-top: 2px;">Powered By Fishkinian</div>
+                                <div style="color: #666; font-size: 0.6rem; margin-top: 2px;">Support By Fishkinian</div>
                             </div>
                         </div>
 
