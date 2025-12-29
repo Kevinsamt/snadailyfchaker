@@ -200,38 +200,170 @@ const initAdmin = () => {
         const data = await DataStore.find(id);
         if (!data) return;
 
+        const isPremium = data.origin && data.origin.toLowerCase().includes('thailand');
+
         const printWindow = window.open('', '', 'width=800,height=600');
+
+        // CSS Styles based on Type
+        let styles, contentHtml;
+
+        if (isPremium) {
+            // PREMIUM LUXURY DESIGN (Thailand)
+            styles = `
+                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700&display=swap');
+                body { margin: 0; padding: 0; background: #0a0a0a; color: #d4af37; font-family: 'Playfair Display', serif; -webkit-print-color-adjust: exact; }
+                .cert-container { 
+                    width: 100%; height: 100vh; box-sizing: border-box; 
+                    border: 20px solid #d4af37; 
+                    background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
+                    display: flex; flex-direction: column; justify-content: center; align-items: center; 
+                    position: relative; overflow: hidden;
+                }
+                .inner-border {
+                    width: calc(100% - 60px); height: calc(100% - 60px);
+                    border: 2px solid #d4af37; position: relative;
+                    display: flex; flex-direction: column; justify-content: center; align-items: center;
+                }
+                .corner-ornament {
+                    position: absolute; width: 100px; height: 100px;
+                    border-top: 5px solid #d4af37; border-left: 5px solid #d4af37;
+                }
+                .top-left { top: 20px; left: 20px; }
+                .top-right { top: 20px; right: 20px; transform: rotate(90deg); }
+                .bottom-right { bottom: 20px; right: 20px; transform: rotate(180deg); }
+                .bottom-left { bottom: 20px; left: 20px; transform: rotate(270deg); }
+
+                .watermark {
+                    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+                    font-size: 15rem; opacity: 0.03; color: #d4af37; font-family: 'Cinzel', serif; white-space: nowrap; pointer-events: none;
+                }
+                .header-title { font-family: 'Cinzel', serif; font-size: 3.5rem; letter-spacing: 5px; margin-bottom: 10px; text-shadow: 2px 2px 4px #000; }
+                .header-subtitle { font-size: 1.2rem; letter-spacing: 3px; border-bottom: 1px solid #d4af37; padding-bottom: 20px; margin-bottom: 40px; font-style: italic; }
+                
+                .main-content { text-align: center; max-width: 80%; }
+                .cert-text { font-size: 1.2rem; margin-bottom: 20px; color: #ccc; }
+                .fish-name { font-size: 4rem; font-weight: 700; margin: 10px 0 30px 0; color: #fff; text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); font-style: italic;}
+                
+                .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; text-align: left; border-top: 1px solid #333; border-bottom: 1px solid #333; padding: 20px; }
+                .detail-item { font-size: 1.1rem; }
+                .detail-label { color: #888; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+                .detail-value { color: #d4af37; font-weight: bold; font-family: 'Cinzel', serif; }
+
+                .seal-area { margin-top: 40px; position: relative; width: 150px; height: 150px; border: 3px solid #d4af37; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #d4af37; margin-left: auto; margin-right: auto;}
+                .seal-text { font-family: 'Cinzel', serif; font-size: 0.8rem; text-align: center; transform: rotate(-5deg); font-weight: bold; letter-spacing: 2px;}
+                
+                .footer-id { margin-top: 30px; font-family: 'Courier New', monospace; letter-spacing: 5px; color: #555; font-size: 0.9rem; }
+            `;
+
+            contentHtml = `
+                <div class="cert-container">
+                    <div class="watermark">ROYALTY</div>
+                    <div class="inner-border">
+                        <div class="corner-ornament top-left"></div>
+                        <div class="corner-ornament top-right"></div>
+                        <div class="corner-ornament bottom-right"></div>
+                        <div class="corner-ornament bottom-left"></div>
+
+                        <div class="header-title">CERTIFICATE</div>
+                        <div class="header-subtitle">OF AUTHENTICITY & LINEAGE</div>
+
+                        <div class="main-content">
+                            <div class="cert-text">This document certifies that the specimen described below is a genuine, high-quality export grade fish from the prestigious farms of Thailand.</div>
+                            <div class="fish-name">${data.species}</div>
+                            
+                            <div class="details-grid">
+                                <div class="detail-item"><div class="detail-label">Origin</div><div class="detail-value">${data.origin}</div></div>
+                                <div class="detail-item"><div class="detail-label">Weight</div><div class="detail-value">${data.weight} kg</div></div>
+                                <div class="detail-item"><div class="detail-label">Lineage / Method</div><div class="detail-value">${data.method}</div></div>
+                                <div class="detail-item"><div class="detail-label">Established</div><div class="detail-value">${data.importDate ? 'Imported: ' + formatDate(data.importDate) : 'Hatched: ' + formatDate(data.catchDate)}</div></div>
+                            </div>
+                        </div>
+
+                        <div class="seal-area">
+                            <div class="seal-text">SNADAILY<br>OFFICIAL<br>VERIFIED</div>
+                        </div>
+
+                        <div class="footer-id">ID: ${data.id}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // STANDARD BUT CLASSY DESIGN (Regular)
+            styles = `
+                @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap');
+                body { margin: 0; padding: 0; background: #fff; color: #1f2937; font-family: 'Outfit', sans-serif; -webkit-print-color-adjust: exact; }
+                .cert-card {
+                    width: 700px; height: 500px; margin: 50px auto;
+                    border: 1px solid #e5e7eb; border-radius: 12px;
+                    padding: 40px; box-sizing: border-box;
+                    background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* Shadow won't print usually but looks good on screen */
+                    position: relative; overflow: hidden;
+                }
+                .accent-bar { position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: linear-gradient(90deg, #10b981, #059669); }
+                .top-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+                .brand { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700; color: #059669; letter-spacing: -1px; }
+                .doc-name { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; color: #6b7280; font-weight: 600; }
+
+                .main-body { margin-bottom: 50px; }
+                .label-text { font-size: 0.9rem; color: #6b7280; margin-bottom: 5px; }
+                .fish-title { font-size: 2.5rem; font-weight: 600; color: #111827; margin: 0 0 5px 0; letter-spacing: -0.5px; }
+                .fish-id { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; color: #059669; background: #ecfdf5; padding: 4px 12px; border-radius: 20px; display: inline-block; }
+
+                .grid-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-top: 20px; border-top: 1px dashed #e5e7eb; margin-top: 20px;}
+                .info-box h4 { margin: 0 0 5px 0; font-size: 0.8rem; color: #9ca3af; text-transform: uppercase; }
+                .info-box p { margin: 0; font-size: 1.1rem; font-weight: 500; color: #374151; }
+
+                .footer { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; }
+                .sign-area { border-top: 1px solid #d1d5db; width: 200px; padding-top: 10px; font-size: 0.9rem; color: #4b5563; }
+                .qr-placeholder { width: 60px; height: 60px; background: #f3f4f6; display: flex; justify-content: center; align-items: center; color: #9ca3af; font-size: 0.7rem; border-radius: 8px;}
+            `;
+
+            contentHtml = `
+                <div class="cert-card">
+                    <div class="accent-bar"></div>
+                    <div class="top-header">
+                        <div class="brand">SnaDaily.</div>
+                        <div class="doc-name">Authenticity Card</div>
+                    </div>
+
+                    <div class="main-body">
+                        <div class="label-text">Verified Specimen</div>
+                        <h1 class="fish-title">${data.species}</h1>
+                        <div class="fish-id">${data.id}</div>
+
+                        <div class="grid-info">
+                            <div class="info-box">
+                                <h4>Origin</h4>
+                                <p>${data.origin}</p>
+                            </div>
+                            <div class="info-box">
+                                <h4>Weight</h4>
+                                <p>${data.weight} kg</p>
+                            </div>
+                            <div class="info-box">
+                                <h4>Date</h4>
+                                <p>${data.importDate ? formatDate(data.importDate) : formatDate(data.catchDate)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="footer">
+                        <div class="sign-area">Authorized Signature</div>
+                        <div class="qr-placeholder">SCAN ME</div>
+                    </div>
+                </div>
+            `;
+        }
+
         const certHtml = `
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Certificate of Authenticity - ${data.id}</title>
-                <style>
-                    body { font-family: 'Times New Roman', serif; padding: 40px; text-align: center; background: #fff; }
-                    .border { border: 10px double #1a365d; padding: 40px; height: 90%; position: relative; }
-                    .header { font-size: 40px; font-weight: bold; margin-bottom: 10px; color: #1a365d; text-transform: uppercase; letter-spacing: 2px; }
-                    .sub-header { font-size: 20px; font-style: italic; color: #718096; margin-bottom: 40px; }
-                    .content { font-size: 18px; line-height: 1.6; margin-bottom: 40px; }
-                    .fish-name { font-size: 32px; font-weight: bold; color: #2b6cb0; margin: 20px 0; }
-                    .footer { margin-top: 60px; display: flex; justify-content: space-around; }
-                    .signature { border-top: 1px solid #000; padding-top: 10px; width: 200px; }
-                    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; font-size: 100px; pointer-events: none; z-index: -1; }
-                </style>
+                <title>Sertifikat - ${data.id}</title>
+                <style>${styles}</style>
             </head>
             <body>
-                <div class="border">
-                    <div class="watermark">ORIGINAL</div>
-                    <div class="header">Sertifikat Keaslian</div>
-                    <div class="sub-header">Certificate of Authenticity</div>
-
-                    <div class="content">
-                        Ini adalah sertifikasi bahwa produk di bawah ini adalah asli dan terverifikasi oleh sistem SnaDaily Tracking.
-                        <div class="fish-name">${data.species}</div>
-                        <div style="font-family: monospace; letter-spacing: 2px; margin-bottom: 20px;">ID: ${data.id}</div>
-                    </div>
-
-                    <div class="footer"></div>
-                </div>
+                ${contentHtml}
                 <script>
                     window.onload = function() { window.print(); }
                 </script>
