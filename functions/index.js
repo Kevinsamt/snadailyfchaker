@@ -1,21 +1,23 @@
+const functions = require('firebase-functions');
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: true }));
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '.'))); // Serve static files
 
 // Database Setup
+// Note: We will need to set this environment variable in Firebase
+// using: firebase functions:config:set db.url="YOUR_POSTGRES_CONNECTION_STRING"
 const pool = new Pool({
-    connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
-    ssl: true // Force SSL
+    connectionString: functions.config().db ? functions.config().db.url : process.env.POSTGRES_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 // Initialize Table
@@ -33,7 +35,7 @@ async function initDb() {
         )`);
         console.log("Fish table ready.");
     } catch (err) {
-        console.log("Database connection error (might need env vars):", err.message);
+        console.log("Database connection error:", err.message);
     }
 }
 initDb();
@@ -143,12 +145,5 @@ app.delete('/api/fish/:id', async (req, res) => {
     }
 });
 
-// Export for Vercel
-module.exports = app;
-
-// Only listen if running locally
-if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
-}
+// Expose Express API as a single Cloud Function:
+exports.api = functions.https.onRequest(app);
