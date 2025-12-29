@@ -274,7 +274,7 @@ const initAdmin = () => {
                 }
                 .seal-area { width: 80px; height: 80px; border: 2px solid #d4af37; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #d4af37; font-size: 0.5rem; text-align: center; letter-spacing: 1px; font-family: 'Cinzel', serif; font-weight: bold;}
                 
-                .partner-logo { width: 60px; border-radius: 50%; border: 1px solid #d4af37; }
+
                 .qr-code { border: 2px solid #d4af37; border-radius: 6px; width: 70px; height: 70px;}
                 
                 .footer-id { font-family: 'Courier New', monospace; letter-spacing: 3px; color: #555; font-size: 0.8rem; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); }
@@ -320,10 +320,7 @@ const initAdmin = () => {
 
                             <img src="${qrCodeUrl}" class="qr-code" alt="Scan Me">
                             
-                            <div style="text-align: right;">
-                                <img src="/img/fishkinian.jpg" class="partner-logo" alt="Fishkinian">
-                                <div style="color: #666; font-size: 0.6rem; margin-top: 2px;">Support By Fishkinian</div>
-                            </div>
+
                         </div>
 
                         <div class="footer-id">ID: ${data.id}</div>
