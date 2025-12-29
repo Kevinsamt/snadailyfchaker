@@ -200,7 +200,8 @@ const initAdmin = () => {
         const data = await DataStore.find(id);
         if (!data) return;
 
-        const isPremium = data.origin && data.origin.toLowerCase().includes('thailand');
+        const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
+            (data.importDate && data.importDate.toLowerCase().includes('thailand'));
 
         const printWindow = window.open('', '', 'width=800,height=600');
 
