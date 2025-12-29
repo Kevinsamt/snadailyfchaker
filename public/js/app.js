@@ -300,7 +300,7 @@ const initAdmin = () => {
                             <div class="fish-name">${data.species}</div>
                             
                             <div class="details-grid">
-                                <div class="detail-item"><div class="detail-label">Origin</div><div class="detail-value">${data.origin}</div></div>
+                                <div class="detail-item"><div class="detail-label">Variety</div><div class="detail-value">${data.species}</div></div>
                                 <div class="detail-item"><div class="detail-label">Weight</div><div class="detail-value">${data.weight} kg</div></div>
                                 <div class="detail-item"><div class="detail-label">Lineage / Method</div><div class="detail-value">${data.method}</div></div>
                                 <div class="detail-item"><div class="detail-label">Date / Source</div><div class="detail-value">${data.importDate ? 'From: ' + data.importDate : 'Hatched: ' + formatDate(data.catchDate)}</div></div>
