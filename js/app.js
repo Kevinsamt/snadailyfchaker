@@ -5,7 +5,7 @@
  */
 
 // API Configuration
-const API_URL = 'http://localhost:3000/api/fish';
+const API_URL = '/api/fish';
 
 // Utils
 const generateId = () => {
@@ -30,6 +30,7 @@ const DataStore = {
             return json.data || [];
         } catch (error) {
             console.error('Error fetching data:', error);
+            // alert('Gagal mengambil data dari server. Pastikan server berjalan!'); // Optional: don't spam alerts on load
             return [];
         }
     },
@@ -360,6 +361,7 @@ const initAdmin = () => {
             methodSelect.dispatchEvent(new Event('change'));
             renderHistory();
         } catch (error) {
+            console.error('Submission failed:', error);
             alert('Gagal menyimpan data: ' + error.message);
         }
     });
