@@ -16,9 +16,13 @@ const generateId = () => {
 }
 
 const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    // Check if valid date
+    if (isNaN(date.getTime())) return dateString || '-';
+
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('id-ID', options);
+    return date.toLocaleDateString('id-ID', options);
 }
 
 // Data Layer (Async)
