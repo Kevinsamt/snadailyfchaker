@@ -534,9 +534,20 @@ const initCustomer = () => {
         const importDateContainer = document.getElementById('res-import-date-container');
         const importDateEl = document.getElementById('res-import-date');
 
+        const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
+            (data.importDate && data.importDate.toLowerCase().includes('thailand'));
+
+        if (isPremium) {
+            resultCard.classList.add('premium-card');
+            document.querySelector('#resultCard h2').innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
+        } else {
+            resultCard.classList.remove('premium-card');
+            document.querySelector('#resultCard h2').innerHTML = '<i class="ri-checkbox-circle-fill" style="color: var(--success); margin-right: 8px;"></i> Data Terverifikasi';
+        }
+
         if (data.importDate) {
             importDateContainer.style.display = 'block';
-            importDateEl.textContent = data.importDate; // Display country directly
+            importDateEl.textContent = data.importDate;
         } else {
             importDateContainer.style.display = 'none';
         }
