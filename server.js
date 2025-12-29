@@ -15,7 +15,9 @@ app.use(express.static(path.join(__dirname, 'public'))); // Serve static files f
 // Database Setup
 const pool = new Pool({
     connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
-    ssl: true // Force SSL
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 // Initialize Table
