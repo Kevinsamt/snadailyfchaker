@@ -232,6 +232,29 @@ body {
     display: none;
 }
 
+@media (max-width: 480px) {
+    .result-card {
+        padding: 1.5rem;
+    }
+
+    .verified-badge {
+        padding: 0.4rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    #res-species {
+        font-size: 1.5rem !important;
+    }
+
+    .glass-panel {
+        padding: 1.5rem !important;
+    }
+
+    h1 {
+        font-size: 2rem !important;
+    }
+}
+
 .verified-badge {
     display: inline-flex;
     align-items: center;
@@ -252,6 +275,21 @@ body {
     margin-top: 2rem;
     text-align: left;
 }
+
+@media (max-width: 480px) {
+    .fish-details {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .detail-item {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+}
+
 
 .detail-item strong {
     display: block;
@@ -441,12 +479,10 @@ body {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(
-        to right,
-        transparent,
-        rgba(255, 215, 0, 0.1),
-        transparent
-    );
+    background: linear-gradient(to right,
+            transparent,
+            rgba(255, 215, 0, 0.1),
+            transparent);
     transform: rotate(45deg);
     animation: goldShimmer 3s infinite linear;
     pointer-events: none;
@@ -469,10 +505,17 @@ body {
 }
 
 @keyframes goldShimmer {
-    0% { transform: translateX(-100%) rotate(45deg); }
-    100% { transform: translateX(100%) rotate(45deg); }
+    0% {
+        transform: translateX(-100%) rotate(45deg);
+    }
+
+    100% {
+        transform: translateX(100%) rotate(45deg);
+    }
 }
 
 @keyframes goldTextShine {
-    to { background-position: 200% center; }
+    to {
+        background-position: 200% center;
+    }
 }
