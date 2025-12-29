@@ -131,7 +131,7 @@ const initAdmin = () => {
                     <div>
                         <div style="font-size: 0.9rem;">${item.origin}</div>
                         ${item.catchDate ? `<div style="font-size: 0.8rem; color: var(--secondary);">${formatDate(item.catchDate)}</div>` : ''}
-                        ${item.importDate ? `<div style="font-size: 0.8rem; color: #fbbf24;">Import: ${formatDate(item.importDate)}</div>` : ''}
+                        ${item.importDate ? `<div style="font-size: 0.8rem; color: #fbbf24;">Import From: ${item.importDate}</div>` : ''}
                     </div>
                     <div style="display: flex;">
                         <button class="action-btn btn-edit" onclick="window.editFish('${item.id}')" title="Edit Data">
@@ -275,7 +275,7 @@ const initAdmin = () => {
                                 <div class="detail-item"><div class="detail-label">Origin</div><div class="detail-value">${data.origin}</div></div>
                                 <div class="detail-item"><div class="detail-label">Weight</div><div class="detail-value">${data.weight} kg</div></div>
                                 <div class="detail-item"><div class="detail-label">Lineage / Method</div><div class="detail-value">${data.method}</div></div>
-                                <div class="detail-item"><div class="detail-label">Established</div><div class="detail-value">${data.importDate ? 'Imported: ' + formatDate(data.importDate) : 'Hatched: ' + formatDate(data.catchDate)}</div></div>
+                                <div class="detail-item"><div class="detail-label">Date / Source</div><div class="detail-value">${data.importDate ? 'From: ' + data.importDate : 'Hatched: ' + formatDate(data.catchDate)}</div></div>
                             </div>
                         </div>
 
@@ -341,8 +341,8 @@ const initAdmin = () => {
                                 <p>${data.weight} kg</p>
                             </div>
                             <div class="info-box">
-                                <h4>Date</h4>
-                                <p>${data.importDate ? formatDate(data.importDate) : formatDate(data.catchDate)}</p>
+                                <h4>Source</h4>
+                                <p>${data.importDate ? data.importDate : formatDate(data.catchDate)}</p>
                             </div>
                         </div>
                     </div>
@@ -535,7 +535,7 @@ const initCustomer = () => {
 
         if (data.importDate) {
             importDateContainer.style.display = 'block';
-            importDateEl.textContent = formatDate(data.importDate);
+            importDateEl.textContent = data.importDate; // Display country directly
         } else {
             importDateContainer.style.display = 'none';
         }
