@@ -15,9 +15,17 @@ app.use(express.static(path.join(__dirname, 'public'))); // Serve static files f
 // Database Setup
 // Fix SSL for Supabase/Vercel
 let connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
-if (connectionString && connectionString.includes('sslmode=require')) {
-    connectionString = connectionString.replace('?sslmode=require', '');
-    connectionString = connectionString.replace('&sslmode=require', '');
+
+try {
+    // Safely parse and clean the URL
+    if (connectionString) {
+        const dbUrl = new URL(connectionString);
+        dbUrl.searchParams.delete('sslmode');
+        connectionString = dbUrl.toString();
+    }
+} catch (e) {
+    console.error("Error parsing DB URL:", e);
+    // Fallback to original if parsing fails
 }
 
 const pool = new Pool({
