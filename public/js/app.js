@@ -216,110 +216,113 @@ const initAdmin = () => {
         let styles, contentHtml;
 
         if (isPremium) {
-            // PREMIUM LUXURY DESIGN (Thailand)
+            // PREMIUM LUXURY DESIGN (Landscape Card - 700x500)
             styles = `
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700&display=swap');
                 body { margin: 0; padding: 0; background: #0a0a0a; color: #d4af37; font-family: 'Playfair Display', serif; -webkit-print-color-adjust: exact; }
                 .cert-container { 
-                    width: 100%; height: 100vh; box-sizing: border-box; 
-                    border: 20px solid #d4af37; 
+                    width: 700px; height: 500px; margin: 50px auto; box-sizing: border-box; 
+                    border: 10px solid #d4af37; 
                     background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
                     display: flex; flex-direction: column; justify-content: center; align-items: center; 
                     position: relative; overflow: hidden;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
                 }
                 .inner-border {
-                    width: calc(100% - 60px); height: calc(100% - 60px);
+                    width: calc(100% - 40px); height: calc(100% - 40px);
                     border: 2px solid #d4af37; position: relative;
-                    display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
-                    padding-top: 40px;
+                    display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+                    padding: 20px; box-sizing: border-box;
                 }
                 .corner-ornament {
-                    position: absolute; width: 100px; height: 100px;
-                    border-top: 5px solid #d4af37; border-left: 5px solid #d4af37;
+                    position: absolute; width: 60px; height: 60px;
+                    border-top: 4px solid #d4af37; border-left: 4px solid #d4af37;
                 }
-                .top-left { top: 20px; left: 20px; }
-                .top-right { top: 20px; right: 20px; transform: rotate(90deg); }
-                .bottom-right { bottom: 20px; right: 20px; transform: rotate(180deg); }
-                .bottom-left { bottom: 20px; left: 20px; transform: rotate(270deg); }
+                .top-left { top: 10px; left: 10px; }
+                .top-right { top: 10px; right: 10px; transform: rotate(90deg); }
+                .bottom-right { bottom: 10px; right: 10px; transform: rotate(180deg); }
+                .bottom-left { bottom: 10px; left: 10px; transform: rotate(270deg); }
 
                 .watermark {
-                    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
-                    font-size: 15rem; opacity: 0.03; color: #d4af37; font-family: 'Cinzel', serif; white-space: nowrap; pointer-events: none;
+                    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
+                    font-size: 8rem; opacity: 0.04; color: #d4af37; font-family: 'Cinzel', serif; white-space: nowrap; pointer-events: none;
                 }
                 
-                .brand-logo-premium {
-                    width: 150px; margin-bottom: 20px;
-                    border-radius: 50%; /* Optional: nice round look if square image */
-                    border: 2px solid #d4af37;
+                .header-row {
+                    display: flex; justify-content: space-between; align-items: center; width: 100%;
+                    border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;
                 }
-
-                .header-title { font-family: 'Cinzel', serif; font-size: 3.5rem; letter-spacing: 5px; margin-bottom: 10px; text-shadow: 2px 2px 4px #000; }
-                .header-subtitle { font-size: 1.2rem; letter-spacing: 3px; border-bottom: 1px solid #d4af37; padding-bottom: 20px; margin-bottom: 30px; font-style: italic; }
+                .brand-logo-premium { width: 80px; border-radius: 50%; border: 2px solid #d4af37; }
+                .header-text { text-align: right; }
+                .header-title { font-family: 'Cinzel', serif; font-size: 2rem; letter-spacing: 3px; margin: 0; text-shadow: 1px 1px 2px #000; }
+                .header-subtitle { font-size: 0.8rem; letter-spacing: 2px; font-style: italic; color: #888; }
                 
-                .main-content { text-align: center; max-width: 80%; flex-grow: 1; }
-                .cert-text { font-size: 1.2rem; margin-bottom: 20px; color: #ccc; }
-                .fish-name { font-size: 4rem; font-weight: 700; margin: 10px 0 20px 0; color: #fff; text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); font-style: italic;}
+                .main-content { text-align: center; width: 100%; flex-grow: 1; display:flex; flex-direction:column; justify-content:center;}
+                .fish-name { font-size: 3rem; font-weight: 700; margin: 5px 0 15px 0; color: #fff; text-shadow: 0 0 15px rgba(212, 175, 55, 0.6); font-style: italic;}
                 
-                .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; text-align: left; border-top: 1px solid #333; border-bottom: 1px solid #333; padding: 20px; }
-                .detail-item { font-size: 1.1rem; }
-                .detail-label { color: #888; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
-                .detail-value { color: #d4af37; font-weight: bold; font-family: 'Cinzel', serif; }
+                .details-grid { 
+                    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; 
+                    text-align: center; border-top: 1px solid #333; border-bottom: 1px solid #333; padding: 10px 0; 
+                    width: 100%;
+                }
+                .detail-item { font-size: 0.9rem; }
+                .detail-label { color: #888; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+                .detail-value { color: #d4af37; font-weight: bold; font-family: 'Cinzel', serif; margin-top: 2px;}
 
                 .footer-area {
-                    display: flex; justify-content: space-between; align-items: center; width: 80%; margin-bottom: 30px;
+                    display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-top: 10px;
                 }
-                .seal-area { position: relative; width: 120px; height: 120px; border: 3px solid #d4af37; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #d4af37; }
-                .seal-text { font-family: 'Cinzel', serif; font-size: 0.7rem; text-align: center; transform: rotate(-5deg); font-weight: bold; letter-spacing: 2px;}
-
-                .partner-logo {
-                    width: 80px;
-                    border-radius: 50%;
-                    border: 1px solid #d4af37;
-                }
-                .qr-code { border: 2px solid #d4af37; border-radius: 8px; }
+                .seal-area { width: 80px; height: 80px; border: 2px solid #d4af37; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #d4af37; font-size: 0.5rem; text-align: center; letter-spacing: 1px; font-family: 'Cinzel', serif; font-weight: bold;}
                 
-                .footer-id { font-family: 'Courier New', monospace; letter-spacing: 5px; color: #555; font-size: 0.9rem; position: absolute; bottom: 10px; }
+                .partner-logo { width: 60px; border-radius: 50%; border: 1px solid #d4af37; }
+                .qr-code { border: 2px solid #d4af37; border-radius: 6px; width: 70px; height: 70px;}
+                
+                .footer-id { font-family: 'Courier New', monospace; letter-spacing: 3px; color: #555; font-size: 0.8rem; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); }
             `;
 
             contentHtml = `
                 <div class="cert-container">
-                    <div class="watermark">ROYALTY</div>
+                    <div class="watermark">PREMIUM</div>
                     <div class="inner-border">
                         <div class="corner-ornament top-left"></div>
                         <div class="corner-ornament top-right"></div>
                         <div class="corner-ornament bottom-right"></div>
                         <div class="corner-ornament bottom-left"></div>
 
-                        <img src="/img/bettatumedan.jpg" class="brand-logo-premium" alt="BettatuMedan">
-
-                        <div class="header-title">CERTIFICATE</div>
-                        <div class="header-subtitle">OF AUTHENTICITY & LINEAGE</div>
+                        <div class="header-row">
+                            <img src="/img/bettatumedan.jpg" class="brand-logo-premium" alt="BettatuMedan">
+                            <div class="header-text">
+                                <div class="header-title">AUTHENTICITY</div>
+                                <div class="header-subtitle">PREMIUM EXPORT GRADE</div>
+                            </div>
+                        </div>
 
                         <div class="main-content">
-                            <div class="cert-text">This document certifies that the specimen described below is a genuine, high-quality export grade fish.</div>
                             <div class="fish-name">${data.species}</div>
                             
                             <div class="details-grid">
-                                <div class="detail-item"><div class="detail-label">Variety / Species</div><div class="detail-value">${data.species}</div></div>
+                                <div class="detail-item"><div class="detail-label">Variety</div><div class="detail-value">${data.species}</div></div>
+                                <div class="detail-item"><div class="detail-label">Origin</div><div class="detail-value">${data.origin}</div></div>
                                 <div class="detail-item"><div class="detail-label">Weight</div><div class="detail-value">${data.weight} kg</div></div>
-                                <div class="detail-item"><div class="detail-label">Lineage / Method</div><div class="detail-value">${data.method}</div></div>
-                                <div class="detail-item"><div class="detail-label">Date / Source</div><div class="detail-value">${data.importDate ? 'From: ' + data.importDate : 'Hatched: ' + formatDate(data.catchDate)}</div></div>
+                                <div class="detail-item"><div class="detail-label">Source</div><div class="detail-value">${data.importDate}</div></div>
                             </div>
                         </div>
 
                         <div class="footer-area">
                             <div style="text-align: center;">
-                                <img src="${qrCodeUrl}" class="qr-code" width="100" height="100" alt="Scan Me">
-                                <div style="font-family: 'Cinzel', serif; color: #d4af37; margin-top:5px; font-size: 0.7rem;">SCAN VALIDATION</div>
+                                <div style="border-bottom: 1px solid #d4af37; width: 120px; margin-bottom: 5px;"></div>
+                                <div style="font-family: 'Cinzel', serif; color: #d4af37; font-size: 0.7rem;">Authorized Signature</div>
                             </div>
                             
                             <div class="seal-area">
-                                <div class="seal-text">SNADAILY<br>OFFICIAL<br>VERIFIED</div>
+                                SNADAILY<br>OFFICIAL
                             </div>
 
-                            <div style="text-align: center;">
+                            <img src="${qrCodeUrl}" class="qr-code" alt="Scan Me">
+                            
+                            <div style="text-align: right;">
                                 <img src="/img/fishkinian.jpg" class="partner-logo" alt="Fishkinian">
-                                <div style="color: #666; font-size: 0.8rem; margin-top: 5px;">Powered By Fishkinian</div>
+                                <div style="color: #666; font-size: 0.6rem; margin-top: 2px;">Powered By Fishkinian</div>
                             </div>
                         </div>
 
