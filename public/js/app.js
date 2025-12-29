@@ -205,7 +205,7 @@ const initAdmin = () => {
         if (!data) return;
 
         const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
-            (data.importDate && data.importDate.toLowerCase().includes('thailand'));
+            (data.importDate && data.importDate.length > 0);
 
         const verificationUrl = `https://snadailyfchaker.vercel.app/?id=${data.id}`;
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verificationUrl)}`;
@@ -574,7 +574,7 @@ const initCustomer = () => {
         const importDateEl = document.getElementById('res-import-date');
 
         const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
-            (data.importDate && data.importDate.toLowerCase().includes('thailand'));
+            (data.importDate && data.importDate.length > 0);
 
         if (isPremium) {
             resultCard.classList.add('premium-card');
