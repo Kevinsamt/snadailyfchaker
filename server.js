@@ -1,5 +1,5 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -13,68 +13,70 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '.'))); // Serve static files
 
 // Database Setup
-const db = new sqlite3.Database('./fish.db', (err) => {
-    if (err) {
-        console.error('Error opening database', err.message);
-    } else {
-        console.log('Connected to the SQlite database.');
-        initDb();
+const pool = new Pool({
+    connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
     }
 });
 
-function initDb() {
-    db.run(`CREATE TABLE IF NOT EXISTS fish (
-        id TEXT PRIMARY KEY,
-        species TEXT,
-        origin TEXT,
-        weight REAL,
-        method TEXT,
-        catchDate TEXT,
-        importDate TEXT,
-        timestamp TEXT
-    )`, (err) => {
-        if (err) {
-            console.error("Error creating table:", err.message);
-        } else {
-            console.log("Fish table ready.");
-        }
-    });
+// Initialize Table
+async function initDb() {
+    try {
+        await pool.query(`CREATE TABLE IF NOT EXISTS fish (
+            id TEXT PRIMARY KEY,
+            species TEXT,
+            origin TEXT,
+            weight REAL,
+            method TEXT,
+            "catchDate" TEXT,
+            "importDate" TEXT,
+            timestamp TEXT
+        )`);
+        console.log("Fish table ready.");
+    } catch (err) {
+        console.log("Database connection error (might need env vars):", err.message);
+    }
 }
+initDb();
 
 // Routes
 
 // Get all fish
-app.get('/api/fish', (req, res) => {
-    db.all("SELECT * FROM fish ORDER BY timestamp DESC", [], (err, rows) => {
-        if (err) {
-            res.status(400).json({ "error": err.message });
-            return;
-        }
+app.get('/api/fish', async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM fish ORDER BY timestamp DESC");
         res.json({
             "message": "success",
-            "data": rows
+            "data": result.rows
         });
-    });
+    } catch (err) {
+        res.status(400).json({ "error": err.message });
+    }
 });
 
 // Get single fish by ID
-app.get('/api/fish/:id', (req, res) => {
-    const sql = "SELECT * FROM fish WHERE id = ?";
-    const params = [req.params.id];
-    db.get(sql, params, (err, row) => {
-        if (err) {
-            res.status(400).json({ "error": err.message });
+app.get('/api/fish/:id', async (req, res) => {
+    try {
+        const sql = "SELECT * FROM fish WHERE id = $1";
+        const result = await pool.query(sql, [req.params.id]);
+
+        if (result.rows.length === 0) {
+            res.status(404).json({ "error": "Not found" });
             return;
         }
+
         res.json({
             "message": "success",
-            "data": row
+            "data": result.rows[0]
         });
-    });
+    } catch (err) {
+        res.status(400).json({ "error": err.message });
+    }
 });
 
 // Create new fish
-app.post('/api/fish', (req, res) => {
+app.post('/api/fish', async (req, res) => {
     const data = {
         id: req.body.id,
         species: req.body.species,
@@ -85,23 +87,23 @@ app.post('/api/fish', (req, res) => {
         importDate: req.body.importDate,
         timestamp: new Date().toISOString()
     }
-    const sql = 'INSERT INTO fish (id, species, origin, weight, method, catchDate, importDate, timestamp) VALUES (?,?,?,?,?,?,?,?)'
+    const sql = 'INSERT INTO fish (id, species, origin, weight, method, "catchDate", "importDate", timestamp) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *';
     const params = [data.id, data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp]
-    db.run(sql, params, function (err, result) {
-        if (err) {
-            res.status(400).json({ "error": err.message });
-            return;
-        }
+
+    try {
+        const result = await pool.query(sql, params);
         res.json({
             "message": "success",
-            "data": data,
-            "id": this.lastID
-        })
-    });
+            "data": result.rows[0],
+            "id": result.rows[0].id
+        });
+    } catch (err) {
+        res.status(400).json({ "error": err.message });
+    }
 });
 
 // Update fish
-app.put('/api/fish/:id', (req, res) => {
+app.put('/api/fish/:id', async (req, res) => {
     const data = {
         species: req.body.species,
         origin: req.body.origin,
@@ -112,42 +114,43 @@ app.put('/api/fish/:id', (req, res) => {
         timestamp: new Date().toISOString()
     }
     const sql = `UPDATE fish SET 
-        species = ?, 
-        origin = ?, 
-        weight = ?, 
-        method = ?, 
-        catchDate = ?, 
-        importDate = ?, 
-        timestamp = ? 
-        WHERE id = ?`
+        species = $1, 
+        origin = $2, 
+        weight = $3, 
+        method = $4, 
+        "catchDate" = $5, 
+        "importDate" = $6, 
+        timestamp = $7 
+        WHERE id = $8 RETURNING *`
     const params = [data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp, req.params.id]
-    db.run(sql, params, function (err, result) {
-        if (err) {
-            res.status(400).json({ "error": err.message });
-            return;
-        }
+
+    try {
+        const result = await pool.query(sql, params);
         res.json({
             message: "success",
-            data: data,
-            changes: this.changes
-        })
-    });
+            data: result.rows[0]
+        });
+    } catch (err) {
+        res.status(400).json({ "error": err.message });
+    }
 });
 
 // Delete fish
-app.delete('/api/fish/:id', (req, res) => {
-    db.run(
-        'DELETE FROM fish WHERE id = ?',
-        req.params.id,
-        function (err, result) {
-            if (err) {
-                res.status(400).json({ "error": err.message });
-                return;
-            }
-            res.json({ "message": "deleted", changes: this.changes })
-        });
+app.delete('/api/fish/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM fish WHERE id = $1', [req.params.id]);
+        res.json({ "message": "deleted" });
+    } catch (err) {
+        res.status(400).json({ "error": err.message });
+    }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Export for Vercel
+module.exports = app;
+
+// Only listen if running locally
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
