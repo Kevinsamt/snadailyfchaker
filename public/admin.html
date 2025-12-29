@@ -2,6 +2,16 @@
 <html lang="id">
 
 <head>
+    <script>
+        // Security Check
+        if (!sessionStorage.getItem('sna_admin_token')) {
+            window.location.href = 'login.html';
+        }
+        function logout() {
+            sessionStorage.removeItem('sna_admin_token');
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SnaDailyCheker | Admin Dashboard</title>
@@ -75,6 +85,23 @@
                                 <option>Import dari luar negri</option>
                                 <option>Import dari luar pulau</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="header animate-slide-down">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="logo-container">
+                                <i class="ri-shield-star-line logo-icon"></i>
+                                <div>
+                                    <h1 class="app-title">SnaDaily Admin</h1>
+                                    <p class="app-subtitle">Panel Manajemen Data Ikan</p>
+                                </div>
+                            </div>
+                            <button
+                                onclick="sessionStorage.removeItem('sna_admin_token'); window.location.href='login.html'"
+                                style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: inherit; transition: all 0.2s;">
+                                <i class="ri-logout-box-r-line"></i> Logout
+                            </button>
                         </div>
                     </div>
 
