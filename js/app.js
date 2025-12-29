@@ -1,61 +1,108 @@
 /**
  * FishAuth Logic
  * Handles data persistence and UI interactions
+ * Now using Node.js + SQLite Backend
  */
 
-// Storage Keys
-const DB_KEY = 'fish_auth_db';
+// API Configuration
+const API_URL = 'http://localhost:3000/api/fish';
 
 // Utils
 const generateId = () => {
+    // ID generation is now handled partially by frontend but persisted by backend.
+    // We'll keep this if we need client-side ID generation, but DB usually handles IDs.
+    // However, the original app generated IDs like 'FISH-XXXX'. We can keep that.
     return 'FISH-' + Math.random().toString(36).substr(2, 6).toUpperCase();
 }
 
 const formatDate = (dateString) => {
+    if (!dateString) return '';
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('id-ID', options);
 }
 
-// Data Layer
+// Data Layer (Async)
 const DataStore = {
-    getAll: () => {
-        const data = localStorage.getItem(DB_KEY);
-        return data ? JSON.parse(data) : [];
-    },
-
-    save: (fishData) => {
-        const currentData = DataStore.getAll();
-
-        if (fishData.id) {
-            // Update existing
-            const index = currentData.findIndex(item => item.id === fishData.id);
-            if (index !== -1) {
-                currentData[index] = { ...currentData[index], ...fishData, timestamp: new Date().toISOString() }; // Update timestamp on edit? Maybe keep original? Let's update.
-                localStorage.setItem(DB_KEY, JSON.stringify(currentData));
-                return currentData[index];
-            }
+    getAll: async () => {
+        try {
+            const response = await fetch(API_URL);
+            const json = await response.json();
+            return json.data || [];
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            return [];
         }
-
-        // Create new
-        const newEntry = {
-            id: generateId(),
-            timestamp: new Date().toISOString(),
-            ...fishData
-        };
-        currentData.unshift(newEntry); // Add to top
-        localStorage.setItem(DB_KEY, JSON.stringify(currentData));
-        return newEntry;
     },
 
-    find: (id) => {
-        const data = DataStore.getAll();
-        return data.find(item => item.id === id);
+    save: async (fishData) => {
+        try {
+            // Check if exists (update) or new
+            let isUpdate = false;
+            if (fishData.id) {
+                // Try to find it first to decide if PUT or POST? 
+                // The logical flow in the UI uses 'editId' to determine update.
+                // But here we rely on the implementation. 
+                // Let's assume if it has an ID, we try to UPDATE.
+                // However, the original "save" handled both.
+
+                // If ID exists in DB, it's an update. But wait, `fishData` from form might have ID if editing.
+                // We will handle this logic in the form submitter or here. 
+                // Simple check: The form passes `id` only if editing.
+
+                // We'll assume if ID is present and we are in "update mode" (caller knows), we PUT.
+                // But the caller just calls save.
+
+                // Let's try to update if ID is present.
+                const check = await fetch(`${API_URL}/${fishData.id}`);
+                const checkJson = await check.json();
+
+                if (checkJson.data) {
+                    isUpdate = true;
+                }
+            }
+
+            if (isUpdate) {
+                const response = await fetch(`${API_URL}/${fishData.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fishData)
+                });
+                const res = await response.json();
+                return { ...fishData, ...res.data };
+            } else {
+                // New
+                if (!fishData.id) fishData.id = generateId(); // Generate ID client side if not present
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fishData)
+                });
+                const res = await response.json();
+                return { ...fishData, id: fishData.id }; // Return client generated ID or server one?
+            }
+        } catch (error) {
+            console.error('Error saving data:', error);
+            throw error;
+        }
     },
 
-    delete: (id) => {
-        const data = DataStore.getAll();
-        const newData = data.filter(item => item.id !== id);
-        localStorage.setItem(DB_KEY, JSON.stringify(newData));
+    find: async (id) => {
+        try {
+            const response = await fetch(`${API_URL}/${id}`);
+            const json = await response.json();
+            return json.data;
+        } catch (error) {
+            console.error('Error finding data:', error);
+            return null;
+        }
+    },
+
+    delete: async (id) => {
+        try {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        } catch (error) {
+            console.error('Error deleting data:', error);
+        }
     }
 };
 
@@ -66,11 +113,11 @@ const initAdmin = () => {
 
     if (!form) return;
 
-    const renderHistory = (filterText = '') => {
-        const data = DataStore.getAll();
+    const renderHistory = async (filterText = '') => {
+        const data = await DataStore.getAll();
         const filteredData = data.filter(item =>
-            item.species.toLowerCase().includes(filterText.toLowerCase()) ||
-            item.id.toLowerCase().includes(filterText.toLowerCase())
+            (item.species && item.species.toLowerCase().includes(filterText.toLowerCase())) ||
+            (item.id && item.id.toLowerCase().includes(filterText.toLowerCase()))
         );
 
         historyContainer.innerHTML = filteredData.map(item => `
@@ -124,8 +171,8 @@ const initAdmin = () => {
     }
 
     // Expose actions globally
-    window.editFish = (id) => {
-        const data = DataStore.find(id);
+    window.editFish = async (id) => {
+        const data = await DataStore.find(id);
         if (!data) return;
 
         document.getElementById('editId').value = data.id;
@@ -145,11 +192,11 @@ const initAdmin = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         const btn = document.querySelector('button[type="submit"]');
         btn.innerHTML = '<i class="ri-save-line" style="margin-right: 8px;"></i> Update Data';
-        btn.classList.add('pulse-animation'); // Optional visual cue
+        btn.classList.add('pulse-animation');
     };
 
-    window.printCertificate = (id) => {
-        const data = DataStore.find(id);
+    window.printCertificate = async (id) => {
+        const data = await DataStore.find(id);
         if (!data) return;
 
         const printWindow = window.open('', '', 'width=800,height=600');
@@ -195,13 +242,13 @@ const initAdmin = () => {
     };
 
     // Backup & Restore
-    window.backupData = () => {
-        const data = DataStore.getAll();
+    window.backupData = async () => {
+        const data = await DataStore.getAll();
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
         downloadAnchorNode.setAttribute("download", "fish_data_backup_" + new Date().toISOString().split('T')[0] + ".json");
-        document.body.appendChild(downloadAnchorNode); // required for firefox
+        document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
     };
@@ -211,14 +258,24 @@ const initAdmin = () => {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             try {
                 const data = JSON.parse(e.target.result);
                 if (Array.isArray(data)) {
-                    if (confirm(`Ditemukan ${data.length} data. Apakah anda yakin ingin me-restore (menimpa) data saat ini?`)) {
-                        localStorage.setItem(DB_KEY, JSON.stringify(data));
-                        alert('Data berhasil dipulihkan!');
-                        renderHistory(''); // Refresh
+                    if (confirm(`Ditemukan ${data.length} data. Apakah anda yakin ingin me-restore (menambahkan) data ini ke database?`)) {
+                        // Loop and save each
+                        let successCount = 0;
+                        for (const item of data) {
+                            try {
+                                await DataStore.save(item);
+                                successCount++;
+                            } catch (err) {
+                                console.error("Failed to restore item", item, err);
+                            }
+                        }
+
+                        alert(`Berhasil memulihkan ${successCount} data!`);
+                        renderHistory('');
                     }
                 } else {
                     alert('Format file tidak valid!');
@@ -229,13 +286,12 @@ const initAdmin = () => {
             }
         };
         reader.readAsText(file);
-        // Reset input so chance event fires again for same file
         input.value = '';
     };
 
-    window.deleteFish = (id) => {
+    window.deleteFish = async (id) => {
         if (confirm('Apakah anda yakin ingin menghapus data ini?')) {
-            DataStore.delete(id);
+            await DataStore.delete(id);
             renderHistory(document.getElementById('searchInput').value);
         }
     };
@@ -270,7 +326,7 @@ const initAdmin = () => {
         });
     }
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const formData = {
@@ -283,23 +339,29 @@ const initAdmin = () => {
         };
 
         const editId = document.getElementById('editId').value;
-        if (editId) {
-            formData.id = editId;
-            DataStore.save(formData);
-            alert('Data Berhasil Diupdate!');
+        try {
+            if (editId) {
+                formData.id = editId;
+                await DataStore.save(formData);
+                alert('Data Berhasil Diupdate!');
 
-            // Reset state
-            document.getElementById('editId').value = '';
-            document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
-        } else {
-            const result = DataStore.save(formData);
-            alert(`Data Tersimpan!\nID Batch: ${result.id}`);
+                // Reset state
+                document.getElementById('editId').value = '';
+                document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
+            } else {
+                // Let the DataStore (and potentially server) handle ID if not provided, 
+                // but our logic above generates ID.
+                const result = await DataStore.save(formData);
+                alert(`Data Tersimpan!\nID Batch: ${result.id}`);
+            }
+
+            form.reset();
+            // Reset hiding logic
+            methodSelect.dispatchEvent(new Event('change'));
+            renderHistory();
+        } catch (error) {
+            alert('Gagal menyimpan data: ' + error.message);
         }
-
-        form.reset();
-        // Reset hiding logic
-        methodSelect.dispatchEvent(new Event('change'));
-        renderHistory();
     });
 
     renderHistory();
@@ -358,8 +420,9 @@ const initCustomer = () => {
         // Simulate loading
         searchBtn.textContent = 'Verifying...';
 
-        setTimeout(() => {
-            const data = DataStore.find(id);
+        // 800ms delay for UX + async fetch
+        setTimeout(async () => {
+            const data = await DataStore.find(id);
             searchBtn.textContent = 'Check Authenticity';
 
             if (data) {
