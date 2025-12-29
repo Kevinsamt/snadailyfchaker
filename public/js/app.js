@@ -579,9 +579,17 @@ const initCustomer = () => {
         if (isPremium) {
             resultCard.classList.add('premium-card');
             document.querySelector('#resultCard h2').innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
+
+            // Override Origin for Premium
+            document.getElementById('res-origin-label').textContent = 'Variety / Species';
+            document.getElementById('res-origin').textContent = data.species;
         } else {
             resultCard.classList.remove('premium-card');
             document.querySelector('#resultCard h2').innerHTML = '<i class="ri-checkbox-circle-fill" style="color: var(--success); margin-right: 8px;"></i> Data Terverifikasi';
+
+            // Revert Origin for Standard
+            document.getElementById('res-origin-label').textContent = 'Asal (Origin)';
+            document.getElementById('res-origin').textContent = data.origin;
         }
 
         if (data.importDate) {
