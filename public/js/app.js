@@ -583,7 +583,7 @@ window.initAdminOrders = async () => {
                     ${order.status === 'pending' ? `<button onclick="updateOrderStatus('${order.id}', 'paid')" class="action-btn" title="Mark Paid" style="color: #34d399;"><i class="ri-money-dollar-circle-line"></i> Confirm Pay</button>` : ''}
                     ${order.status === 'paid' ? `<button onclick="updateOrderStatus('${order.id}', 'packed')" class="action-btn" title="Mark Packed" style="color: #60a5fa;"><i class="ri-box-3-line"></i> Mark Packed</button>` : ''}
                     ${order.status === 'packed' ? `<button onclick="updateOrderStatus('${order.id}', 'shipped')" class="action-btn" title="Mark Shipped" style="color: #a78bfa;"><i class="ri-truck-line"></i> Mark Shipped</button>` : ''}
-                    <button onclick="deleteOrder('${order.id}')" class="action-btn" style="color: #ef4444;" title="Delete & Restore Fish"><i class="ri-delete-bin-line"></i></button>
+                    <button onclick="deleteOrder('${order.id}')" class="action-btn" style="color: #ef4444; width: auto; padding: 0 10px; border-radius: 8px;" title="Delete & Restore Fish"><i class="ri-delete-bin-line"></i> Delete</button>
                 </div>
             </div>
             `;
@@ -768,6 +768,24 @@ const initCustomer = () => {
         input.value = idFromUrl;
         searchAction();
     }
+};
+
+window.deleteOrder = async (id) => {
+    if (!confirm('Hapus Order? Status ikan akan dikembalikan menjadi "Available".')) return;
+    try {
+        await fetch(`/api/orders/${id}`, { method: 'DELETE' });
+        alert('Order deleted and Fish restored.');
+        initAdminOrders();
+    } catch (e) {
+        alert('Delete Failed');
+    }
+};
+
+window.resetForm = () => {
+    document.getElementById('fishForm').reset();
+    document.getElementById('editId').value = '';
+    document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
+    document.getElementById('cancelEditBtn').style.display = 'none';
 };
 
 // Main Initialization
