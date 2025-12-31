@@ -47,6 +47,58 @@
 
     <div class="container admin-grid">
 
+        <!-- Stats Section -->
+        <div
+            style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <div class="glass-panel animate-fade-in"
+                style="padding: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Total Ikan</div>
+                    <div id="stat-total" style="font-size: 2rem; font-weight: bold;">0</div>
+                </div>
+                <div
+                    style="width: 45px; height: 45px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+                    <i class="ri-database-2-line" style="font-size: 1.5rem;"></i>
+                </div>
+            </div>
+
+            <div class="glass-panel animate-fade-in"
+                style="padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; animation-delay: 0.1s;">
+                <div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Terjual (Sold)</div>
+                    <div id="stat-sold" style="font-size: 2rem; font-weight: bold; color: var(--error);">0</div>
+                </div>
+                <div
+                    style="width: 45px; height: 45px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--error);">
+                    <i class="ri-shopping-cart-line" style="font-size: 1.5rem;"></i>
+                </div>
+            </div>
+
+            <div class="glass-panel animate-fade-in"
+                style="padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; animation-delay: 0.2s;">
+                <div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Tersedia</div>
+                    <div id="stat-available" style="font-size: 2rem; font-weight: bold; color: var(--success);">0</div>
+                </div>
+                <div
+                    style="width: 45px; height: 45px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--success);">
+                    <i class="ri-store-2-line" style="font-size: 1.5rem;"></i>
+                </div>
+            </div>
+
+            <div class="glass-panel animate-fade-in"
+                style="padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; animation-delay: 0.3s;">
+                <div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Premium</div>
+                    <div id="stat-premium" style="font-size: 2rem; font-weight: bold; color: #fbbf24;">0</div>
+                </div>
+                <div
+                    style="width: 45px; height: 45px; background: rgba(251, 191, 36, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fbbf24;">
+                    <i class="ri-vip-crown-line" style="font-size: 1.5rem;"></i>
+                </div>
+            </div>
+        </div>
+
         <!-- Input Section -->
         <div>
             <div class="glass-panel animate-fade-in" style="padding: 2rem;">
@@ -93,6 +145,14 @@
                     <div class="input-group" id="importDateContainer" style="display: none; margin-top: 1rem;">
                         <label class="input-label">Negara Asal Import</label>
                         <input type="text" id="importDate" class="glass-input" placeholder="Contoh: Thailand">
+                    </div>
+
+                    <div class="input-group" style="margin-top: 1rem;">
+                        <label class="input-label">Status Ketersediaan</label>
+                        <select id="status" class="glass-input" style="background-color: #0a0e17;">
+                            <option value="available">Tersedia (Available)</option>
+                            <option value="sold">Terjual (Sold)</option>
+                        </select>
                     </div>
 
                     <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
