@@ -103,13 +103,18 @@
         <div>
             <div class="glass-panel animate-fade-in" style="padding: 2rem;">
                 <div class="container" style="margin-top: 2rem;">
-                    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-                        <button class="nav-tab active" onclick="switchTab('inventory')">Inventory</button>
-                        <button class="nav-tab" onclick="switchTab('orders')">Orders</button>
+                    <div
+                        style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                        <button class="nav-tab active" onclick="switchTab('input')"><i class="ri-add-circle-line"></i>
+                            Input Ikan</button>
+                        <button class="nav-tab" onclick="switchTab('data')"><i class="ri-file-list-3-line"></i> Data
+                            Ikan</button>
+                        <button class="nav-tab" onclick="switchTab('orders')"><i class="ri-shopping-bag-3-line"></i>
+                            Orders</button>
                     </div>
 
-                    <!-- Inventory Tab -->
-                    <div id="tab-inventory">
+                    <!-- Tab 1: Input -->
+                    <div id="tab-input">
                         <div class="dashboard-grid">
                             <!-- ... Existing form and list ... -->
                             <div class="card animate-slide-up">
@@ -184,7 +189,11 @@
                                 </form>
                             </div>
 
-                            <div class="card animate-slide-up" style="animation-delay: 0.1s;">
+                        </div> <!-- End Tab Input -->
+
+                        <!-- Tab 2: Data Ikan -->
+                        <div id="tab-data" style="display: none;">
+                            <div class="card animate-slide-up">
                                 <div
                                     style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                                     <h2 class="card-title"><i class="ri-history-line"
@@ -241,16 +250,23 @@
                         window.location.href = '/login.html';
                     }
 
-                    // Simple Tab Switcher
+                    // Tab Switcher
                     function switchTab(tabName) {
                         document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
                         document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
 
-                        if (tabName === 'inventory') {
-                            document.getElementById('tab-inventory').style.display = 'block';
-                            document.getElementById('tab-orders').style.display = 'none';
-                        } else {
-                            document.getElementById('tab-inventory').style.display = 'none';
+                        // Hide all
+                        document.getElementById('tab-input').style.display = 'none';
+                        document.getElementById('tab-data').style.display = 'none';
+                        document.getElementById('tab-orders').style.display = 'none';
+
+                        // Show target
+                        if (tabName === 'input') {
+                            document.getElementById('tab-input').style.display = 'block';
+                        } else if (tabName === 'data') {
+                            document.getElementById('tab-data').style.display = 'block';
+                            if (window.renderHistory) window.renderHistory();
+                        } else if (tabName === 'orders') {
                             document.getElementById('tab-orders').style.display = 'block';
                             if (window.initAdminOrders) window.initAdminOrders();
                         }

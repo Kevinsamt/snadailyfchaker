@@ -359,6 +359,30 @@ app.put('/api/orders/:id/status', async (req, res) => {
     }
 });
 
+// Delete Order (with Restore Fish Status)
+app.delete('/api/orders/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        // 1. Get order to find fish_id
+        const orderResult = await pool.query("SELECT fish_id FROM orders WHERE id = $1", [id]);
+        if (orderResult.rows.length === 0) {
+            res.status(404).json({ error: "Order not found" });
+            return;
+        }
+        const fishId = orderResult.rows[0].fish_id;
+
+        // 2. Delete Order
+        await pool.query("DELETE FROM orders WHERE id = $1", [id]);
+
+        // 3. Restore Fish Status to 'available'
+        await pool.query("UPDATE fish SET status = 'available' WHERE id = $1", [fishId]);
+
+        res.json({ message: "success", deletedId: id, restoredFishId: fishId });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Delete fish
 app.delete('/api/fish/:id', async (req, res) => {
     try {

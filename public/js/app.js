@@ -575,6 +575,7 @@ window.initAdminOrders = async () => {
                     <div style="text-align: right;">
                         <span style="background: ${statusColor}20; color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase;">${order.status}</span>
                         <div style="margin-top: 8px; font-size: 0.8rem; color: #9ca3af;">${new Date(order.created_at).toLocaleDateString()}</div>
+                        <button onclick="deleteOrder('${order.id}')" class="action-btn" style="color: #ef4444; margin-top: 5px; font-size: 0.8rem;" title="Delete & Restore Fish"><i class="ri-delete-bin-line"></i> Delete</button>
                     </div>
                 </div>
                 
@@ -582,6 +583,7 @@ window.initAdminOrders = async () => {
                     ${order.status === 'pending' ? `<button onclick="updateOrderStatus('${order.id}', 'paid')" class="action-btn" title="Mark Paid" style="color: #34d399;"><i class="ri-money-dollar-circle-line"></i> Confirm Pay</button>` : ''}
                     ${order.status === 'paid' ? `<button onclick="updateOrderStatus('${order.id}', 'packed')" class="action-btn" title="Mark Packed" style="color: #60a5fa;"><i class="ri-box-3-line"></i> Mark Packed</button>` : ''}
                     ${order.status === 'packed' ? `<button onclick="updateOrderStatus('${order.id}', 'shipped')" class="action-btn" title="Mark Shipped" style="color: #a78bfa;"><i class="ri-truck-line"></i> Mark Shipped</button>` : ''}
+                    <button onclick="deleteOrder('${order.id}')" class="action-btn" style="color: #ef4444;" title="Delete & Restore Fish"><i class="ri-delete-bin-line"></i></button>
                 </div>
             </div>
             `;
