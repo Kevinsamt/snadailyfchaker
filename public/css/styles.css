@@ -137,40 +137,6 @@ body {
     }
 }
 
-@keyframes reveal {
-    from {
-        transform: scale(0.9);
-        opacity: 0;
-    }
-
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* Tab Navigation */
-.nav-tab {
-    background: transparent;
-    border: none;
-    color: #a0aec0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.3s;
-}
-
-.nav-tab:hover {
-    color: white;
-}
-
-.nav-tab.active {
-    color: var(--primary);
-    border-bottom: 2px solid var(--primary);
-}
-
 @keyframes fadeIn {
     from {
         opacity: 0;

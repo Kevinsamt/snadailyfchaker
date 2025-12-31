@@ -12,14 +12,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public folder
 
-// Route for Shop page
-app.get('/shop', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'shop.html'));
-});
-app.get('/shop.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'shop.html'));
-});
-
 // Database Setup
 // Fix SSL for Supabase/Vercel
 let connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
@@ -38,16 +30,8 @@ try {
 
 const pool = new Pool({
     connectionString,
-    ssl: connectionString && connectionString.includes('localhost') ? false : { rejectUnauthorized: false } // Fix SSL for Vercel
-});
-
-// Health Check
-app.get('/api/health', async (req, res) => {
-    try {
-        await pool.query('SELECT NOW()');
-        res.json({ status: 'ok', db: 'connected' });
-    } catch (err) {
-        res.status(500).json({ status: 'error', db: err.message });
+    ssl: {
+        rejectUnauthorized: false
     }
 });
 
@@ -62,31 +46,39 @@ async function initDb() {
             method TEXT,
             "catchDate" TEXT,
             "importDate" TEXT,
-            timestamp TEXT,
-            status TEXT DEFAULT 'available',
-            isPremium BOOLEAN DEFAULT 0
+            timestamp TEXT
         )`);
 
-        await pool.query(`CREATE TABLE IF NOT EXISTS orders (
-            id TEXT PRIMARY KEY,
-            fish_id TEXT,
-            customer_name TEXT,
-            email TEXT,
-            phone TEXT,
-            address_full TEXT,
-            district TEXT,
-            subdistrict TEXT,
-            postal_code TEXT,
-            payment_method TEXT,
-            status TEXT DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        await pool.query(`CREATE TABLE IF NOT EXISTS products (
+            id SERIAL PRIMARY KEY,
+            name TEXT,
+            price REAL,
+            image TEXT,
+            description TEXT,
+            category TEXT,
+            stock INTEGER DEFAULT 10
         )`);
 
-        // Ensure columns exist (for migration)
-        try { await pool.query(`ALTER TABLE fish ADD COLUMN status TEXT DEFAULT 'available'`); } catch (e) { }
-        try { await pool.query(`ALTER TABLE fish ADD COLUMN isPremium BOOLEAN DEFAULT 0`); } catch (e) { }
+        // Seed products if empty
+        try {
+            const productCount = await pool.query('SELECT COUNT(*) FROM products');
+            if (parseInt(productCount.rows[0].count) === 0) {
+                const seedProducts = [
+                    { name: 'Premium Salmon Fillet', price: 150000, image: 'https://plus.unsplash.com/premium_photo-1667520042457-347589ae79d6?auto=format&fit=crop&q=80&w=600', description: 'Fresh Atlantic Salmon, high omega-3.', category: 'Fish' },
+                    { name: 'Tuna Loin Grade A', price: 120000, image: 'https://images.unsplash.com/photo-1595186835619-21b6a782a20e?auto=format&fit=crop&q=80&w=600', description: 'Perfect for sashimi and steak.', category: 'Fish' },
+                    { name: 'Giant Tiger Prawns', price: 180000, image: 'https://images.unsplash.com/photo-1623855244183-52fd8d3ce2f7?auto=format&fit=crop&q=80&w=600', description: 'Fresh large prawns from Tarakan.', category: 'Shellfish' },
+                    { name: 'Live Lobster', price: 450000, image: 'https://images.unsplash.com/photo-1552160753-117159d4541c?auto=format&fit=crop&q=80&w=600', description: 'Fresh live lobster, sweet meat.', category: 'Shellfish' }
+                ];
 
-        console.log("Database tables ready.");
+                for (const p of seedProducts) {
+                    await pool.query('INSERT INTO products (name, price, image, description, category) VALUES ($1, $2, $3, $4, $5)', [p.name, p.price, p.image, p.description, p.category]);
+                }
+                console.log("Seeded products table.");
+            }
+        } catch (seedErr) {
+            console.warn("Seeding error (non-fatal):", seedErr.message);
+        }
+        console.log("Fish table ready.");
     } catch (err) {
         console.log("Database connection error (might need env vars):", err.message);
     }
@@ -102,29 +94,9 @@ app.get('/api/init', async (req, res) => {
             method TEXT,
             "catchDate" TEXT,
             "importDate" TEXT,
-            timestamp TEXT,
-            status TEXT DEFAULT 'available',
-            isPremium BOOLEAN DEFAULT 0
+            timestamp TEXT
         )`);
-        await pool.query(`CREATE TABLE IF NOT EXISTS orders (
-            id TEXT PRIMARY KEY,
-            fish_id TEXT,
-            customer_name TEXT,
-            email TEXT,
-            phone TEXT,
-            address_full TEXT,
-            district TEXT,
-            subdistrict TEXT,
-            postal_code TEXT,
-            payment_method TEXT,
-            status TEXT DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`);
-
-        try { await pool.query(`ALTER TABLE fish ADD COLUMN status TEXT DEFAULT 'available'`); } catch (e) { }
-        try { await pool.query(`ALTER TABLE fish ADD COLUMN isPremium BOOLEAN DEFAULT 0`); } catch (e) { }
-
-        res.json({ message: "Database initialized successfully (Tables 'fish', 'orders' ready)." });
+        res.json({ message: "Database initialized successfully (Table 'fish' checked/created)." });
     } catch (err) {
         console.error("Init Error:", err);
         res.status(500).json({ error: err.message, stack: err.stack });
@@ -150,8 +122,6 @@ initDb();
 
 // Routes
 
-// --- FISH API ---
-
 // Get all fish
 app.get('/api/fish', async (req, res) => {
     console.log("GET /api/fish called");
@@ -165,38 +135,6 @@ app.get('/api/fish', async (req, res) => {
     } catch (err) {
         console.error("GET Error:", err);
         res.status(400).json({ "error": err.message });
-    }
-});
-
-// Get Dashboard Statistics
-app.get('/api/stats', async (req, res) => {
-    try {
-        const totalQuery = await pool.query("SELECT COUNT(*) FROM fish");
-        const soldQuery = await pool.query("SELECT COUNT(*) FROM fish WHERE status = 'sold'");
-        const availableQuery = await pool.query("SELECT COUNT(*) FROM fish WHERE status IS NULL OR status = 'available'");
-
-        // Premium: isPremium is true OR (Origin includes thailand OR importDate > 0)
-        // We accept both manual and auto definitions for now, or prioritize manual.
-        // Let's count where manual is TRUE OR auto logic matches.
-        const premiumQuery = await pool.query(`
-            SELECT COUNT(*) FROM fish 
-            WHERE (isPremium = true)
-            OR (LOWER(origin) LIKE '%thailand%') 
-            OR ("importDate" IS NOT NULL AND "importDate" != '')
-        `);
-
-        res.json({
-            message: "success",
-            data: {
-                total: parseInt(totalQuery.rows[0].count),
-                sold: parseInt(soldQuery.rows[0].count),
-                available: parseInt(availableQuery.rows[0].count),
-                premium: parseInt(premiumQuery.rows[0].count)
-            }
-        });
-    } catch (err) {
-        console.error("Stats Error:", err);
-        res.status(500).json({ "error": err.message });
     }
 });
 
@@ -230,12 +168,10 @@ app.post('/api/fish', async (req, res) => {
         method: req.body.method,
         catchDate: req.body.catchDate,
         importDate: req.body.importDate,
-        timestamp: new Date().toISOString(),
-        status: req.body.status || 'available',
-        isPremium: req.body.isPremium || false
+        timestamp: new Date().toISOString()
     }
-    const sql = 'INSERT INTO fish (id, species, origin, weight, method, "catchDate", "importDate", timestamp, status, isPremium) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *';
-    const params = [data.id, data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp, data.status, data.isPremium]
+    const sql = 'INSERT INTO fish (id, species, origin, weight, method, "catchDate", "importDate", timestamp) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *';
+    const params = [data.id, data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp]
 
     try {
         const result = await pool.query(sql, params);
@@ -258,35 +194,18 @@ app.put('/api/fish/:id', async (req, res) => {
         method: req.body.method,
         catchDate: req.body.catchDate,
         importDate: req.body.importDate,
-        status: req.body.status,
-        timestamp: new Date().toISOString(),
-        isPremium: req.body.isPremium
+        timestamp: new Date().toISOString()
     }
-
     const sql = `UPDATE fish SET 
-        species = COALESCE($1, species), 
-        origin = COALESCE($2, origin), 
-        weight = COALESCE($3, weight), 
-        method = COALESCE($4, method), 
-        "catchDate" = COALESCE($5, "catchDate"), 
-        "importDate" = COALESCE($6, "importDate"), 
-        status = COALESCE($7, status),
-        timestamp = $8,
-        isPremium = COALESCE($9, isPremium)
-        WHERE id = $10 RETURNING *`
-
-    const params = [
-        data.species || null,
-        data.origin || null,
-        data.weight || null,
-        data.method || null,
-        data.catchDate || null,
-        data.importDate || null,
-        data.status || null,
-        data.timestamp,
-        data.isPremium !== undefined ? data.isPremium : null,
-        req.params.id
-    ]
+        species = $1, 
+        origin = $2, 
+        weight = $3, 
+        method = $4, 
+        "catchDate" = $5, 
+        "importDate" = $6, 
+        timestamp = $7 
+        WHERE id = $8 RETURNING *`
+    const params = [data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp, req.params.id]
 
     try {
         const result = await pool.query(sql, params);
@@ -299,103 +218,24 @@ app.put('/api/fish/:id', async (req, res) => {
     }
 });
 
-// --- ORDERS API ---
-
-// Create Order
-app.post('/api/orders', async (req, res) => {
-    const data = {
-        id: 'ORD-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
-        fish_id: req.body.fish_id,
-        customer_name: req.body.customer_name,
-        email: req.body.email,
-        phone: req.body.phone,
-        address_full: req.body.address_full,
-        district: req.body.district,
-        subdistrict: req.body.subdistrict,
-        postal_code: req.body.postal_code,
-        payment_method: req.body.payment_method,
-        status: 'pending'
-    };
-
-    const sql = `INSERT INTO orders (id, fish_id, customer_name, email, phone, address_full, district, subdistrict, postal_code, payment_method, status)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`;
-
-    const params = [data.id, data.fish_id, data.customer_name, data.email, data.phone, data.address_full, data.district, data.subdistrict, data.postal_code, data.payment_method, data.status];
-
-    try {
-        // 1. Create Order
-        const result = await pool.query(sql, params);
-
-        // 2. Mark Fish as 'booked' (so it disappears from shop but is not totally sold yet?)
-        // Or directly 'sold'? Let's use 'booked' if we supported it, but 'sold' is safer to prevent double buy.
-        // User requested: "notif pesanan dikemas dan dikirim". 
-        // Let's mark as 'sold' or maybe 'booked' if we add that status. For now 'sold' is simplest to hide it.
-        // But better: Add 'booked' status support or just 'sold'. 
-        // Let's stick to 'sold' for now to ensure it's removed from available list.
-        await pool.query("UPDATE fish SET status = 'sold' WHERE id = $1", [data.fish_id]);
-
-        res.json({
-            "message": "success",
-            "data": result.rows[0],
-            "order_id": result.rows[0].id
-        });
-    } catch (err) {
-        res.status(400).json({ "error": err.message });
-    }
-});
-
-// Get All Orders (Admin)
-app.get('/api/orders', async (req, res) => {
-    try {
-        const result = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
-        res.json({ "message": "success", "data": result.rows });
-    } catch (err) {
-        res.status(400).json({ "error": err.message });
-    }
-});
-
-// Update Order Status
-app.put('/api/orders/:id/status', async (req, res) => {
-    const { status } = req.body; // pending, paid, packed, shipped
-    const { id } = req.params;
-
-    try {
-        const result = await pool.query("UPDATE orders SET status = $1 WHERE id = $2 RETURNING *", [status, id]);
-        res.json({ "message": "success", "data": result.rows[0] });
-    } catch (err) {
-        res.status(400).json({ "error": err.message });
-    }
-});
-
-// Delete Order (with Restore Fish Status)
-app.delete('/api/orders/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        // 1. Get order to find fish_id
-        const orderResult = await pool.query("SELECT fish_id FROM orders WHERE id = $1", [id]);
-        if (orderResult.rows.length === 0) {
-            res.status(404).json({ error: "Order not found" });
-            return;
-        }
-        const fishId = orderResult.rows[0].fish_id;
-
-        // 2. Delete Order
-        await pool.query("DELETE FROM orders WHERE id = $1", [id]);
-
-        // 3. Restore Fish Status to 'available'
-        await pool.query("UPDATE fish SET status = 'available' WHERE id = $1", [fishId]);
-
-        res.json({ message: "success", deletedId: id, restoredFishId: fishId });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 // Delete fish
 app.delete('/api/fish/:id', async (req, res) => {
     try {
         await pool.query('DELETE FROM fish WHERE id = $1', [req.params.id]);
         res.json({ "message": "deleted" });
+    } catch (err) {
+        res.status(400).json({ "error": err.message });
+    }
+});
+
+// Product Routes
+app.get('/api/products', async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
+        res.json({
+            "message": "success",
+            "data": result.rows
+        });
     } catch (err) {
         res.status(400).json({ "error": err.message });
     }

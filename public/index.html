@@ -89,15 +89,6 @@
         style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-top: 10vh;">
 
         <!-- Hero Section -->
-        <!-- Language Toggle -->
-        <div style="position: absolute; top: 20px; right: 20px; z-index: 100;">
-            <button id="langToggle" class="glass-panel"
-                style="padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 1.2rem;">🇮🇩</span>
-                <span style="font-size: 0.8rem; font-weight: bold;">ID</span>
-            </button>
-        </div>
-
         <div class="glass-panel animate-fade-in"
             style="padding: 3rem; text-align: center; max-width: 600px; width: 100%; position: relative; overflow: hidden;">
             <!-- Decorative Glow -->
@@ -109,10 +100,17 @@
                 <i class="ri-anchor-line" style="font-size: 4rem; color: var(--primary);"></i>
             </div>
 
+            <div style="position: absolute; top: 20px; right: 20px;">
+                <a href="shop.html" class="btn-primary"
+                    style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                    <i class="ri-store-2-line" style="vertical-align: middle; margin-right: 5px;"></i> Shop
+                </a>
+            </div>
+
             <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; line-height: 1.2;">
                 SnaDaily<span class="text-gradient">Cheker</span>
             </h1>
-            <p id="hero-desc" style="color: var(--text-muted); margin-bottom: 2.5rem;">
+            <p style="color: var(--text-muted); margin-bottom: 2.5rem;">
                 Verifikasi keaslian dan lacak perjalanan produk laut anda dari lautan hingga ke tangan anda.
             </p>
 
@@ -124,7 +122,7 @@
 
             <button id="searchBtn" class="btn-primary" style="width: 100%;">
                 <i class="ri-search-line" style="vertical-align: middle; margin-right: 8px;"></i>
-                <span id="btn-text">Check Authenticity</span>
+                Check Authenticity
             </button>
 
             <div id="errorMsg" style="color: var(--error); margin-top: 1rem; display: none;"></div>
@@ -133,16 +131,9 @@
         <!-- Result Section (Initially Hidden) -->
         <div id="resultCard" class="glass-panel result-card"
             style="margin-top: 2rem; width: 100%; max-width: 600px; position: relative; display: none;">
-
-            <!-- Sold Badge Overlay -->
-            <div id="sold-badge"
-                style="position: absolute; top: 20px; right: 20px; background: var(--error); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; transform: rotate(15deg); border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.2); display: none; z-index: 10;">
-                SOLD OUT
-            </div>
-
             <div class="verified-badge">
                 <i class="ri-checkbox-circle-fill"></i>
-                <span id="verified-text">TERVERIFIKASI ORIGINAL</span>
+                TERVERIFIKASI ORIGINAL
             </div>
 
             <h2 id="res-species" style="font-size: 2rem; margin-bottom: 0.5rem;">Atlantic Salmon</h2>
@@ -154,28 +145,21 @@
                     <span id="res-origin" style="color: var(--primary);">Norway</span>
                 </div>
                 <div class="detail-item">
-                    <strong id="label-hatch">Tanggal Menetas</strong>
+                    <strong>Tanggal Menetas</strong>
                     <span id="res-date">12 Des 2024</span>
                 </div>
                 <div class="detail-item">
-                    <strong id="label-weight">Berat</strong>
+                    <strong>Berat</strong>
                     <span id="res-weight">4.5 kg</span>
                 </div>
                 <div class="detail-item">
-                    <strong id="label-method">Metode</strong>
+                    <strong>Metode</strong>
                     <span id="res-method">Ternak sendiri</span>
                 </div>
                 <div class="detail-item" id="res-import-date-container" style="display: none;">
-                    <strong id="label-import">Negara Asal Import</strong>
+                    <strong>Negara Asal Import</strong>
                     <span id="res-import-date"></span>
                 </div>
-            </div>
-
-            <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-                <button onclick="window.shareResult()" class="btn-primary"
-                    style="flex: 1; background: transparent; border: 1px solid var(--primary); color: var(--primary);">
-                    <i class="ri-share-forward-line"></i> <span id="btn-share">Share Result</span>
-                </button>
             </div>
 
             <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
