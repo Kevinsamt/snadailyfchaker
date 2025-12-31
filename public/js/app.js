@@ -443,6 +443,174 @@ const initAdmin = () => {
     renderHistory();
 };
 
+// Shop Init
+window.initShop = async () => {
+    const grid = document.getElementById('shopGrid');
+    if (!grid) return;
+
+    try {
+        const res = await fetch('/api/fish');
+        const json = await res.json();
+        const data = json.data || [];
+
+        // Filter available only
+        const available = data.filter(item => !item.status || item.status === 'available');
+
+        if (available.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">No items available at the moment.</div>';
+            return;
+        }
+
+        grid.innerHTML = available.map(item => {
+            const isPremium = item.isPremium || (item.origin && item.origin.toLowerCase().includes('thailand')) || (item.importDate && item.importDate.length > 0);
+
+            return `
+            <div class="${isPremium ? 'premium-card animate-reveal' : 'glass-card animate-fade-in'}" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                <div>
+                    ${isPremium ? '<div style="font-size: 0.8rem; color: #fbbf24; margin-bottom: 0.5rem;"><i class="ri-vip-crown-fill"></i> Premium Grade</div>' : ''}
+                    <h3 style="font-size: 1.5rem; margin: 0 0 0.5rem 0;">${item.species}</h3>
+                    <div style="font-family: monospace; color: var(--secondary); margin-bottom: 1rem;">#${item.id}</div>
+                    
+                    <div style="font-size: 0.9rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <div style="color: #a0aec0;">Origin</div> <div>${item.origin}</div>
+                        <div style="color: #a0aec0;">Weight</div> <div>${item.weight} kg</div>
+                    </div>
+                </div>
+                <button onclick="openCheckout('${item.id}', '${item.species}')" class="glow-button" style="width: 100%; margin-top: 1.5rem; justify-content: center;">
+                    Buy Now
+                </button>
+            </div>
+            `;
+        }).join('');
+
+    } catch (e) {
+        console.error("Shop Load Error", e);
+        grid.innerHTML = '<div style="color: var(--error);">Failed to load catalog.</div>';
+    }
+
+    // Checkout Form Handler
+    const orderForm = document.getElementById('orderForm');
+    if (orderForm) {
+        orderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = orderForm.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Processing...';
+            btn.disabled = true;
+
+            const payload = {
+                fish_id: document.getElementById('orderFishId').value,
+                customer_name: document.getElementById('custName').value,
+                email: document.getElementById('custEmail').value,
+                phone: document.getElementById('custPhone').value,
+                address_full: document.getElementById('custAddress').value,
+                district: document.getElementById('custDistrict').value,
+                subdistrict: document.getElementById('custSubdistrict').value,
+                postal_code: document.getElementById('custPostal').value,
+                payment_method: document.getElementById('paymentMethod').value
+            };
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+
+                if (result.message === 'success') {
+                    alert('Order Placed! Please wait for admin confirmation.');
+                    document.getElementById('checkoutModal').style.display = 'none';
+                    orderForm.reset();
+                    initShop(); // Refresh grid to remove sold item
+                } else {
+                    alert('Order Failed: ' + result.error);
+                }
+            } catch (err) {
+                alert('Connection Error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+    }
+};
+
+window.openCheckout = (id, title) => {
+    document.getElementById('orderFishId').value = id;
+    document.getElementById('selectedFishDetail').innerHTML = `<strong>Selected Item:</strong> ${title} <br><small>ID: ${id}</small>`;
+    document.getElementById('checkoutModal').style.display = 'block';
+};
+
+// Admin Orders Logic (Added to initAdmin via conditional call or separate init)
+// Let's modify initAdmin to include order tab logic or create initAdminOrders
+window.initAdminOrders = async () => {
+    const container = document.getElementById('ordersList');
+    if (!container) return;
+
+    try {
+        const res = await fetch('/api/orders');
+        const json = await res.json();
+        const orders = json.data || [];
+
+        if (orders.length === 0) {
+            container.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 2rem;">No new orders.</div>';
+            return;
+        }
+
+        container.innerHTML = orders.map(order => {
+            let statusColor = '#fbbf24'; // pending
+            if (order.status === 'paid') statusColor = '#34d399';
+            if (order.status === 'packed') statusColor = '#60a5fa';
+            if (order.status === 'shipped') statusColor = '#a78bfa';
+
+            return `
+            <div class="glass-card" style="margin-bottom: 1rem; border-left: 4px solid ${statusColor};">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 4px;">Order #${order.id.slice(-6)}</div>
+                        <div style="font-size: 0.9rem; color: #d1d5db;">by ${order.customer_name} (${order.phone})</div>
+                        <div style="font-size: 0.8rem; color: var(--secondary); margin-top: 4px;">Item: ${order.fish_id} | ${order.payment_method}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="background: ${statusColor}20; color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase;">${order.status}</span>
+                        <div style="margin-top: 8px; font-size: 0.8rem; color: #9ca3af;">${new Date(order.created_at).toLocaleDateString()}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    ${order.status === 'pending' ? `<button onclick="updateOrderStatus('${order.id}', 'paid')" class="action-btn" title="Mark Paid" style="color: #34d399;"><i class="ri-money-dollar-circle-line"></i> Confirm Pay</button>` : ''}
+                    ${order.status === 'paid' ? `<button onclick="updateOrderStatus('${order.id}', 'packed')" class="action-btn" title="Mark Packed" style="color: #60a5fa;"><i class="ri-box-3-line"></i> Mark Packed</button>` : ''}
+                    ${order.status === 'packed' ? `<button onclick="updateOrderStatus('${order.id}', 'shipped')" class="action-btn" title="Mark Shipped" style="color: #a78bfa;"><i class="ri-truck-line"></i> Mark Shipped</button>` : ''}
+                </div>
+            </div>
+            `;
+        }).join('');
+
+    } catch (e) {
+        container.innerHTML = 'Error loading orders.';
+    }
+};
+
+window.updateOrderStatus = async (id, status) => {
+    if (!confirm(`Update status to ${status.toUpperCase()}?`)) return;
+    try {
+        await fetch(`/api/orders/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+
+        // Notify user simulation (In reality, we would send Email/WA here server-side)
+        if (status === 'packed') alert('System: Packaging Notification Sent to Customer.');
+        if (status === 'shipped') alert('System: Shipping Notification sent.');
+
+        initAdminOrders();
+    } catch (e) {
+        alert('Update Failed');
+    }
+};
+
 // Customer Logic
 const initCustomer = () => {
     const searchBtn = document.getElementById('searchBtn');
@@ -600,10 +768,17 @@ const initCustomer = () => {
     }
 };
 
+// Main Initialization
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.location.pathname.includes('admin.html')) {
+    // Determine page context logic
+    if (document.getElementById('fishForm')) {
         initAdmin();
-    } else {
+        // Also init orders if the container exists (we need to update admin.html first for this)
+        // I will add a check inside initAdminOrders but calling it here is safe.
+        initAdminOrders();
+    } else if (document.getElementById('searchBtn')) {
         initCustomer();
+    } else {
+        // Shop or other pages
     }
 });

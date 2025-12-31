@@ -102,96 +102,160 @@
         <!-- Input Section -->
         <div>
             <div class="glass-panel animate-fade-in" style="padding: 2rem;">
-                <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="ri-file-add-line" style="color: var(--secondary);"></i>
-                    Input Data Ikan
-                </h2>
-
-                <form id="fishForm">
-                    <input type="hidden" id="editId">
-                    <div class="input-group">
-                        <label class="input-label">Spesies Ikan</label>
-                        <input type="text" id="species" class="glass-input" placeholder="Contoh: Tuna Bluefin" required>
+                <div class="container" style="margin-top: 2rem;">
+                    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                        <button class="nav-tab active" onclick="switchTab('inventory')">Inventory</button>
+                        <button class="nav-tab" onclick="switchTab('orders')">Orders</button>
                     </div>
 
-                    <div class="input-group">
-                        <label class="input-label">Asal (Origin)</label>
-                        <input type="text" id="origin" class="glass-input" placeholder="Contoh: Maluku, Indonesia"
-                            required>
-                    </div>
+                    <!-- Inventory Tab -->
+                    <div id="tab-inventory">
+                        <div class="dashboard-grid">
+                            <!-- ... Existing form and list ... -->
+                            <div class="card animate-slide-up">
+                                <h2 class="card-title"><i class="ri-add-circle-line"
+                                        style="margin-right: 10px; color: var(--primary);"></i> Input Data Ikan</h2>
+                                <form id="fishForm">
+                                    <input type="hidden" id="editId">
 
-                    <div class="input-group" id="hatchDateContainer">
-                        <label class="input-label">Tanggal Menetas</label>
-                        <input type="date" id="catchDate" class="glass-input" required>
-                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Varietas / Spesies</label>
+                                        <input type="text" id="species" class="glass-input" required
+                                            placeholder="Contoh: Giant Betta">
+                                    </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="input-group">
-                            <label class="input-label">Berat (kg)</label>
-                            <input type="number" step="0.1" id="weight" class="glass-input" placeholder="0.0" required>
+                                    <div class="input-group">
+                                        <label class="input-label">Asal (Origin)</label>
+                                        <input type="text" id="origin" class="glass-input" required
+                                            placeholder="Contoh: Medan, Indonesia">
+                                    </div>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                        <div class="input-group">
+                                            <label class="input-label" id="hatchDateContainer">Tanggal Menetas</label>
+                                            <label class="input-label" id="catchDateContainer"
+                                                style="display: none;">Tanggal Tangkap</label>
+                                            <input type="date" id="catchDate" class="glass-input" required>
+                                        </div>
+                                        <div class="input-group">
+                                            <label class="input-label">Berat (kg)</label>
+                                            <input type="number" step="0.01" id="weight" class="glass-input" required
+                                                placeholder="0.0">
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group">
+                                        <label class="input-label">Metode</label>
+                                        <select id="method" class="glass-input">
+                                            <option value="Farm Raised">Farm Raised (Ternak)</option>
+                                            <option value="Wild Caught">Wild Caught (Alam)</option>
+                                            <option value="Import">Import</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="input-group" id="importDateContainer"
+                                        style="display: none; margin-top: 1rem;">
+                                        <label class="input-label">Negara Asal Import</label>
+                                        <input type="text" id="importDate" class="glass-input"
+                                            placeholder="Contoh: Thailand">
+                                    </div>
+
+                                    <div
+                                        style="margin-top: 1.5rem; display: flex; align-items: center; gap: 1rem; background: rgba(251, 191, 36, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3);">
+                                        <input type="checkbox" id="isPremium"
+                                            style="width: 20px; height: 20px; cursor: pointer;">
+                                        <label for="isPremium"
+                                            style="cursor: pointer; font-weight: bold; color: #fbbf24;">Mark as PREMIUM
+                                            Quality</label>
+                                    </div>
+
+                                    <div class="input-group" style="margin-top: 1rem;">
+                                        <label class="input-label">Status Ketersediaan</label>
+                                        <select id="status" class="glass-input" style="background-color: #0a0e17;">
+                                            <option value="available">Available in Shop</option>
+                                            <option value="sold">Sold Out</option>
+                                            <option value="booked">Booked</option>
+                                        </select>
+                                    </div>
+
+                                    <button type="submit" class="glow-button" style="width: 100%; margin-top: 2rem;">
+                                        <i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="card animate-slide-up" style="animation-delay: 0.1s;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                    <h2 class="card-title"><i class="ri-history-line"
+                                            style="margin-right: 10px; color: var(--secondary);"></i> Riwayat Data</h2>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="action-btn"
+                                            onclick="document.getElementById('restoreInput').click()"
+                                            title="Restore Data"><i class="ri-upload-cloud-2-line"></i></button>
+                                        <input type="file" id="restoreInput" hidden onchange="window.restoreData(this)">
+                                        <button class="action-btn" onclick="window.backupData()" title="Backup Data"><i
+                                                class="ri-download-cloud-2-line"></i></button>
+                                    </div>
+                                </div>
+
+                                <div style="position: relative; margin-bottom: 1rem;">
+                                    <input type="text" id="searchInput" class="glass-input"
+                                        placeholder="Cari ID atau Spesies...">
+                                    <button id="clearSearchBtn"
+                                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #a0aec0; cursor: pointer; display: none;">
+                                        <i class="ri-close-circle-fill"></i>
+                                    </button>
+                                </div>
+
+                                <div id="historyList">
+                                    <!-- Items injected here -->
+                                </div>
+                            </div>
                         </div>
-                        <div class="input-group">
-                            <label class="input-label">Metode</label>
-                            <select id="method" class="glass-input" style="background-color: #0a0e17;">
-                                <option>Ternak sendiri</option>
-                                <option>Import dari luar negri</option>
-                                <option>Import dari luar pulau</option>
-                            </select>
+                    </div>
+
+                    <!-- Orders Tab -->
+                    <div id="tab-orders" style="display: none;">
+                        <div class="card animate-slide-up">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                                <h2 class="card-title"><i class="ri-shopping-bag-3-line"
+                                        style="margin-right: 10px; color: var(--primary);"></i> Pesanan Masuk</h2>
+                                <button onclick="window.initAdminOrders()" class="action-btn" title="Refresh Orders"><i
+                                        class="ri-refresh-line"></i> Refresh</button>
+                            </div>
+                            <div id="ordersList">
+                                <!-- Orders injected here -->
+                                <div style="text-align: center; color: #6b7280; padding: 2rem;">Loading...</div>
+                            </div>
                         </div>
                     </div>
 
-
-
-                    <div class="input-group" id="importDateContainer" style="display: none; margin-top: 1rem;">
-                        <label class="input-label">Negara Asal Import</label>
-                        <input type="text" id="importDate" class="glass-input" placeholder="Contoh: Thailand">
-                    </div>
-
-                    <div
-                        style="margin-top: 1.5rem; display: flex; align-items: center; gap: 1rem; background: rgba(251, 191, 36, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3);">
-                        <input type="checkbox" id="isPremium" style="width: 20px; height: 20px; cursor: pointer;">
-                        <label for="isPremium" style="cursor: pointer; font-weight: bold; color: #fbbf24;">Mark as
-                            PREMIUM Quality</label>
-                    </div>
-
-                    <div class="input-group" style="margin-top: 1rem;">
-                        <label class="input-label">Status Ketersediaan</label>
-                        <select id="status" class="glass-input" style="background-color: #0a0e17;">
-                            <option value="available">Tersedia (Available)</option>
-                            <option value="sold">Terjual (Sold)</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-                        <i class="ri-qr-code-line" style="margin-right: 8px;"></i>
-                        Generate ID & Simpan
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- History/Preview Section -->
-        <div>
-            <div class="glass-panel animate-fade-in" style="padding: 2rem; height: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <div style="font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="ri-history-line" style="color: var(--primary);"></i>
-                        Riwayat
-                    </div>
-                    <div class="input-group" style="margin-bottom: 0; width: 60%; position: relative;">
-                        <input type="text" id="searchInput" class="glass-input" placeholder="Cari..."
-                            style="padding: 0.5rem 1rem; padding-right: 2rem; border-color: var(--primary); font-size: 0.9rem;">
-                        <i class="ri-close-line" id="clearSearchBtn"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); display: none;"></i>
-                    </div>
                 </div>
 
-                <div id="historyList" style="max-height: 500px; overflow-y: auto; padding-right: 0.5rem;">
-                    <!-- Items will be injected here by JS -->
-                    <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                        Belum ada data yang diinput hari ini.
-                    </div>
-                </div>
+                <script src="js/app.js"></script>
+                <script>
+                    function logout() {
+                        sessionStorage.removeItem('admin_token');
+                        window.location.href = '/login.html';
+                    }
+
+                    // Simple Tab Switcher
+                    function switchTab(tabName) {
+                        document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+                        document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+
+                        if (tabName === 'inventory') {
+                            document.getElementById('tab-inventory').style.display = 'block';
+                            document.getElementById('tab-orders').style.display = 'none';
+                        } else {
+                            document.getElementById('tab-inventory').style.display = 'none';
+                            document.getElementById('tab-orders').style.display = 'block';
+                            if (window.initAdminOrders) window.initAdminOrders();
+                        }
+                    }
+                </script>
             </div>
         </div>
     </div>

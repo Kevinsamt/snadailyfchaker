@@ -12,6 +12,14 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public folder
 
+// Route for Shop page
+app.get('/shop', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'shop.html'));
+});
+app.get('/shop.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'shop.html'));
+});
+
 // Database Setup
 // Fix SSL for Supabase/Vercel
 let connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
@@ -51,15 +59,26 @@ async function initDb() {
             isPremium BOOLEAN DEFAULT 0
         )`);
 
-        // Ensure columns exist (for migration)
-        try {
-            await pool.query(`ALTER TABLE fish ADD COLUMN status TEXT DEFAULT 'available'`);
-        } catch (e) { }
-        try {
-            await pool.query(`ALTER TABLE fish ADD COLUMN isPremium BOOLEAN DEFAULT 0`);
-        } catch (e) { }
+        await pool.query(`CREATE TABLE IF NOT EXISTS orders (
+            id TEXT PRIMARY KEY,
+            fish_id TEXT,
+            customer_name TEXT,
+            email TEXT,
+            phone TEXT,
+            address_full TEXT,
+            district TEXT,
+            subdistrict TEXT,
+            postal_code TEXT,
+            payment_method TEXT,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
 
-        console.log("Fish table ready.");
+        // Ensure columns exist (for migration)
+        try { await pool.query(`ALTER TABLE fish ADD COLUMN status TEXT DEFAULT 'available'`); } catch (e) { }
+        try { await pool.query(`ALTER TABLE fish ADD COLUMN isPremium BOOLEAN DEFAULT 0`); } catch (e) { }
+
+        console.log("Database tables ready.");
     } catch (err) {
         console.log("Database connection error (might need env vars):", err.message);
     }
@@ -79,11 +98,25 @@ app.get('/api/init', async (req, res) => {
             status TEXT DEFAULT 'available',
             isPremium BOOLEAN DEFAULT 0
         )`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS orders (
+            id TEXT PRIMARY KEY,
+            fish_id TEXT,
+            customer_name TEXT,
+            email TEXT,
+            phone TEXT,
+            address_full TEXT,
+            district TEXT,
+            subdistrict TEXT,
+            postal_code TEXT,
+            payment_method TEXT,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
 
         try { await pool.query(`ALTER TABLE fish ADD COLUMN status TEXT DEFAULT 'available'`); } catch (e) { }
         try { await pool.query(`ALTER TABLE fish ADD COLUMN isPremium BOOLEAN DEFAULT 0`); } catch (e) { }
 
-        res.json({ message: "Database initialized successfully (Table 'fish' checked/created/migrated)." });
+        res.json({ message: "Database initialized successfully (Tables 'fish', 'orders' ready)." });
     } catch (err) {
         console.error("Init Error:", err);
         res.status(500).json({ error: err.message, stack: err.stack });
@@ -108,6 +141,8 @@ app.post('/api/login', (req, res) => {
 initDb();
 
 // Routes
+
+// --- FISH API ---
 
 // Get all fish
 app.get('/api/fish', async (req, res) => {
@@ -251,6 +286,74 @@ app.put('/api/fish/:id', async (req, res) => {
             message: "success",
             data: result.rows[0]
         });
+    } catch (err) {
+        res.status(400).json({ "error": err.message });
+    }
+});
+
+// --- ORDERS API ---
+
+// Create Order
+app.post('/api/orders', async (req, res) => {
+    const data = {
+        id: 'ORD-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+        fish_id: req.body.fish_id,
+        customer_name: req.body.customer_name,
+        email: req.body.email,
+        phone: req.body.phone,
+        address_full: req.body.address_full,
+        district: req.body.district,
+        subdistrict: req.body.subdistrict,
+        postal_code: req.body.postal_code,
+        payment_method: req.body.payment_method,
+        status: 'pending'
+    };
+
+    const sql = `INSERT INTO orders (id, fish_id, customer_name, email, phone, address_full, district, subdistrict, postal_code, payment_method, status)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`;
+
+    const params = [data.id, data.fish_id, data.customer_name, data.email, data.phone, data.address_full, data.district, data.subdistrict, data.postal_code, data.payment_method, data.status];
+
+    try {
+        // 1. Create Order
+        const result = await pool.query(sql, params);
+
+        // 2. Mark Fish as 'booked' (so it disappears from shop but is not totally sold yet?)
+        // Or directly 'sold'? Let's use 'booked' if we supported it, but 'sold' is safer to prevent double buy.
+        // User requested: "notif pesanan dikemas dan dikirim". 
+        // Let's mark as 'sold' or maybe 'booked' if we add that status. For now 'sold' is simplest to hide it.
+        // But better: Add 'booked' status support or just 'sold'. 
+        // Let's stick to 'sold' for now to ensure it's removed from available list.
+        await pool.query("UPDATE fish SET status = 'sold' WHERE id = $1", [data.fish_id]);
+
+        res.json({
+            "message": "success",
+            "data": result.rows[0],
+            "order_id": result.rows[0].id
+        });
+    } catch (err) {
+        res.status(400).json({ "error": err.message });
+    }
+});
+
+// Get All Orders (Admin)
+app.get('/api/orders', async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+        res.json({ "message": "success", "data": result.rows });
+    } catch (err) {
+        res.status(400).json({ "error": err.message });
+    }
+});
+
+// Update Order Status
+app.put('/api/orders/:id/status', async (req, res) => {
+    const { status } = req.body; // pending, paid, packed, shipped
+    const { id } = req.params;
+
+    try {
+        const result = await pool.query("UPDATE orders SET status = $1 WHERE id = $2 RETURNING *", [status, id]);
+        res.json({ "message": "success", "data": result.rows[0] });
     } catch (err) {
         res.status(400).json({ "error": err.message });
     }

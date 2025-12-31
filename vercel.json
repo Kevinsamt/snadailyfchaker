@@ -2,6 +2,10 @@
     "version": 2,
     "rewrites": [
         {
+            "source": "/shop",
+            "destination": "/shop.html"
+        },
+        {
             "source": "/api/(.*)",
             "destination": "/server.js"
         }
