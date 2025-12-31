@@ -670,8 +670,8 @@ window.loadProducts = async () => {
                         <p style="font-size: 0.9rem; color: #cbd5e0; margin-bottom: 1rem; line-height: 1.4;">${product.description}</p>
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div class="product-price">Rp ${product.price.toLocaleString('id-ID')}</div>
-                            <button onclick="addToCart(${product.id})" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                Add +
+                            <button onclick="showPaymentModal('${product.name}', ${product.price})" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                Beli Sekarang
                             </button>
                         </div>
                     </div>
@@ -687,24 +687,25 @@ window.loadProducts = async () => {
     }
 };
 
-window.addToCart = (id) => {
-    const badge = document.getElementById('cartCount');
-    if (badge) {
-        let count = parseInt(badge.textContent);
-        badge.textContent = count + 1;
-    }
+window.showPaymentModal = (name, price) => {
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+        document.getElementById('paymentTotal').innerText = 'Rp ' + price.toLocaleString('id-ID');
+        document.getElementById('paymentItem').innerText = name;
 
-    // Animation
-    const btn = event.target;
-    if (btn) {
-        const originalText = btn.innerText;
-        btn.innerText = "Added!";
-        btn.style.background = "var(--secondary)";
-        setTimeout(() => {
-            btn.innerText = originalText;
-            btn.style.background = "";
-        }, 1000);
+        // Dynamic QR (Simulation)
+        // In real app, this would be a static image of the shop's QRIS
+        const qrisUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Bayar ${price} ke Sndaily`;
+        const qrisImg = document.getElementById('qrisImage');
+        if (qrisImg) qrisImg.src = qrisUrl;
+
+        modal.style.display = 'flex';
     }
+};
+
+// Deprecated addToCart, kept for compatibility if referenced elsewhere
+window.addToCart = (id) => {
+    console.log("Add to cart clicked");
 };
 
 // Initialize based on page
