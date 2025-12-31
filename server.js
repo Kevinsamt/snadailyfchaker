@@ -59,21 +59,29 @@ async function initDb() {
             stock INTEGER DEFAULT 10
         )`);
 
-        // Seed products if empty
+        // Seed products if empty or contains old seafood data
         try {
+            // Check for old data (Salmon)
+            const checkOld = await pool.query("SELECT * FROM products WHERE name LIKE '%Salmon%' LIMIT 1");
+            if (checkOld.rows.length > 0) {
+                console.log("Old seafood data detected. Clearing table...");
+                await pool.query("DELETE FROM products");
+            }
+
             const productCount = await pool.query('SELECT COUNT(*) FROM products');
             if (parseInt(productCount.rows[0].count) === 0) {
                 const seedProducts = [
-                    { name: 'Premium Salmon Fillet', price: 150000, image: 'https://plus.unsplash.com/premium_photo-1667520042457-347589ae79d6?auto=format&fit=crop&q=80&w=600', description: 'Fresh Atlantic Salmon, high omega-3.', category: 'Fish' },
-                    { name: 'Tuna Loin Grade A', price: 120000, image: 'https://images.unsplash.com/photo-1595186835619-21b6a782a20e?auto=format&fit=crop&q=80&w=600', description: 'Perfect for sashimi and steak.', category: 'Fish' },
-                    { name: 'Giant Tiger Prawns', price: 180000, image: 'https://images.unsplash.com/photo-1623855244183-52fd8d3ce2f7?auto=format&fit=crop&q=80&w=600', description: 'Fresh large prawns from Tarakan.', category: 'Shellfish' },
-                    { name: 'Live Lobster', price: 450000, image: 'https://images.unsplash.com/photo-1552160753-117159d4541c?auto=format&fit=crop&q=80&w=600', description: 'Fresh live lobster, sweet meat.', category: 'Shellfish' }
+                    { name: 'Super Red Betta (Halfmoon)', price: 150000, image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80&w=600', description: 'Ikan cupang Halfmoon warna merah menyala, sirip lebar sempurna.', category: 'Betta' },
+                    { name: 'Channa Maru Yellow Sentarum', price: 450000, image: 'https://preview.redd.it/channa-marulioides-yellow-sentarum-v0-ea3u435k3e0d1.jpeg?auto=webp&s=ed73562baea8fa9c6ac92292f76326075908b871', description: 'Channa Maru YS size 20cm, mental preman, bunga banyak.', category: 'Channa' },
+                    { name: 'Goldfish Oranda Panda', price: 85000, image: 'https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?auto=format&fit=crop&q=80&w=600', description: 'Koki Oranda dengan corak panda hitam putih yang unik.', category: 'Goldfish' },
+                    { name: 'Platinum Guppy (Pair)', price: 50000, image: 'https://images.unsplash.com/photo-1545645672-aa6052dc6cf3?auto=format&fit=crop&q=80&w=600', description: 'Sepasang Guppy Platinum White, genetik murni.', category: 'Guppy' },
+                    { name: 'Discus Red Melon', price: 250000, image: 'https://images.unsplash.com/photo-1534032049383-a4e99f57245d?auto=format&fit=crop&q=80&w=600', description: 'Discus Red Melon 3 inch, bulat high body.', category: 'Discus' }
                 ];
 
                 for (const p of seedProducts) {
                     await pool.query('INSERT INTO products (name, price, image, description, category) VALUES ($1, $2, $3, $4, $5)', [p.name, p.price, p.image, p.description, p.category]);
                 }
-                console.log("Seeded products table.");
+                console.log("Seeded ornamental fish products.");
             }
         } catch (seedErr) {
             console.warn("Seeding error (non-fatal):", seedErr.message);
