@@ -38,8 +38,16 @@ try {
 
 const pool = new Pool({
     connectionString,
-    ssl: {
-        rejectUnauthorized: false
+    ssl: connectionString && connectionString.includes('localhost') ? false : { rejectUnauthorized: false } // Fix SSL for Vercel
+});
+
+// Health Check
+app.get('/api/health', async (req, res) => {
+    try {
+        await pool.query('SELECT NOW()');
+        res.json({ status: 'ok', db: 'connected' });
+    } catch (err) {
+        res.status(500).json({ status: 'error', db: err.message });
     }
 });
 

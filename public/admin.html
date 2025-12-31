@@ -277,6 +277,22 @@
     </div>
 
     <script src="js/app.js"></script>
+    <script>
+        // Check DB Connection
+        fetch('/api/health')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status !== 'ok') {
+                    const banner = document.createElement('div');
+                    banner.style.cssText = 'position:fixed; top:0; left:0; width:100%; background: #ef4444; color: white; padding: 1rem; text-align: center; z-index: 9999; font-weight: bold;';
+                    banner.innerHTML = `⚠️ Database Error: ${data.db}. <br>Please check your Vercel Environment Variables (POSTGRES_URL).`;
+                    document.body.appendChild(banner);
+                }
+            })
+            .catch(err => {
+                console.error("Health check failed:", err);
+            });
+    </script>
 </body>
 
 </html>
