@@ -221,6 +221,7 @@ const initAdmin = () => {
     }
 
     // Expose actions globally
+    window.renderHistory = renderHistory;
     window.editFish = async (id) => {
         const data = await DataStore.find(id);
         if (!data) return;
