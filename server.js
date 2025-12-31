@@ -47,15 +47,17 @@ async function initDb() {
             "catchDate" TEXT,
             "importDate" TEXT,
             timestamp TEXT,
-            status TEXT DEFAULT 'available'
+            status TEXT DEFAULT 'available',
+            isPremium BOOLEAN DEFAULT 0
         )`);
 
-        // Ensure status column exists (for migration)
+        // Ensure columns exist (for migration)
         try {
             await pool.query(`ALTER TABLE fish ADD COLUMN status TEXT DEFAULT 'available'`);
-        } catch (e) {
-            // Column likely exists, ignore
-        }
+        } catch (e) { }
+        try {
+            await pool.query(`ALTER TABLE fish ADD COLUMN isPremium BOOLEAN DEFAULT 0`);
+        } catch (e) { }
 
         console.log("Fish table ready.");
     } catch (err) {
@@ -74,14 +76,13 @@ app.get('/api/init', async (req, res) => {
             "catchDate" TEXT,
             "importDate" TEXT,
             timestamp TEXT,
-            status TEXT DEFAULT 'available'
+            status TEXT DEFAULT 'available',
+            isPremium BOOLEAN DEFAULT 0
         )`);
-        // Ensure status column exists (for migration)
-        try {
-            await pool.query(`ALTER TABLE fish ADD COLUMN status TEXT DEFAULT 'available'`);
-        } catch (e) {
-            // Column likely exists, ignore
-        }
+
+        try { await pool.query(`ALTER TABLE fish ADD COLUMN status TEXT DEFAULT 'available'`); } catch (e) { }
+        try { await pool.query(`ALTER TABLE fish ADD COLUMN isPremium BOOLEAN DEFAULT 0`); } catch (e) { }
+
         res.json({ message: "Database initialized successfully (Table 'fish' checked/created/migrated)." });
     } catch (err) {
         console.error("Init Error:", err);
@@ -131,11 +132,13 @@ app.get('/api/stats', async (req, res) => {
         const soldQuery = await pool.query("SELECT COUNT(*) FROM fish WHERE status = 'sold'");
         const availableQuery = await pool.query("SELECT COUNT(*) FROM fish WHERE status IS NULL OR status = 'available'");
 
-        // Premium: Import or specific origin (matches client logic roughly)
-        // Client logic: origin includes 'thailand' OR importDate > 0
+        // Premium: isPremium is true OR (Origin includes thailand OR importDate > 0)
+        // We accept both manual and auto definitions for now, or prioritize manual.
+        // Let's count where manual is TRUE OR auto logic matches.
         const premiumQuery = await pool.query(`
             SELECT COUNT(*) FROM fish 
-            WHERE (LOWER(origin) LIKE '%thailand%') 
+            WHERE (isPremium = true)
+            OR (LOWER(origin) LIKE '%thailand%') 
             OR ("importDate" IS NOT NULL AND "importDate" != '')
         `);
 
@@ -185,10 +188,11 @@ app.post('/api/fish', async (req, res) => {
         catchDate: req.body.catchDate,
         importDate: req.body.importDate,
         timestamp: new Date().toISOString(),
-        status: req.body.status || 'available'
+        status: req.body.status || 'available',
+        isPremium: req.body.isPremium || false
     }
-    const sql = 'INSERT INTO fish (id, species, origin, weight, method, "catchDate", "importDate", timestamp, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *';
-    const params = [data.id, data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp, data.status]
+    const sql = 'INSERT INTO fish (id, species, origin, weight, method, "catchDate", "importDate", timestamp, status, isPremium) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *';
+    const params = [data.id, data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp, data.status, data.isPremium]
 
     try {
         const result = await pool.query(sql, params);
@@ -204,18 +208,6 @@ app.post('/api/fish', async (req, res) => {
 
 // Update fish
 app.put('/api/fish/:id', async (req, res) => {
-    // If only status is passed (PATCH-like behavior handling in full PUT for simplicity/safety)
-    // Ideally we should select first or use COALESCE in SQL, but let's assume client sends full object OR we do a quick check.
-    // For specific status toggling, the client might send just { status: 'sold' }. 
-    // To support partial updates efficiently without rewriting everything, let's dynamic build query or just Fetch-Merge-Update.
-
-    // BUT, keeping it simple consistent with current style:
-    // We will update everything that is sent. If fields are missing in req.body, they might be overwritten with NULL if we aren't careful.
-    // The current code replaced everything.
-    // Let's modify to be safer or expect full object.
-
-    // BETTER APPROACH: Use COALESCE in SQL to keep old value if new is null/undefined.
-
     const data = {
         species: req.body.species,
         origin: req.body.origin,
@@ -224,7 +216,8 @@ app.put('/api/fish/:id', async (req, res) => {
         catchDate: req.body.catchDate,
         importDate: req.body.importDate,
         status: req.body.status,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        isPremium: req.body.isPremium
     }
 
     const sql = `UPDATE fish SET 
@@ -235,11 +228,9 @@ app.put('/api/fish/:id', async (req, res) => {
         "catchDate" = COALESCE($5, "catchDate"), 
         "importDate" = COALESCE($6, "importDate"), 
         status = COALESCE($7, status),
-        timestamp = $8 
-        WHERE id = $9 RETURNING *`
-
-    // Note: COALESCE helps if we pass null/undefined from client for fields we don't want to change.
-    // However, JS 'undefined' becomes 'null' in params normally or needs careful handling.
+        timestamp = $8,
+        isPremium = COALESCE($9, isPremium)
+        WHERE id = $10 RETURNING *`
 
     const params = [
         data.species || null,
@@ -250,6 +241,7 @@ app.put('/api/fish/:id', async (req, res) => {
         data.importDate || null,
         data.status || null,
         data.timestamp,
+        data.isPremium !== undefined ? data.isPremium : null,
         req.params.id
     ]
 

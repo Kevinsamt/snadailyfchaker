@@ -162,13 +162,16 @@ const initAdmin = () => {
                 ? `<span style="font-size: 0.7rem; background: var(--error); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">SOLD</span>`
                 : `<span style="font-size: 0.7rem; background: var(--success); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">AVAILABLE</span>`;
 
-            const toggleIcon = isSold ? 'ri-arrow-go-back-line' : 'ri-shopping-cart-line';
-            const toggleTitle = isSold ? 'Mark Available' : 'Mark Sold';
+            // Check premium
+            const isPremium = item.isPremium || (item.origin && item.origin.toLowerCase().includes('thailand')) || (item.importDate && item.importDate.length > 0);
+            const premiumBadge = isPremium
+                ? `<i class="ri-vip-crown-fill" style="color: #fbbf24; margin-left: 5px;" title="Premium"></i>`
+                : ``;
 
             return `
             <div class="history-item animate-fade-in" style="display: flex; justify-content: space-between; align-items: center; opacity: ${isSold ? '0.7' : '1'};">
                 <div>
-                    <div style="font-weight: bold;">${item.species} ${statusBadge}</div>
+                    <div style="font-weight: bold;">${item.species} ${statusBadge} ${premiumBadge}</div>
                     <div style="font-size: 0.8rem; color: #a0aec0;">${item.id}</div>
                 </div>
                 <div style="text-align: right; display: flex; align-items: center; gap: 1rem;">
@@ -178,9 +181,6 @@ const initAdmin = () => {
                         ${item.importDate ? `<div style="font-size: 0.8rem; color: #fbbf24;">Import From: ${item.importDate}</div>` : ''}
                     </div>
                     <div style="display: flex;">
-                        <button class="action-btn" onclick="window.toggleFishStatus('${item.id}', '${item.status}')" title="${toggleTitle}">
-                            <i class="${toggleIcon}"></i>
-                        </button>
                         <button class="action-btn btn-edit" onclick="window.editFish('${item.id}')" title="Edit Data">
                             <i class="ri-pencil-line"></i>
                         </button>
@@ -237,9 +237,17 @@ const initAdmin = () => {
         if (data.catchDate) document.getElementById('catchDate').value = data.catchDate;
         if (data.importDate) document.getElementById('importDate').value = data.importDate;
 
+        // Status Field
         const statusSelect = document.getElementById('status');
         if (statusSelect) {
             statusSelect.value = data.status || 'available';
+        }
+
+        // Premium Checkbox
+        const premiumCheck = document.getElementById('isPremium');
+        if (premiumCheck) {
+            // Check simplified logic or direct field
+            premiumCheck.checked = !!data.isPremium;
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -248,22 +256,13 @@ const initAdmin = () => {
         btn.classList.add('pulse-animation');
     };
 
-    window.toggleFishStatus = async (id, currentStatus) => {
-        const newStatus = (currentStatus === 'sold') ? 'available' : 'sold';
-        try {
-            await DataStore.save({ id, status: newStatus });
-            renderHistory(document.getElementById('searchInput').value);
-        } catch (e) {
-            console.error("Failed to toggle status", e);
-            alert("Gagal mengubah status");
-        }
-    };
+    // Removed toggleFishStatus per user request to remove "shopping cart" chat style interaction
 
     window.printCertificate = async (id) => {
         const data = await DataStore.find(id);
         if (!data) return;
 
-        const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
+        const isPremium = data.isPremium || (data.origin && data.origin.toLowerCase().includes('thailand')) ||
             (data.importDate && data.importDate.length > 0);
 
         const verificationUrl = `https://snadailyfchaker.vercel.app/?id=${data.id}`;
@@ -422,7 +421,8 @@ const initAdmin = () => {
             weight: document.getElementById('weight').value,
             method: document.getElementById('method').value,
             importDate: document.getElementById('importDate').value,
-            status: document.getElementById('status').value
+            status: document.getElementById('status').value,
+            isPremium: document.getElementById('isPremium').checked // Get Checkbox Value
         };
         const editId = document.getElementById('editId').value;
         if (editId) formData.id = editId;
@@ -433,6 +433,7 @@ const initAdmin = () => {
             form.reset();
             methodSelect.dispatchEvent(new Event('change'));
             document.getElementById('status').value = 'available';
+            document.getElementById('isPremium').checked = false; // Reset checkbox
             document.getElementById('editId').value = '';
             document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
             renderHistory();
@@ -541,7 +542,7 @@ const initCustomer = () => {
         }
 
         // Premium Logic
-        const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
+        const isPremium = data.isPremium || (data.origin && data.origin.toLowerCase().includes('thailand')) ||
             (data.importDate && data.importDate.length > 0);
 
         resultCard.classList.remove('premium-card', 'animate-reveal');
