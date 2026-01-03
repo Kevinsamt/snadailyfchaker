@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public folder
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] })); // Serve static files from public folder
 
 // Database Setup
 // Fix SSL for Supabase/Vercel
