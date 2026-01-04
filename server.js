@@ -80,7 +80,7 @@ app.get('/api/shipping/search', apiLimiter, async (req, res) => {
 
     try {
         console.log("Komerce Search Request:", query);
-        const response = await fetch(`https://rajaongkir.komerce.id/api/v1/destination/domestic-search?search=${encodeURIComponent(query)}`, {
+        const response = await fetch(`https://rajaongkir.komerce.id/api/v1/destination/domestic-destination?search=${encodeURIComponent(query)}`, {
             headers: { 'x-api-key': KOMERCE_API_COST }
         });
 
