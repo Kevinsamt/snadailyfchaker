@@ -70,6 +70,7 @@ app.use('/api/', apiLimiter);
 
 // Komerce Configuration
 const KOMERCE_API_COST = process.env.KOMERCE_API_KEY_COST;
+const KOMERCE_API_DELIVERY = process.env.KOMERCE_API_KEY_DELIVERY;
 const KOMERCE_ORIGIN_ID = process.env.KOMERCE_ORIGIN_ID || '256'; // Medan id
 
 // Shipping: Search Destination (City/Subdistrict)
@@ -112,6 +113,23 @@ app.post('/api/shipping/cost', apiLimiter, async (req, res) => {
     } catch (err) {
         console.error("Komerce Cost Error:", err);
         res.status(500).json({ error: "Gagal menghitung ongkir" });
+    }
+});
+
+// Shipping: Tracking Realtime
+app.get('/api/shipping/track/:waybill', apiLimiter, async (req, res) => {
+    const { waybill } = req.params;
+    const { courier } = req.query; // e.g., jne, tiki
+
+    try {
+        const response = await fetch(`https://komid.komerce.id/api/v1/waybill/track?waybill=${waybill}&courier=${courier || 'jne'}`, {
+            headers: { 'x-api-key': KOMERCE_API_DELIVERY }
+        });
+        const data = await response.json();
+        res.json(data.data || data);
+    } catch (err) {
+        console.error("Komerce Tracking Error:", err);
+        res.status(500).json({ error: "Gagal melacak resi" });
     }
 });
 
