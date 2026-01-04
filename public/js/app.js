@@ -36,14 +36,25 @@ const playSound = (id) => {
 
 // Data Layer (Async)
 const DataStore = {
+    // Helper untuk header keamanan
+    getHeaders: (extraHeaders = {}) => {
+        const token = sessionStorage.getItem('sna_admin_token');
+        return {
+            'Authorization': token || '',
+            'Content-Type': 'application/json',
+            ...extraHeaders
+        };
+    },
+
     getAll: async () => {
         try {
-            const response = await fetch(API_URL);
+            const response = await fetch(API_URL, {
+                headers: DataStore.getHeaders()
+            });
             const json = await response.json();
             return json.data || [];
         } catch (error) {
             console.error('Error fetching data:', error);
-            // alert('Gagal mengambil data dari server. Pastikan server berjalan!'); // Optional: don't spam alerts on load
             return [];
         }
     },
@@ -54,7 +65,7 @@ const DataStore = {
                 // Update existing
                 const response = await fetch(`${API_URL}/${fishData.id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: DataStore.getHeaders(),
                     body: JSON.stringify(fishData)
                 });
                 if (!response.ok) throw new Error('Update failed');
@@ -62,16 +73,11 @@ const DataStore = {
                 return { ...fishData, ...res.data };
             } else {
                 // Create new
-                // Backend expects an ID because the table definition is `id TEXT PRIMARY KEY`
-                // and backend INSERT uses provided ID.
-                // We MUST generate ID client side OR update backend to generate it.
-                // Current backend logic: `const data = { id: req.body.id, ... }`
-
                 fishData.id = generateId();
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: DataStore.getHeaders(),
                     body: JSON.stringify(fishData)
                 });
                 if (!response.ok) throw new Error('Create failed');
@@ -80,7 +86,6 @@ const DataStore = {
             }
         } catch (error) {
             console.error('Error saving data:', error);
-            // Show detailed alert to user
             alert(`GAGAL SIMPAN: ${error.message}\nCek Console (F12) untuk detail.`);
             throw error;
         }
@@ -88,6 +93,7 @@ const DataStore = {
 
     find: async (id) => {
         try {
+            // Customer view: Teatap publik, tidak butuh headers khusus
             const response = await fetch(`${API_URL}/${id}`);
             const json = await response.json();
             return json.data;
@@ -99,7 +105,10 @@ const DataStore = {
 
     delete: async (id) => {
         try {
-            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE',
+                headers: DataStore.getHeaders()
+            });
         } catch (error) {
             console.error('Error deleting data:', error);
         }

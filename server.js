@@ -120,22 +120,37 @@ app.get('/api/init', async (req, res) => {
     }
 });
 
+// Security Middleware
+const verifyAdmin = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    // Validasi token sederhana. Di app nyata gunakan JWT atau Session DB
+    if (authHeader && authHeader.startsWith('secure_server_token_')) {
+        next();
+    } else {
+        res.status(403).json({ error: 'Access Denied: Login Required' });
+    }
+};
+
 // LOGIN ROUTE (Server-Side Security)
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
-    // Secure Credentials (Hidden on Server)
     const VALID_USER = 'bettatumedan';
     const VALID_PASS = 'snadailybetta';
 
     if (username === VALID_USER && password === VALID_PASS) {
-        res.json({ success: true, token: 'secure_server_token_' + Date.now() });
+        // Berikan token dengan prefix yang bisa divalidasi middleware
+        res.json({ success: true, token: 'secure_server_token_' + Buffer.from(VALID_USER).toString('base64') });
     } else {
         res.status(401).json({ success: false, message: 'Invalid Credentials' });
     }
 });
 
 initDb();
+
+// Apply Security to sensitive routes
+// Public: GET /api/fish/:id (for customers), GET /api/status, POST /api/login
+// Protected: GET /api/fish (all), POST /api/fish, PUT /api/fish/:id, DELETE /api/fish/:id
 
 // Health Check
 app.get('/api/status', async (req, res) => {
@@ -149,8 +164,8 @@ app.get('/api/status', async (req, res) => {
 
 // Routes
 
-// Get all fish
-app.get('/api/fish', async (req, res) => {
+// Get all fish (ADMIN ONLY)
+app.get('/api/fish', verifyAdmin, async (req, res) => {
     console.log("GET /api/fish called");
     try {
         const result = await pool.query("SELECT * FROM fish ORDER BY timestamp DESC");
@@ -185,8 +200,8 @@ app.get('/api/fish/:id', async (req, res) => {
     }
 });
 
-// Create new fish
-app.post('/api/fish', async (req, res) => {
+// Create new fish (ADMIN ONLY)
+app.post('/api/fish', verifyAdmin, async (req, res) => {
     const data = {
         id: req.body.id,
         species: req.body.species,
@@ -215,7 +230,8 @@ app.post('/api/fish', async (req, res) => {
 });
 
 // Update fish
-app.put('/api/fish/:id', async (req, res) => {
+// Update fish (ADMIN ONLY)
+app.put('/api/fish/:id', verifyAdmin, async (req, res) => {
     const data = {
         species: req.body.species,
         origin: req.body.origin,
@@ -247,8 +263,8 @@ app.put('/api/fish/:id', async (req, res) => {
     }
 });
 
-// Delete fish
-app.delete('/api/fish/:id', async (req, res) => {
+// Delete fish (ADMIN ONLY)
+app.delete('/api/fish/:id', verifyAdmin, async (req, res) => {
     try {
         await pool.query('DELETE FROM fish WHERE id = $1', [req.params.id]);
         res.json({ "message": "deleted" });
