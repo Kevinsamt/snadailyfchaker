@@ -147,7 +147,7 @@ const initAdmin = () => {
     if (searchInput) searchInput.value = '';
 
     const renderHistory = async (filterText = '') => {
-        const renderHistory = async (filterText = '') => {
+        try {
             const data = await DataStore.getAll();
             console.log("RenderHistory RAW:", data);
 
