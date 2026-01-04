@@ -125,6 +125,19 @@ const initAdmin = () => {
     };
     checkConnection();
 
+    // Debug Tool
+    window.debugFetch = async () => {
+        try {
+            const res = await fetch('/api/fish');
+            if (!res.ok) throw new Error(res.statusText);
+            const json = await res.json();
+            alert(`Debug Info:\nJumlah Data di Server: ${json.data ? json.data.length : 0}\nStatus: ${json.message}`);
+            console.log("Raw Data:", json);
+        } catch (e) {
+            alert("Debug Error: " + e.message);
+        }
+    };
+
     const renderHistory = async (filterText = '') => {
         const data = await DataStore.getAll();
         const filteredData = data.filter(item =>
