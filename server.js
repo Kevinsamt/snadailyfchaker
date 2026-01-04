@@ -33,6 +33,7 @@ const pool = new Pool({
 });
 
 // Wrapper for Query
+// Wrapper for Query
 async function query(text, params) {
     if (dbMode === 'postgres') {
         return await pool.query(text, params);
@@ -40,18 +41,21 @@ async function query(text, params) {
         // SQLite Adapter
         return new Promise((resolve, reject) => {
             // Convert $1, $2 to ?, ?
-            let i = 1;
-            const sqliteText = text.replace(/\$\d+/g, () => '?');
+            let sqliteText = text.replace(/\$\d+/g, () => '?');
+
+            // Remove RETURNING * for SQLite
+            sqliteText = sqliteText.replace(/RETURNING\s+\*/gi, '');
+            sqliteText = sqliteText.replace(/RETURNING\s+\w+/gi, ''); // Handle RETURNING id etc
 
             if (text.trim().toUpperCase().startsWith('SELECT')) {
                 sqliteDb.all(sqliteText, params, (err, rows) => {
                     if (err) reject(err);
-                    else resolve({ rows: rows, rowCount: rows.length });
+                    else resolve({ rows: rows, rowCount: rows ? rows.length : 0 });
                 });
             } else if (text.trim().toUpperCase().startsWith('INSERT') || text.trim().toUpperCase().startsWith('UPDATE') || text.trim().toUpperCase().startsWith('DELETE')) {
                 sqliteDb.run(sqliteText, params, function (err) {
                     if (err) reject(err);
-                    else resolve({ rows: [this], rowCount: this.changes }); // Mock return for simple cases
+                    else resolve({ rows: [], rowCount: this.changes });
                 });
             } else {
                 sqliteDb.run(sqliteText, params, (err) => {
