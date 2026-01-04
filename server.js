@@ -67,6 +67,54 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use('/api/login', loginLimiter);
 app.use('/api/', apiLimiter);
+
+// Komerce Configuration
+const KOMERCE_API_COST = process.env.KOMERCE_API_KEY_COST;
+const KOMERCE_ORIGIN_ID = process.env.KOMERCE_ORIGIN_ID || '256'; // Medan id
+
+// Shipping: Search Destination (City/Subdistrict)
+app.get('/api/shipping/search', apiLimiter, async (req, res) => {
+    const query = req.query.q;
+    if (!query) return res.json([]);
+
+    try {
+        const response = await fetch(`https://rajaongkir.komerce.id/api/v1/destination/domestic-search?search=${encodeURIComponent(query)}`, {
+            headers: { 'x-api-key': KOMERCE_API_COST }
+        });
+        const data = await response.json();
+        res.json(data.data || []);
+    } catch (err) {
+        console.error("Komerce Search Error:", err);
+        res.status(500).json({ error: "Gagal mencari lokasi" });
+    }
+});
+
+// Shipping: Calculate Cost
+app.post('/api/shipping/cost', apiLimiter, async (req, res) => {
+    const { destination_id, weight } = req.body;
+
+    try {
+        const response = await fetch('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': KOMERCE_API_COST
+            },
+            body: JSON.stringify({
+                origin: KOMERCE_ORIGIN_ID,
+                destination: destination_id,
+                weight: weight || 1000, // gram
+                courier: 'jne,tiki'
+            })
+        });
+        const data = await response.json();
+        res.json(data.data || []);
+    } catch (err) {
+        console.error("Komerce Cost Error:", err);
+        res.status(500).json({ error: "Gagal menghitung ongkir" });
+    }
+});
+
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 // Database Setup

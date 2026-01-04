@@ -798,28 +798,129 @@ window.showPaymentModal = (name, price) => {
     currentOrder.productPrice = price;
 
     document.getElementById('priceProduct').innerText = 'Rp ' + price.toLocaleString('id-ID');
-    updateShippingCost();
+    document.getElementById('priceShipping').innerText = 'Pilih Lokasi...';
+    document.getElementById('priceTotal').innerText = 'Rp ' + (price + currentOrder.packingFee).toLocaleString('id-ID');
 
     modal.style.display = 'flex';
 };
 
-window.updateShippingCost = () => {
-    // Simulated Shipping Cost Logic
-    // In real app, this would call RajaOngkir API
-    const courier = document.getElementById('shipCourier').value;
-    const service = document.getElementById('shipService').value;
+let searchTimeout;
+window.searchLocation = (query) => {
+    clearTimeout(searchTimeout);
+    const resultsDiv = document.getElementById('locResults');
 
-    let base = courier === 'JNE' ? 25000 : 22000;
-    if (service === 'SUPER') base += 20000;
+    if (query.length < 3) {
+        resultsDiv.style.display = 'none';
+        return;
+    }
 
-    currentOrder.shippingCost = base;
+    searchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/api/shipping/search?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+
+            resultsDiv.innerHTML = '';
+            if (data.length > 0) {
+                data.forEach(loc => {
+                    const div = document.createElement('div');
+                    div.style.padding = '10px 15px';
+                    div.style.cursor = 'pointer';
+                    div.style.borderBottom = '1px solid #2d3748';
+                    div.style.color = 'white';
+                    div.innerHTML = `<i class="ri-map-pin-line"></i> ${loc.label}`;
+                    div.onclick = () => selectLocation(loc);
+                    div.onmouseover = () => div.style.background = '#2d3748';
+                    div.onmouseout = () => div.style.background = 'transparent';
+                    resultsDiv.appendChild(div);
+                });
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.style.display = 'none';
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }, 500);
+};
+
+window.selectLocation = async (loc) => {
+    document.getElementById('locSearch').value = loc.label;
+    document.getElementById('locResults').style.display = 'none';
+
+    document.getElementById('destId').value = loc.id;
+    document.getElementById('custProv').value = loc.province_name;
+    document.getElementById('custCity').value = loc.city_name;
+    document.getElementById('custDistrict').value = loc.subdistrict_name;
+
+    // Fetch Shipping Costs
+    const optionsDiv = document.getElementById('shippingOptions');
+    const selectionDiv = document.getElementById('shippingSelection');
+
+    optionsDiv.innerHTML = '<div style="color:white; padding:10px;"><i class="ri-loader-4-line animate-spin"></i> Menghitung ongkir...</div>';
+    selectionDiv.style.display = 'block';
+
+    try {
+        const response = await fetch('/api/shipping/cost', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ destination_id: loc.id, weight: 1000 }) // Default 1kg for fish
+        });
+        const services = await response.json();
+
+        optionsDiv.innerHTML = '';
+        if (services.length > 0) {
+            services.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel';
+                card.style.padding = '10px 15px';
+                card.style.cursor = 'pointer';
+                card.style.display = 'flex';
+                card.style.justifyContent = 'space-between';
+                card.style.alignItems = 'center';
+                card.style.border = '1px solid rgba(255,255,255,0.1)';
+
+                card.innerHTML = `
+                    <div>
+                        <div style="font-weight:bold; color:white;">${s.courier.toUpperCase()} - ${s.service}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">Estimasi: ${s.etd} hari</div>
+                    </div>
+                    <div style="color:var(--secondary); font-weight:bold;">Rp ${s.cost.toLocaleString('id-ID')}</div>
+                `;
+
+                card.onclick = () => {
+                    // Update selection
+                    document.querySelectorAll('#shippingOptions .glass-panel').forEach(p => p.style.borderColor = 'rgba(255,255,255,0.1)');
+                    card.style.borderColor = 'var(--secondary)';
+
+                    document.getElementById('shipCourier').value = s.courier;
+                    document.getElementById('shipService').value = s.service;
+
+                    currentOrder.shippingCost = s.cost;
+                    updateSummary();
+                };
+                optionsDiv.appendChild(card);
+            });
+        } else {
+            optionsDiv.innerHTML = '<div style="color:red; padding:10px;">Maaf, tidak ada layanan pengiriman tersedia.</div>';
+        }
+    } catch (err) {
+        optionsDiv.innerHTML = '<div style="color:red; padding:10px;">Gagal mengambil data ongkir.</div>';
+    }
+};
+
+window.updateSummary = () => {
     currentOrder.total = currentOrder.productPrice + currentOrder.shippingCost + currentOrder.packingFee;
-
     document.getElementById('priceShipping').innerText = 'Rp ' + currentOrder.shippingCost.toLocaleString('id-ID');
     document.getElementById('priceTotal').innerText = 'Rp ' + currentOrder.total.toLocaleString('id-ID');
 };
 
 window.proceedToPayment = async () => {
+    const courier = document.getElementById('shipCourier').value;
+    if (!courier) {
+        alert("Harap pilih layanan pengiriman!");
+        return;
+    }
+
     const btn = document.querySelector('#checkoutForm button');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Memproses...';

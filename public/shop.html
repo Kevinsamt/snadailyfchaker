@@ -138,60 +138,52 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="input-group">
-                        <label class="input-label">Email (Gmail)</label>
-                        <input type="email" id="custEmail" class="glass-input" placeholder="nama@gmail.com" required>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Provinsi</label>
-                        <input type="text" id="custProv" class="glass-input" placeholder="Contoh: Jawa Timur" required>
-                    </div>
+                <div class="input-group">
+                    <label class="input-label">Email (Gmail)</label>
+                    <input type="email" id="custEmail" class="glass-input" placeholder="nama@gmail.com" required>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="input-group">
-                        <label class="input-label">Kabupaten / Kota</label>
-                        <input type="text" id="custCity" class="glass-input" placeholder="Contoh: Surabaya" required>
+                <div class="input-group" style="position: relative;">
+                    <label class="input-label">Cari Lokasi (Kota / Kecamatan)</label>
+                    <div style="position: relative;">
+                        <input type="text" id="locSearch" class="glass-input"
+                            placeholder="Ketik nama kota atau kecamatan..." autocomplete="off"
+                            oninput="searchLocation(this.value)">
+                        <i class="ri-search-line"
+                            style="position: absolute; right: 15px; top: 15px; color: var(--text-muted);"></i>
                     </div>
-                    <div class="input-group">
-                        <label class="input-label">Kecamatan / Kelurahan</label>
-                        <input type="text" id="custDistrict" class="glass-input" placeholder="Nama daerah" required>
+                    <div id="locResults"
+                        style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: #1a202c; border: 1px solid #2d3748; border-radius: 8px; z-index: 100; max-height: 200px; overflow-y: auto; margin-top: 5px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);">
+                        <!-- Results will appear here -->
                     </div>
+                    <!-- Hidden fields to store selected location info -->
+                    <input type="hidden" id="destId">
+                    <input type="hidden" id="custProv">
+                    <input type="hidden" id="custCity">
+                    <input type="hidden" id="custDistrict">
                 </div>
 
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
-                    <div class="input-group">
-                        <label class="input-label">Alamat Lengkap</label>
-                        <input type="text" id="custAddress" class="glass-input" placeholder="Jl. Nama Jalan No. XX"
-                            required>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Kode Pos</label>
-                        <input type="text" id="custZip" class="glass-input" placeholder="XXXXX" required>
-                    </div>
+                <div class="input-group">
+                    <label class="input-label">Alamat Lengkap (Jalan, No Rumah, RT/RW)</label>
+                    <input type="text" id="custAddress" class="glass-input" placeholder="Jl. Nama Jalan No. XX"
+                        required>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Kode Pos</label>
+                    <input type="text" id="custZip" class="glass-input" placeholder="XXXXX" required>
                 </div>
 
                 <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 1.5rem 0;">
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="input-group">
-                        <label class="input-label">Kurir Pengiriman</label>
-                        <select id="shipCourier" class="glass-input" style="background:#0a0e17"
-                            onchange="updateShippingCost()">
-                            <option value="JNE">JNE (Spesialis Hewan)</option>
-                            <option value="TIKI">TIKI (Spesialis Hewan)</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Layanan</label>
-                        <select id="shipService" class="glass-input" style="background:#0a0e17"
-                            onchange="updateShippingCost()">
-                            <option value="REG">Reguler</option>
-                            <option value="SUPER">Super Cepat (Next Day)</option>
-                        </select>
+                <div id="shippingSelection" style="display: none;">
+                    <label class="input-label">Pilih Layanan Pengiriman</label>
+                    <div id="shippingOptions" style="display: grid; gap: 10px;">
+                        <!-- Options will be populated here -->
                     </div>
                 </div>
+                <input type="hidden" id="shipCourier">
+                <input type="hidden" id="shipService">
 
                 <!-- Price Summary -->
                 <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; margin-top: 2rem;">
