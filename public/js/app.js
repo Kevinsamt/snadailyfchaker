@@ -826,25 +826,35 @@ window.searchLocation = (query) => {
             console.log("Location results:", data);
 
             resultsDiv.innerHTML = '';
-            if (data && data.length > 0) {
-                data.forEach(loc => {
-                    const div = document.createElement('div');
-                    div.style.padding = '10px 15px';
-                    div.style.cursor = 'pointer';
-                    div.style.borderBottom = '1px solid #2d3748';
-                    div.style.color = 'white';
-                    div.innerHTML = `<i class="ri-map-pin-line"></i> ${loc.label}`;
-                    div.onclick = () => selectLocation(loc);
-                    div.onmouseover = () => div.style.background = '#2d3748';
-                    div.onmouseout = () => div.style.background = 'transparent';
-                    resultsDiv.appendChild(div);
-                });
-                resultsDiv.style.display = 'block';
+
+            if (Array.isArray(data)) {
+                if (data.length > 0) {
+                    data.forEach(loc => {
+                        const div = document.createElement('div');
+                        div.style.padding = '10px 15px';
+                        div.style.cursor = 'pointer';
+                        div.style.borderBottom = '1px solid #2d3748';
+                        div.style.color = 'white';
+                        // Handle different label fields just in case
+                        const label = loc.label || `${loc.subdistrict_name}, ${loc.city_name}, ${loc.province_name}`;
+                        div.innerHTML = `<i class="ri-map-pin-line"></i> ${label}`;
+                        div.onclick = () => selectLocation(loc);
+                        div.onmouseover = () => div.style.background = '#2d3748';
+                        div.onmouseout = () => div.style.background = 'transparent';
+                        resultsDiv.appendChild(div);
+                    });
+                    resultsDiv.style.display = 'block';
+                } else {
+                    resultsDiv.innerHTML = '<div style="color:var(--text-muted); padding:10px;">Lokasi tidak ditemukan. Coba ketik nama Kota saja.</div>';
+                }
+            } else if (data && data.error) {
+                resultsDiv.innerHTML = `<div style="color:#ff5e5e; padding:10px;">Error: ${data.error}</div>`;
             } else {
-                resultsDiv.style.display = 'none';
+                resultsDiv.innerHTML = '<div style="color:#ff5e5e; padding:10px;">Terjadi kesalahan sistem.</div>';
             }
         } catch (err) {
             console.error(err);
+            resultsDiv.innerHTML = '<div style="color:#ff5e5e; padding:10px;">Gagal terhubung ke server.</div>';
         }
     }, 500);
 };

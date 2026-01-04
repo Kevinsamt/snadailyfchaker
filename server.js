@@ -78,6 +78,10 @@ app.get('/api/shipping/search', apiLimiter, async (req, res) => {
     const query = req.query.q;
     if (!query) return res.json([]);
 
+    if (!KOMERCE_API_COST) {
+        return res.status(500).json({ error: "API Key Komerce (Cost) belum diset di Vercel!" });
+    }
+
     try {
         console.log("Komerce Search Request:", query);
         const response = await fetch(`https://rajaongkir.komerce.id/api/v1/destination/domestic-destination?search=${encodeURIComponent(query)}`, {
@@ -103,25 +107,36 @@ app.get('/api/shipping/search', apiLimiter, async (req, res) => {
 app.post('/api/shipping/cost', apiLimiter, async (req, res) => {
     const { destination_id, weight } = req.body;
 
+    if (!KOMERCE_API_COST) {
+        return res.status(500).json({ error: "API Key Komerce belum dikonfigurasi di Vercel!" });
+    }
+
     try {
+        console.log("Komerce Cost Request for Origin:", KOMERCE_ORIGIN_ID, "Dest:", destination_id);
         const response = await fetch('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': KOMERCE_API_COST
+                'x-api-key': KOMERCE_API_COST,
+                'key': KOMERCE_API_COST // Fallback header
             },
             body: JSON.stringify({
                 origin: KOMERCE_ORIGIN_ID,
                 destination: destination_id,
-                weight: weight || 1000, // gram
+                weight: weight || 1000,
                 courier: 'jne,tiki'
             })
         });
+
         const data = await response.json();
+        if (!response.ok) {
+            console.error("Komerce Cost API Error:", data);
+            return res.status(response.status).json({ error: data.message || "Gagal menghitung ongkir kerna API error" });
+        }
         res.json(data.data || []);
     } catch (err) {
-        console.error("Komerce Cost Error:", err);
-        res.status(500).json({ error: "Gagal menghitung ongkir" });
+        console.error("Komerce Cost System Error:", err);
+        res.status(500).json({ error: "Gagal menghitung ongkir: " + err.message });
     }
 });
 
