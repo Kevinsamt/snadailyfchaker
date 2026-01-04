@@ -137,6 +137,16 @@ app.post('/api/login', (req, res) => {
 
 initDb();
 
+// Health Check
+app.get('/api/status', async (req, res) => {
+    try {
+        await pool.query('SELECT 1');
+        res.json({ status: 'ok', database: 'connected' });
+    } catch (err) {
+        res.status(500).json({ status: 'error', database: 'disconnected', details: err.message });
+    }
+});
+
 // Routes
 
 // Get all fish
