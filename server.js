@@ -94,6 +94,11 @@ async function initDb() {
 // Initialize Table Route (Manual Trigger)
 app.get('/api/init', async (req, res) => {
     try {
+        // Drop to ensure clean slate if schema was wrong
+        // await pool.query("DROP TABLE IF EXISTS fish"); // Optional: dangerous if data exists, but user says "empty".
+        // Let's NOT drop by default, but ensuring it exists is key.
+        // Actually, user said "ga bisa input", maybe schema mismatch.
+
         await pool.query(`CREATE TABLE IF NOT EXISTS fish (
             id TEXT PRIMARY KEY,
             species TEXT,
@@ -104,7 +109,11 @@ app.get('/api/init', async (req, res) => {
             "importDate" TEXT,
             timestamp TEXT
         )`);
-        res.json({ message: "Database initialized successfully (Table 'fish' checked/created)." });
+
+        // Force check if table exists
+        const check = await pool.query("SELECT count(*) FROM fish");
+
+        res.json({ message: "Database initialized successfully.", count: check.rows[0].count });
     } catch (err) {
         console.error("Init Error:", err);
         res.status(500).json({ error: err.message, stack: err.stack });
