@@ -36,25 +36,17 @@ const playSound = (id) => {
 
 // Data Layer (Async)
 const DataStore = {
-    // Helper untuk header keamanan
-    getHeaders: (extraHeaders = {}) => {
-        const token = sessionStorage.getItem('sna_admin_token');
-        return {
-            'Authorization': token || '',
-            'Content-Type': 'application/json',
-            ...extraHeaders
-        };
-    },
-
     getAll: async () => {
         try {
+            const token = sessionStorage.getItem('sna_admin_token');
             const response = await fetch(API_URL, {
-                headers: DataStore.getHeaders()
+                headers: { 'Authorization': token }
             });
             const json = await response.json();
             return json.data || [];
         } catch (error) {
             console.error('Error fetching data:', error);
+            // alert('Gagal mengambil data dari server. Pastikan server berjalan!'); // Optional: don't spam alerts on load
             return [];
         }
     },
@@ -63,9 +55,13 @@ const DataStore = {
         try {
             if (fishData.id) {
                 // Update existing
+                const token = sessionStorage.getItem('sna_admin_token');
                 const response = await fetch(`${API_URL}/${fishData.id}`, {
                     method: 'PUT',
-                    headers: DataStore.getHeaders(),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
                     body: JSON.stringify(fishData)
                 });
                 if (!response.ok) throw new Error('Update failed');
@@ -73,11 +69,20 @@ const DataStore = {
                 return { ...fishData, ...res.data };
             } else {
                 // Create new
+                // Backend expects an ID because the table definition is `id TEXT PRIMARY KEY`
+                // and backend INSERT uses provided ID.
+                // We MUST generate ID client side OR update backend to generate it.
+                // Current backend logic: `const data = { id: req.body.id, ... }`
+
                 fishData.id = generateId();
 
+                const token = sessionStorage.getItem('sna_admin_token');
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: DataStore.getHeaders(),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
                     body: JSON.stringify(fishData)
                 });
                 if (!response.ok) throw new Error('Create failed');
@@ -86,6 +91,7 @@ const DataStore = {
             }
         } catch (error) {
             console.error('Error saving data:', error);
+            // Show detailed alert to user
             alert(`GAGAL SIMPAN: ${error.message}\nCek Console (F12) untuk detail.`);
             throw error;
         }
@@ -93,7 +99,6 @@ const DataStore = {
 
     find: async (id) => {
         try {
-            // Customer view: Teatap publik, tidak butuh headers khusus
             const response = await fetch(`${API_URL}/${id}`);
             const json = await response.json();
             return json.data;
@@ -105,9 +110,10 @@ const DataStore = {
 
     delete: async (id) => {
         try {
+            const token = sessionStorage.getItem('sna_admin_token');
             await fetch(`${API_URL}/${id}`, {
                 method: 'DELETE',
-                headers: DataStore.getHeaders()
+                headers: { 'Authorization': token }
             });
         } catch (error) {
             console.error('Error deleting data:', error);
@@ -148,7 +154,10 @@ const initAdmin = () => {
         window.debugFetch = async () => {
             alert("Debug Clicked! Checking server..."); // Immediate verification
             try {
-                const res = await fetch('/api/fish');
+                const token = sessionStorage.getItem('sna_admin_token');
+                const res = await fetch('/api/fish', {
+                    headers: { 'Authorization': token }
+                });
                 if (!res.ok) throw new Error(res.statusText);
                 const json = await res.json();
                 const msg = `Debug Info:\nJumlah Data di Server: ${json.data ? json.data.length : 0}\nStatus: ${json.message}\n\nKlik OK untuk membuka data mentah (API).`;
