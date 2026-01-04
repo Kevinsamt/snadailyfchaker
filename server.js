@@ -10,36 +10,82 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] })); // Serve static files from public folder
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
-// Database Setup
+// Database Setup (Multi-mode)
+let dbMode = 'postgres'; // default
+let sqliteDb = null;
+const sqlite3 = require('sqlite3').verbose();
+
 // Fix SSL for Supabase/Vercel
 let connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
-
 try {
-    // Safely parse and clean the URL
     if (connectionString) {
         const dbUrl = new URL(connectionString);
         dbUrl.searchParams.delete('sslmode');
         connectionString = dbUrl.toString();
     }
-} catch (e) {
-    console.error("Error parsing DB URL:", e);
-    // Fallback to original if parsing fails
-}
+} catch (e) { console.error("Error parsing DB URL:", e); }
 
 const pool = new Pool({
     connectionString,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: { rejectUnauthorized: false }
 });
+
+// Wrapper for Query
+async function query(text, params) {
+    if (dbMode === 'postgres') {
+        return await pool.query(text, params);
+    } else {
+        // SQLite Adapter
+        return new Promise((resolve, reject) => {
+            // Convert $1, $2 to ?, ?
+            let i = 1;
+            const sqliteText = text.replace(/\$\d+/g, () => '?');
+
+            if (text.trim().toUpperCase().startsWith('SELECT')) {
+                sqliteDb.all(sqliteText, params, (err, rows) => {
+                    if (err) reject(err);
+                    else resolve({ rows: rows, rowCount: rows.length });
+                });
+            } else if (text.trim().toUpperCase().startsWith('INSERT') || text.trim().toUpperCase().startsWith('UPDATE') || text.trim().toUpperCase().startsWith('DELETE')) {
+                sqliteDb.run(sqliteText, params, function (err) {
+                    if (err) reject(err);
+                    else resolve({ rows: [this], rowCount: this.changes }); // Mock return for simple cases
+                });
+            } else {
+                sqliteDb.run(sqliteText, params, (err) => {
+                    if (err) reject(err);
+                    else resolve({ rows: [], rowCount: 0 });
+                });
+            }
+        });
+    }
+}
 
 // Initialize Table
 async function initDb() {
+    console.log("Initializing Database...");
     try {
-        await pool.query(`CREATE TABLE IF NOT EXISTS fish (
-            id TEXT PRIMARY KEY,
+        // Try Postgres Connection
+        await pool.query('SELECT NOW()');
+        console.log("✅ Connected to PostgreSQL (Cloud)");
+        dbMode = 'postgres';
+    } catch (err) {
+        console.warn("⚠️ PostgreSQL connection failed/missing. Switching to Local SQLite mode.");
+        console.warn("Error:", err.message);
+        dbMode = 'sqlite';
+        sqliteDb = new sqlite3.Database('./fish_local.db');
+    }
+
+    // Schema Creation (Works for both mostly, minor tweaks might be needed for types)
+    // SQLite uses different types but often compatible enough for simple text/real
+    const idType = dbMode === 'postgres' ? 'TEXT PRIMARY KEY' : 'TEXT PRIMARY KEY';
+    const serialType = dbMode === 'postgres' ? 'SERIAL PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
+
+    try {
+        await query(`CREATE TABLE IF NOT EXISTS fish (
+            id ${idType},
             species TEXT,
             origin TEXT,
             weight REAL,
@@ -49,8 +95,8 @@ async function initDb() {
             timestamp TEXT
         )`);
 
-        await pool.query(`CREATE TABLE IF NOT EXISTS products (
-            id SERIAL PRIMARY KEY,
+        await query(`CREATE TABLE IF NOT EXISTS products (
+            id ${serialType},
             name TEXT,
             price REAL,
             image TEXT,
