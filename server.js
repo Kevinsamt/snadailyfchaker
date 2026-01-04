@@ -180,7 +180,7 @@ initDb();
 app.get('/api/fish', async (req, res) => {
     console.log("GET /api/fish called");
     try {
-        const result = await pool.query("SELECT * FROM fish ORDER BY timestamp DESC");
+        const result = await query("SELECT * FROM fish ORDER BY timestamp DESC", []);
         console.log("Query success, rows:", result.rows.length);
         res.json({
             "message": "success",
@@ -196,7 +196,7 @@ app.get('/api/fish', async (req, res) => {
 app.get('/api/fish/:id', async (req, res) => {
     try {
         const sql = "SELECT * FROM fish WHERE id = $1";
-        const result = await pool.query(sql, [req.params.id]);
+        const result = await query(sql, [req.params.id]);
 
         if (result.rows.length === 0) {
             res.status(404).json({ "error": "Not found" });
@@ -228,7 +228,7 @@ app.post('/api/fish', async (req, res) => {
     const params = [data.id, data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp]
 
     try {
-        const result = await pool.query(sql, params);
+        const result = await query(sql, params);
         res.json({
             "message": "success",
             "data": result.rows[0],
@@ -262,7 +262,7 @@ app.put('/api/fish/:id', async (req, res) => {
     const params = [data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp, req.params.id]
 
     try {
-        const result = await pool.query(sql, params);
+        const result = await query(sql, params);
         res.json({
             message: "success",
             data: result.rows[0]
@@ -275,7 +275,7 @@ app.put('/api/fish/:id', async (req, res) => {
 // Delete fish
 app.delete('/api/fish/:id', async (req, res) => {
     try {
-        await pool.query('DELETE FROM fish WHERE id = $1', [req.params.id]);
+        await query('DELETE FROM fish WHERE id = $1', [req.params.id]);
         res.json({ "message": "deleted" });
     } catch (err) {
         res.status(400).json({ "error": err.message });
@@ -285,7 +285,7 @@ app.delete('/api/fish/:id', async (req, res) => {
 // Product Routes
 app.get('/api/products', async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
+        const result = await query("SELECT * FROM products ORDER BY id ASC", []);
         res.json({
             "message": "success",
             "data": result.rows
