@@ -41,49 +41,33 @@ const DataStore = {
 
     save: async (fishData) => {
         try {
-            // Check if exists (update) or new
-            let isUpdate = false;
             if (fishData.id) {
-                // Try to find it first to decide if PUT or POST? 
-                // The logical flow in the UI uses 'editId' to determine update.
-                // But here we rely on the implementation. 
-                // Let's assume if it has an ID, we try to UPDATE.
-                // However, the original "save" handled both.
-
-                // If ID exists in DB, it's an update. But wait, `fishData` from form might have ID if editing.
-                // We will handle this logic in the form submitter or here. 
-                // Simple check: The form passes `id` only if editing.
-
-                // We'll assume if ID is present and we are in "update mode" (caller knows), we PUT.
-                // But the caller just calls save.
-
-                // Let's try to update if ID is present.
-                const check = await fetch(`${API_URL}/${fishData.id}`);
-                const checkJson = await check.json();
-
-                if (checkJson.data) {
-                    isUpdate = true;
-                }
-            }
-
-            if (isUpdate) {
+                // Update existing
                 const response = await fetch(`${API_URL}/${fishData.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(fishData)
                 });
+                if (!response.ok) throw new Error('Update failed');
                 const res = await response.json();
                 return { ...fishData, ...res.data };
             } else {
-                // New
-                if (!fishData.id) fishData.id = generateId(); // Generate ID client side if not present
+                // Create new
+                // Backend expects an ID because the table definition is `id TEXT PRIMARY KEY`
+                // and backend INSERT uses provided ID.
+                // We MUST generate ID client side OR update backend to generate it.
+                // Current backend logic: `const data = { id: req.body.id, ... }`
+
+                fishData.id = generateId();
+
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(fishData)
                 });
+                if (!response.ok) throw new Error('Create failed');
                 const res = await response.json();
-                return { ...fishData, id: fishData.id }; // Return client generated ID or server one?
+                return { ...fishData, id: fishData.id };
             }
         } catch (error) {
             console.error('Error saving data:', error);
