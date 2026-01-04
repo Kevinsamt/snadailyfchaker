@@ -46,9 +46,17 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+
+        const isVercel = origin.endsWith('.vercel.app');
+        const isSna = origin.endsWith('snadigitaltech.com');
+        const isLocal = origin.includes('localhost');
+
+        if (isVercel || isSna || isLocal || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.error("Blocked by CORS:", origin);
             callback(new Error('Not allowed by CORS Security Firewall'));
         }
     }
@@ -345,6 +353,15 @@ app.post('/api/payment/token', apiLimiter, async (req, res) => {
         console.error("Midtrans Error:", err);
         res.status(500).json({ error: err.message });
     }
+});
+
+// Global Error Handler (Ensures JSON response instead of HTML)
+app.use((err, req, res, next) => {
+    console.error("Global Error Handled:", err.message);
+    res.status(err.status || 500).json({
+        error: err.message || "Internal Server Error",
+        path: req.path
+    });
 });
 
 // Export for Vercel
