@@ -102,6 +102,27 @@ const initAdmin = () => {
 
     if (!form) return;
 
+    // Connectivity Check
+    const checkConnection = async () => {
+        try {
+            const response = await fetch('/api/status');
+            const json = await response.json();
+            if (json.status !== 'ok') {
+                const warning = document.createElement('div');
+                warning.style.background = '#e53e3e';
+                warning.style.color = 'white';
+                warning.style.padding = '1rem';
+                warning.style.marginBottom = '1rem';
+                warning.style.borderRadius = '8px';
+                warning.innerHTML = `<strong>⚠️ Database Disconnected</strong><br>Server tidak terhubung ke Database. Cek koneksi internet atau konfigurasi server. (${json.details || 'Unknown Error'})`;
+                form.parentElement.insertBefore(warning, form);
+            }
+        } catch (e) {
+            console.error("Connection check failed:", e);
+        }
+    };
+    checkConnection();
+
     const renderHistory = async (filterText = '') => {
         const data = await DataStore.getAll();
         const filteredData = data.filter(item =>
