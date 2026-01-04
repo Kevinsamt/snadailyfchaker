@@ -10,95 +10,36 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] })); // Serve static files from public folder
 
-// Database Setup (Multi-mode)
-let dbMode = 'postgres'; // default
-let sqliteDb = null;
-const sqlite3 = require('sqlite3').verbose();
-
+// Database Setup
 // Fix SSL for Supabase/Vercel
 let connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+
 try {
+    // Safely parse and clean the URL
     if (connectionString) {
         const dbUrl = new URL(connectionString);
         dbUrl.searchParams.delete('sslmode');
         connectionString = dbUrl.toString();
     }
-} catch (e) { console.error("Error parsing DB URL:", e); }
+} catch (e) {
+    console.error("Error parsing DB URL:", e);
+    // Fallback to original if parsing fails
+}
 
 const pool = new Pool({
     connectionString,
-    ssl: { rejectUnauthorized: false }
-});
-
-// Wrapper for Query
-// Wrapper for Query
-async function query(text, params) {
-    if (dbMode === 'postgres') {
-        return await pool.query(text, params);
-    } else {
-        // SQLite Adapter
-        return new Promise((resolve, reject) => {
-            // Convert $1, $2 to ?, ?
-            let sqliteText = text.replace(/\$\d+/g, () => '?');
-
-            // Remove RETURNING * for SQLite
-            sqliteText = sqliteText.replace(/RETURNING\s+\*/gi, '');
-            sqliteText = sqliteText.replace(/RETURNING\s+\w+/gi, ''); // Handle RETURNING id etc
-
-            console.log("SQL Input:", text);
-            console.log("SQLite Transformed:", sqliteText);
-
-            if (text.trim().toUpperCase().startsWith('SELECT')) {
-                sqliteDb.all(sqliteText, params, (err, rows) => {
-                    if (err) reject(err);
-                    else resolve({ rows: rows, rowCount: rows ? rows.length : 0 });
-                });
-            } else if (text.trim().toUpperCase().startsWith('INSERT') || text.trim().toUpperCase().startsWith('UPDATE') || text.trim().toUpperCase().startsWith('DELETE')) {
-                sqliteDb.run(sqliteText, params, function (err) {
-                    if (err) {
-                        console.error("SQLite Run Error:", err);
-                        reject(err);
-                    }
-                    else resolve({ rows: [], rowCount: this.changes });
-                });
-            } else {
-                sqliteDb.run(sqliteText, params, (err) => {
-                    if (err) {
-                        console.error("SQLite Error:", err);
-                        reject(err);
-                    }
-                    else resolve({ rows: [], rowCount: 0 });
-                });
-            }
-        });
+    ssl: {
+        rejectUnauthorized: false
     }
-}
+});
 
 // Initialize Table
 async function initDb() {
-    console.log("Initializing Database...");
     try {
-        // Try Postgres Connection
-        await pool.query('SELECT NOW()');
-        console.log("✅ Connected to PostgreSQL (Cloud)");
-        dbMode = 'postgres';
-    } catch (err) {
-        console.warn("⚠️ PostgreSQL connection failed/missing. Switching to Local SQLite mode.");
-        console.warn("Error:", err.message);
-        dbMode = 'sqlite';
-        sqliteDb = new sqlite3.Database('./fish_local.db');
-    }
-
-    // Schema Creation (Works for both mostly, minor tweaks might be needed for types)
-    // SQLite uses different types but often compatible enough for simple text/real
-    const idType = dbMode === 'postgres' ? 'TEXT PRIMARY KEY' : 'TEXT PRIMARY KEY';
-    const serialType = dbMode === 'postgres' ? 'SERIAL PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
-
-    try {
-        await query(`CREATE TABLE IF NOT EXISTS fish (
-            id ${idType},
+        await pool.query(`CREATE TABLE IF NOT EXISTS fish (
+            id TEXT PRIMARY KEY,
             species TEXT,
             origin TEXT,
             weight REAL,
@@ -108,8 +49,8 @@ async function initDb() {
             timestamp TEXT
         )`);
 
-        await query(`CREATE TABLE IF NOT EXISTS products (
-            id ${serialType},
+        await pool.query(`CREATE TABLE IF NOT EXISTS products (
+            id SERIAL PRIMARY KEY,
             name TEXT,
             price REAL,
             image TEXT,
@@ -193,7 +134,7 @@ initDb();
 app.get('/api/fish', async (req, res) => {
     console.log("GET /api/fish called");
     try {
-        const result = await query("SELECT * FROM fish ORDER BY timestamp DESC", []);
+        const result = await pool.query("SELECT * FROM fish ORDER BY timestamp DESC");
         console.log("Query success, rows:", result.rows.length);
         res.json({
             "message": "success",
@@ -209,7 +150,7 @@ app.get('/api/fish', async (req, res) => {
 app.get('/api/fish/:id', async (req, res) => {
     try {
         const sql = "SELECT * FROM fish WHERE id = $1";
-        const result = await query(sql, [req.params.id]);
+        const result = await pool.query(sql, [req.params.id]);
 
         if (result.rows.length === 0) {
             res.status(404).json({ "error": "Not found" });
@@ -241,11 +182,11 @@ app.post('/api/fish', async (req, res) => {
     const params = [data.id, data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp]
 
     try {
-        const result = await query(sql, params);
+        const result = await pool.query(sql, params);
         res.json({
             "message": "success",
-            "data": data,
-            "id": data.id
+            "data": result.rows[0],
+            "id": result.rows[0].id
         });
     } catch (err) {
         res.status(400).json({ "error": err.message });
@@ -275,10 +216,10 @@ app.put('/api/fish/:id', async (req, res) => {
     const params = [data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp, req.params.id]
 
     try {
-        const result = await query(sql, params);
+        const result = await pool.query(sql, params);
         res.json({
             message: "success",
-            data: data
+            data: result.rows[0]
         });
     } catch (err) {
         res.status(400).json({ "error": err.message });
@@ -288,7 +229,7 @@ app.put('/api/fish/:id', async (req, res) => {
 // Delete fish
 app.delete('/api/fish/:id', async (req, res) => {
     try {
-        await query('DELETE FROM fish WHERE id = $1', [req.params.id]);
+        await pool.query('DELETE FROM fish WHERE id = $1', [req.params.id]);
         res.json({ "message": "deleted" });
     } catch (err) {
         res.status(400).json({ "error": err.message });
@@ -298,7 +239,7 @@ app.delete('/api/fish/:id', async (req, res) => {
 // Product Routes
 app.get('/api/products', async (req, res) => {
     try {
-        const result = await query("SELECT * FROM products ORDER BY id ASC", []);
+        const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
         res.json({
             "message": "success",
             "data": result.rows

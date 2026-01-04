@@ -7,11 +7,6 @@
 // API Configuration
 const API_URL = '/api/fish';
 
-// Protocol Check
-if (window.location.protocol === 'file:') {
-    alert("⚠️ PERHATIAN: Aplikasi tidak akan berjalan jika dibuka langsung dari file (file://).\n\nSilahkan buka via browser: http://localhost:3000/admin");
-}
-
 // Utils
 const generateId = () => {
     // ID generation is now handled partially by frontend but persisted by backend.
@@ -129,15 +124,6 @@ const initAdmin = () => {
             (item.species && item.species.toLowerCase().includes(filterText.toLowerCase())) ||
             (item.id && item.id.toLowerCase().includes(filterText.toLowerCase()))
         );
-
-        if (filteredData.length === 0) {
-            historyContainer.innerHTML = `
-                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                    Belum ada data yang diinput hari ini.
-                </div>
-            `;
-            return;
-        }
 
         historyContainer.innerHTML = filteredData.map(item => `
             <div class="history-item animate-fade-in" style="display: flex; justify-content: space-between; align-items: center;">
