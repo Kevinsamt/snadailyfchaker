@@ -316,7 +316,7 @@ app.get('/api/products', async (req, res) => {
 // Midtrans: Create Transaction Token
 app.post('/api/payment/token', async (req, res) => {
     try {
-        const { productName, amount } = req.body;
+        const { productName, amount, customer } = req.body;
 
         // Basic unique order ID
         const orderId = `ORDER-${Date.now()}`;
@@ -327,11 +327,24 @@ app.post('/api/payment/token', async (req, res) => {
                 gross_amount: amount
             },
             item_details: [{
-                id: 'PROD-001',
+                id: 'PROD-FISH',
                 price: amount,
                 quantity: 1,
                 name: productName
             }],
+            customer_details: {
+                first_name: customer.name || 'Pelanggan',
+                email: customer.email,
+                phone: customer.phone,
+                billing_address: {
+                    address: customer.address,
+                    phone: customer.phone
+                },
+                shipping_address: {
+                    address: customer.address,
+                    phone: customer.phone
+                }
+            },
             credit_card: {
                 secure: true
             }

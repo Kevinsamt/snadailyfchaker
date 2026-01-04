@@ -775,47 +775,92 @@ window.loadProducts = async () => {
     }
 };
 
-window.showPaymentModal = async (name, price) => {
-    // Show a basic loading alert or spinner
-    const btn = event.target;
-    const originalText = btn.innerText;
-    btn.innerText = 'Processing...';
+// Shop Configuration
+let currentOrder = {
+    productName: '',
+    productPrice: 0,
+    shippingCost: 0,
+    packingFee: 10000,
+    total: 0
+};
+
+window.showPaymentModal = (name, price) => {
+    const modal = document.getElementById('checkoutModal');
+    if (!modal) return;
+
+    currentOrder.productName = name;
+    currentOrder.productPrice = price;
+
+    document.getElementById('priceProduct').innerText = 'Rp ' + price.toLocaleString('id-ID');
+    updateShippingCost();
+
+    modal.style.display = 'flex';
+};
+
+window.updateShippingCost = () => {
+    // Simulated Shipping Cost Logic
+    // In real app, this would call RajaOngkir API
+    const courier = document.getElementById('shipCourier').value;
+    const service = document.getElementById('shipService').value;
+
+    let base = courier === 'JNE' ? 25000 : 22000;
+    if (service === 'SUPER') base += 20000;
+
+    currentOrder.shippingCost = base;
+    currentOrder.total = currentOrder.productPrice + currentOrder.shippingCost + currentOrder.packingFee;
+
+    document.getElementById('priceShipping').innerText = 'Rp ' + currentOrder.shippingCost.toLocaleString('id-ID');
+    document.getElementById('priceTotal').innerText = 'Rp ' + currentOrder.total.toLocaleString('id-ID');
+};
+
+window.proceedToPayment = async () => {
+    const btn = document.querySelector('#checkoutForm button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Memproses...';
     btn.disabled = true;
 
+    const custData = {
+        name: document.getElementById('custName').value,
+        phone: document.getElementById('custPhone').value,
+        email: document.getElementById('custEmail').value,
+        address: `${document.getElementById('custAddress').value}, ${document.getElementById('custDistrict').value}, ${document.getElementById('custCity').value}, ${document.getElementById('custProv').value} ${document.getElementById('custZip').value}`,
+        courier: document.getElementById('shipCourier').value,
+        service: document.getElementById('shipService').value
+    };
+
     try {
-        // 1. Get Snap Token from our server
         const response = await fetch('/api/payment/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productName: name, amount: price })
+            body: JSON.stringify({
+                productName: currentOrder.productName,
+                amount: currentOrder.total,
+                customer: custData
+            })
         });
         const data = await response.json();
 
         if (data.token) {
-            // 2. Trigger Snap Popup
             window.snap.pay(data.token, {
                 onSuccess: function (result) {
-                    console.log('success', result);
-                    alert("Pembayaran Berhasil! Terima kasih.");
+                    alert("Pembayaran Berhasil! Pesanan akan segera diproses.");
+                    document.getElementById('checkoutModal').style.display = 'none';
                 },
                 onPending: function (result) {
-                    console.log('pending', result);
-                    alert("Menunggu pembayaran Anda.");
+                    alert("Menunggu pembayaran. Silakan selesaikan transaksi anda.");
                 },
                 onError: function (result) {
-                    console.log('error', result);
-                    alert("Pembayaran Gagal.");
-                },
-                onClose: function () {
-                    console.log('customer closed the popup without finishing the payment');
+                    alert("Pembayaran Gagal. Silakan coba lagi.");
                 }
             });
+        } else {
+            throw new Error(data.error || "Gagal mendapatkan token pembayaran");
         }
     } catch (err) {
         console.error("Payment Error:", err);
-        alert("Gagal memulai pembayaran. Cek koneksi.");
+        alert("Terjadi kesalahan: " + err.message);
     } finally {
-        btn.innerText = originalText;
+        btn.innerHTML = originalText;
         btn.disabled = false;
     }
 };
