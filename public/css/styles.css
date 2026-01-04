@@ -567,11 +567,13 @@ body {
 .result-card.premium-card h2 {
     background: linear-gradient(to right, #d4af37, #fff, #ffdf00, #d4af37);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     background-size: 300% auto;
-    animation: goldTextShine 2s linear infinite;
+    animation: goldTextShine 3s linear infinite;
     font-size: 2.5rem;
-    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.7));
+    letter-spacing: 2px;
 }
 
 @keyframes goldShimmer {
