@@ -3,6 +3,8 @@
  * Handles data persistence and UI interactions
  * Now using Node.js + SQLite Backend
  */
+console.log("app.js version 2.1 loading...");
+alert("SnaDaily Script Loaded!"); // Temporary alert to confirm script execution
 
 // API Configuration
 const API_URL = '/api/fish';
@@ -606,7 +608,12 @@ const initCustomer = () => {
     const resultCard = document.getElementById('resultCard');
     const errorMsg = document.getElementById('errorMsg');
 
-    if (!searchBtn) return;
+    console.log("initCustomer started. searchBtn:", !!searchBtn);
+
+    if (!searchBtn) {
+        console.warn("initCustomer: searchBtn NOT FOUND");
+        return;
+    }
 
     const showResult = (data) => {
         resultCard.style.display = 'block';
