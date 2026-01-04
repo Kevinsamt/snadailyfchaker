@@ -127,6 +127,7 @@ const initAdmin = () => {
 
     // Debug Tool
     window.debugFetch = async () => {
+        alert("Debug Clicked! Checking server..."); // Immediate verification
         try {
             const res = await fetch('/api/fish');
             if (!res.ok) throw new Error(res.statusText);
