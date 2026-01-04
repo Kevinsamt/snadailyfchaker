@@ -231,8 +231,8 @@ app.post('/api/fish', async (req, res) => {
         const result = await query(sql, params);
         res.json({
             "message": "success",
-            "data": result.rows[0],
-            "id": result.rows[0].id
+            "data": data,
+            "id": data.id
         });
     } catch (err) {
         res.status(400).json({ "error": err.message });
@@ -265,7 +265,7 @@ app.put('/api/fish/:id', async (req, res) => {
         const result = await query(sql, params);
         res.json({
             message: "success",
-            data: result.rows[0]
+            data: data
         });
     } catch (err) {
         res.status(400).json({ "error": err.message });
