@@ -236,6 +236,29 @@ app.delete('/api/fish/:id', async (req, res) => {
     }
 });
 
+// Debug Route: Force Seed
+app.get('/api/seed-force', async (req, res) => {
+    try {
+        await pool.query("DELETE FROM products"); // Clear first
+
+        const seedProducts = [
+            { name: 'Super Red Betta (Halfmoon)', price: 150000, image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80&w=600', description: 'Ikan cupang Halfmoon warna merah menyala, sirip lebar sempurna.', category: 'Betta' },
+            { name: 'Channa Maru Yellow Sentarum', price: 450000, image: 'https://i.pinimg.com/736x/21/df/b3/21dfb3936ca49d264560d268a735e58a.jpg', description: 'Channa Maru YS size 20cm, mental preman, bunga banyak.', category: 'Channa' },
+            { name: 'Goldfish Oranda Panda', price: 85000, image: 'https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?auto=format&fit=crop&q=80&w=600', description: 'Koki Oranda dengan corak panda hitam putih yang unik.', category: 'Goldfish' },
+            { name: 'Platinum Guppy (Pair)', price: 50000, image: 'https://images.unsplash.com/photo-1545645672-aa6052dc6cf3?auto=format&fit=crop&q=80&w=600', description: 'Sepasang Guppy Platinum White, genetik murni.', category: 'Guppy' },
+            { name: 'Discus Red Melon', price: 250000, image: 'https://images.unsplash.com/photo-1534032049383-a4e99f57245d?auto=format&fit=crop&q=80&w=600', description: 'Discus Red Melon 3 inch, bulat high body.', category: 'Discus' }
+        ];
+
+        for (const p of seedProducts) {
+            await pool.query('INSERT INTO products (name, price, image, description, category) VALUES ($1, $2, $3, $4, $5)', [p.name, p.price, p.image, p.description, p.category]);
+        }
+
+        res.json({ message: "Force seed successful!", count: seedProducts.length });
+    } catch (err) {
+        res.status(500).json({ error: err.message, stack: err.stack });
+    }
+});
+
 // Product Routes
 app.get('/api/products', async (req, res) => {
     try {
