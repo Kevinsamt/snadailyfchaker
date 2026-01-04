@@ -3,6 +3,8 @@ const { Pool } = require('pg');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const midtransClient = require('midtrans-client');
 require('dotenv').config();
 
@@ -17,9 +19,45 @@ const snap = new midtransClient.Snap({
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+// SECURITY MIDDLEWARES
+app.use(helmet({
+    contentSecurityPolicy: false, // Disabled for simplicity with external scripts like Midtrans
+}));
+
+// Rate Limiting: Prevent Brute Force on Login
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Limit each IP to 10 login attempts per window
+    message: { error: "Terlalu banyak mencoba login. Silakan tunggu 15 menit." }
+});
+
+// General API Rate Limiting
+const apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 60, // Limit each IP to 60 requests per minute
+    message: { error: "Terlalu banyak permintaan. Silakan tunggu sebentar." }
+});
+
+const allowedOrigins = [
+    'https://snadailyfchaker.vercel.app',
+    'https://snadigitaltech.com',
+    'http://localhost:3000'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS Security Firewall'));
+        }
+    }
+}));
+
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] })); // Serve static files from public folder
+app.use('/api/login', loginLimiter);
+app.use('/api/', apiLimiter);
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 // Database Setup
 // Fix SSL for Supabase/Vercel
@@ -100,37 +138,8 @@ async function initDb() {
         console.log("Database connection error (might need env vars):", err.message);
     }
 }
-// Initialize Table Route (Manual Trigger)
-app.get('/api/init', async (req, res) => {
-    try {
-        // Drop to ensure clean slate if schema was wrong
-        // await pool.query("DROP TABLE IF EXISTS fish"); // Optional: dangerous if data exists, but user says "empty".
-        // Let's NOT drop by default, but ensuring it exists is key.
-        // Actually, user said "ga bisa input", maybe schema mismatch.
-
-        await pool.query(`CREATE TABLE IF NOT EXISTS fish (
-            id TEXT PRIMARY KEY,
-            species TEXT,
-            origin TEXT,
-            weight REAL,
-            method TEXT,
-            "catchDate" TEXT,
-            "importDate" TEXT,
-            timestamp TEXT
-        )`);
-
-        // Force check if table exists
-        const check = await pool.query("SELECT count(*) FROM fish");
-
-        res.json({ message: "Database initialized successfully.", count: check.rows[0].count });
-    } catch (err) {
-        console.error("Init Error:", err);
-        res.status(500).json({ error: err.message, stack: err.stack });
-    }
-});
-
 // LOGIN ROUTE (Server-Side Security)
-app.post('/api/login', (req, res) => {
+app.post('/api/login', loginLimiter, (req, res) => {
     const { username, password } = req.body;
 
     // Secure Credentials (Hidden on Server)
@@ -186,7 +195,7 @@ app.get('/api/fish', authMiddleware, async (req, res) => {
 });
 
 // Get single fish by ID
-app.get('/api/fish/:id', async (req, res) => {
+app.get('/api/fish/:id', apiLimiter, async (req, res) => {
     try {
         const sql = "SELECT * FROM fish WHERE id = $1";
         const result = await pool.query(sql, [req.params.id]);
@@ -277,31 +286,8 @@ app.delete('/api/fish/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// Debug Route: Force Seed
-app.get('/api/seed-force', async (req, res) => {
-    try {
-        await pool.query("DELETE FROM products"); // Clear first
-
-        const seedProducts = [
-            { name: 'Super Red Betta (Halfmoon)', price: 150000, image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80&w=600', description: 'Ikan cupang Halfmoon warna merah menyala, sirip lebar sempurna.', category: 'Betta' },
-            { name: 'Channa Maru Yellow Sentarum', price: 450000, image: 'https://i.pinimg.com/736x/21/df/b3/21dfb3936ca49d264560d268a735e58a.jpg', description: 'Channa Maru YS size 20cm, mental preman, bunga banyak.', category: 'Channa' },
-            { name: 'Goldfish Oranda Panda', price: 85000, image: 'https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?auto=format&fit=crop&q=80&w=600', description: 'Koki Oranda dengan corak panda hitam putih yang unik.', category: 'Goldfish' },
-            { name: 'Platinum Guppy (Pair)', price: 50000, image: 'https://images.unsplash.com/photo-1545645672-aa6052dc6cf3?auto=format&fit=crop&q=80&w=600', description: 'Sepasang Guppy Platinum White, genetik murni.', category: 'Guppy' },
-            { name: 'Discus Red Melon', price: 250000, image: 'https://images.unsplash.com/photo-1534032049383-a4e99f57245d?auto=format&fit=crop&q=80&w=600', description: 'Discus Red Melon 3 inch, bulat high body.', category: 'Discus' }
-        ];
-
-        for (const p of seedProducts) {
-            await pool.query('INSERT INTO products (name, price, image, description, category) VALUES ($1, $2, $3, $4, $5)', [p.name, p.price, p.image, p.description, p.category]);
-        }
-
-        res.json({ message: "Force seed successful!", count: seedProducts.length });
-    } catch (err) {
-        res.status(500).json({ error: err.message, stack: err.stack });
-    }
-});
-
 // Product Routes
-app.get('/api/products', async (req, res) => {
+app.get('/api/products', apiLimiter, async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
         res.json({
@@ -314,7 +300,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 // Midtrans: Create Transaction Token
-app.post('/api/payment/token', async (req, res) => {
+app.post('/api/payment/token', apiLimiter, async (req, res) => {
     try {
         const { productName, amount, customer } = req.body;
 
