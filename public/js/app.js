@@ -675,22 +675,34 @@ const initCustomer = () => {
 
     searchBtn.addEventListener('click', () => {
         const id = input.value.trim().toUpperCase();
-        if (!id) return;
+        console.log("Searching for ID:", id);
+        if (!id) {
+            alert("Harap masukkan ID Batch!");
+            return;
+        }
 
         // Simulate loading
         searchBtn.textContent = 'Verifying...';
 
         // 800ms delay for UX + async fetch
         setTimeout(async () => {
-            const data = await DataStore.find(id);
-            searchBtn.textContent = 'Check Authenticity';
+            try {
+                console.log("Executing DataStore.find for:", id);
+                const data = await DataStore.find(id);
+                console.log("Search Result:", data);
+                searchBtn.textContent = 'Check Authenticity';
 
-            if (data) {
-                showResult(data);
-                // Play simplified success sound
-                playSound('premiumSound');
-            } else {
-                showError();
+                if (data) {
+                    showResult(data);
+                } else {
+                    console.warn("No data found for ID:", id);
+                    showError();
+                    alert("ID tidak ditemukan di database!");
+                }
+            } catch (err) {
+                console.error("Search Logic Error:", err);
+                alert("Terjadi kesalahan saat mencari: " + err.message);
+                searchBtn.textContent = 'Check Authenticity';
             }
         }, 800);
     });
