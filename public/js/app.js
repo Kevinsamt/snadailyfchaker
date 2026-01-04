@@ -140,6 +140,7 @@ const initAdmin = () => {
 
     const renderHistory = async (filterText = '') => {
         const data = await DataStore.getAll();
+        console.log("RenderHistory Data:", data); // Debug Log
         const filteredData = data.filter(item =>
             (item.species && item.species.toLowerCase().includes(filterText.toLowerCase())) ||
             (item.id && item.id.toLowerCase().includes(filterText.toLowerCase()))
