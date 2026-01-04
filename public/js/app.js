@@ -25,6 +25,15 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('id-ID', options);
 }
 
+const playSound = (id) => {
+    const audio = document.getElementById(id);
+    if (audio) {
+        audio.volume = 0.5;
+        audio.currentTime = 0;
+        audio.play().catch(e => console.log("Audio autoplay blocked:", e));
+    }
+}
+
 // Data Layer (Async)
 const DataStore = {
     getAll: async () => {
@@ -99,75 +108,76 @@ const DataStore = {
 
 // Admin Logic
 const initAdmin = () => {
-    const form = document.getElementById('fishForm');
-    const historyContainer = document.getElementById('historyList');
+    try {
+        const form = document.getElementById('fishForm');
+        const historyContainer = document.getElementById('historyList');
 
-    if (!form) return;
+        if (!form) return;
 
-    // Connectivity Check
-    const checkConnection = async () => {
-        try {
-            const response = await fetch('/api/status');
-            const json = await response.json();
-            if (json.status !== 'ok') {
-                const warning = document.createElement('div');
-                warning.style.background = '#e53e3e';
-                warning.style.color = 'white';
-                warning.style.padding = '1rem';
-                warning.style.marginBottom = '1rem';
-                warning.style.borderRadius = '8px';
-                warning.innerHTML = `<strong>⚠️ Database Disconnected</strong><br>Server tidak terhubung ke Database. Cek koneksi internet atau konfigurasi server. (${json.details || 'Unknown Error'})`;
-                form.parentElement.insertBefore(warning, form);
+        // Connectivity Check
+        const checkConnection = async () => {
+            try {
+                const response = await fetch('/api/status');
+                const json = await response.json();
+                if (json.status !== 'ok') {
+                    const warning = document.createElement('div');
+                    warning.style.background = '#e53e3e';
+                    warning.style.color = 'white';
+                    warning.style.padding = '1rem';
+                    warning.style.marginBottom = '1rem';
+                    warning.style.borderRadius = '8px';
+                    warning.innerHTML = `<strong>⚠️ Database Disconnected</strong><br>Server tidak terhubung ke Database. Cek koneksi internet atau konfigurasi server. (${json.details || 'Unknown Error'})`;
+                    form.parentElement.insertBefore(warning, form);
+                }
+            } catch (e) {
+                console.error("Connection check failed:", e);
             }
-        } catch (e) {
-            console.error("Connection check failed:", e);
-        }
-    };
-    checkConnection();
+        };
+        checkConnection();
 
-    // Debug Tool
-    window.debugFetch = async () => {
-        alert("Debug Clicked! Checking server..."); // Immediate verification
-        try {
-            const res = await fetch('/api/fish');
-            if (!res.ok) throw new Error(res.statusText);
-            const json = await res.json();
-            const msg = `Debug Info:\nJumlah Data di Server: ${json.data ? json.data.length : 0}\nStatus: ${json.message}\n\nKlik OK untuk membuka data mentah (API).`;
-            if (confirm(msg)) {
-                window.open('/api/fish', '_blank');
+        // Debug Tool
+        window.debugFetch = async () => {
+            alert("Debug Clicked! Checking server..."); // Immediate verification
+            try {
+                const res = await fetch('/api/fish');
+                if (!res.ok) throw new Error(res.statusText);
+                const json = await res.json();
+                const msg = `Debug Info:\nJumlah Data di Server: ${json.data ? json.data.length : 0}\nStatus: ${json.message}\n\nKlik OK untuk membuka data mentah (API).`;
+                if (confirm(msg)) {
+                    window.open('/api/fish', '_blank');
+                }
+                console.log("Raw Data:", json);
+            } catch (e) {
+                alert("Debug Error: " + e.message);
             }
-            console.log("Raw Data:", json);
-        } catch (e) {
-            alert("Debug Error: " + e.message);
-        }
-    };
+        };
 
-    // Clear search on load to prevent ghost filtering
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) searchInput.value = '';
+        // Clear search on load to prevent ghost filtering
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
 
-    const renderHistory = async (filterText = '') => {
-        try {
-            const data = await DataStore.getAll();
-            console.log("RenderHistory RAW:", data);
+        const renderHistory = async (filterText = '') => {
+            try {
+                const data = await DataStore.getAll();
+                console.log("RenderHistory RAW:", data);
 
-            const lowerFilter = filterText ? filterText.toLowerCase() : '';
+                const lowerFilter = filterText ? filterText.toLowerCase() : '';
 
-            const filteredData = data.filter(item => {
-                const s = item.species ? item.species.toLowerCase() : '';
-                const i = item.id ? item.id.toLowerCase() : '';
-                return s.includes(lowerFilter) || i.includes(lowerFilter);
-            });
+                const filteredData = data.filter(item => {
+                    const s = item.species ? item.species.toLowerCase() : '';
+                    const i = item.id ? item.id.toLowerCase() : '';
+                    return s.includes(lowerFilter) || i.includes(lowerFilter);
+                });
 
-            console.log("RenderHistory FILTERED:", filteredData);
+                console.log("RenderHistory FILTERED:", filteredData);
 
-            if (filteredData.length === 0) {
-                console.log("Empty data filtered from:", data);
-                historyContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada data yang diinput hari ini.<br><small>(Total Data di Server: ' + data.length + ')</small></div>';
-                return;
-            }
+                if (filteredData.length === 0) {
+                    console.log("Empty data filtered from:", data);
+                    historyContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada data yang diinput hari ini.<br><small>(Total Data di Server: ' + data.length + ')</small></div>';
+                    return;
+                }
 
-            historyContainer.innerHTML = filteredData.map(item => `
+                historyContainer.innerHTML = filteredData.map(item => `
             <div class="history-item animate-fade-in" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <div style="font-weight: bold;">${item.species}</div>
@@ -193,77 +203,76 @@ const initAdmin = () => {
                 </div>
             </div>
         `).join('');
-        } catch (e) {
-            console.error("Render History Error:", e);
-            if (historyContainer) historyContainer.innerHTML = '<div style="color:red; padding:1rem;">Error Rendering Data: ' + e.message + '</div>';
-        }
-    };
-
-    // Search Handler
-    const searchInput = document.getElementById('searchInput');
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const val = e.target.value;
-            renderHistory(val);
-            if (clearSearchBtn) {
-                clearSearchBtn.style.display = val ? 'block' : 'none';
+            } catch (e) {
+                console.error("Render History Error:", e);
+                if (historyContainer) historyContainer.innerHTML = '<div style="color:red; padding:1rem;">Error Rendering Data: ' + e.message + '</div>';
             }
-        });
-    }
+        };
 
-    if (clearSearchBtn) {
-        clearSearchBtn.addEventListener('click', () => {
-            searchInput.value = '';
-            renderHistory('');
-            clearSearchBtn.style.display = 'none';
-        });
-    }
+        // Search Handler (searchInput already declared above)
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
 
-    // Expose actions globally
-    window.editFish = async (id) => {
-        const data = await DataStore.find(id);
-        if (!data) return;
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                renderHistory(val);
+                if (clearSearchBtn) {
+                    clearSearchBtn.style.display = val ? 'block' : 'none';
+                }
+            });
+        }
 
-        document.getElementById('editId').value = data.id;
-        document.getElementById('species').value = data.species;
-        document.getElementById('origin').value = data.origin;
-        document.getElementById('weight').value = data.weight;
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                renderHistory('');
+                clearSearchBtn.style.display = 'none';
+            });
+        }
 
-        const methodSelect = document.getElementById('method');
-        methodSelect.value = data.method;
-        // Trigger change to toggle fields
-        methodSelect.dispatchEvent(new Event('change'));
+        // Expose actions globally
+        window.editFish = async (id) => {
+            const data = await DataStore.find(id);
+            if (!data) return;
 
-        if (data.catchDate) document.getElementById('catchDate').value = data.catchDate;
-        if (data.importDate) document.getElementById('importDate').value = data.importDate;
+            document.getElementById('editId').value = data.id;
+            document.getElementById('species').value = data.species;
+            document.getElementById('origin').value = data.origin;
+            document.getElementById('weight').value = data.weight;
 
-        // Visual cue
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        const btn = document.querySelector('button[type="submit"]');
-        btn.innerHTML = '<i class="ri-save-line" style="margin-right: 8px;"></i> Update Data';
-        btn.classList.add('pulse-animation');
-    };
+            const methodSelect = document.getElementById('method');
+            methodSelect.value = data.method;
+            // Trigger change to toggle fields
+            methodSelect.dispatchEvent(new Event('change'));
 
-    window.printCertificate = async (id) => {
-        const data = await DataStore.find(id);
-        if (!data) return;
+            if (data.catchDate) document.getElementById('catchDate').value = data.catchDate;
+            if (data.importDate) document.getElementById('importDate').value = data.importDate;
 
-        const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
-            (data.importDate && data.importDate.length > 0);
+            // Visual cue
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const btn = document.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="ri-save-line" style="margin-right: 8px;"></i> Update Data';
+            btn.classList.add('pulse-animation');
+        };
 
-        const verificationUrl = `https://snadailyfchaker.vercel.app/?id=${data.id}`;
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verificationUrl)}`;
+        window.printCertificate = async (id) => {
+            const data = await DataStore.find(id);
+            if (!data) return;
 
-        const printWindow = window.open('', '', 'width=800,height=600');
+            const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
+                (data.importDate && data.importDate.length > 0);
 
-        // CSS Styles based on Type
-        let styles, contentHtml;
+            const verificationUrl = `https://snadailyfchaker.vercel.app/?id=${data.id}`;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verificationUrl)}`;
 
-        if (isPremium) {
-            // PREMIUM LUXURY DESIGN (Landscape Card - 700x500)
-            styles = `
+            const printWindow = window.open('', '', 'width=800,height=600');
+
+            // CSS Styles based on Type
+            let styles, contentHtml;
+
+            if (isPremium) {
+                // PREMIUM LUXURY DESIGN (Landscape Card - 700x500)
+                styles = `
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700&display=swap');
                 body { margin: 0; padding: 0; background: #0a0a0a; color: #d4af37; font-family: 'Playfair Display', serif; -webkit-print-color-adjust: exact; }
                 .cert-container { 
@@ -326,7 +335,7 @@ const initAdmin = () => {
                 .footer-id { font-family: 'Courier New', monospace; letter-spacing: 3px; color: #555; font-size: 0.8rem; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); }
             `;
 
-            contentHtml = `
+                contentHtml = `
                 <div class="cert-container">
                     <div class="watermark">PREMIUM</div>
                     <div class="inner-border">
@@ -373,9 +382,9 @@ const initAdmin = () => {
                     </div>
                 </div>
             `;
-        } else {
-            // STANDARD BUT CLASSY DESIGN (Regular)
-            styles = `
+            } else {
+                // STANDARD BUT CLASSY DESIGN (Regular)
+                styles = `
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap');
                 body { margin: 0; padding: 0; background: #fff; color: #1f2937; font-family: 'Outfit', sans-serif; -webkit-print-color-adjust: exact; }
                 .cert-card {
@@ -404,7 +413,7 @@ const initAdmin = () => {
                 .qr-placeholder { width: 80px; height: 80px;}
             `;
 
-            contentHtml = `
+                contentHtml = `
                 <div class="cert-card">
                     <div class="accent-bar"></div>
                     <div class="top-header">
@@ -439,9 +448,9 @@ const initAdmin = () => {
                     </div>
                 </div>
             `;
-        }
+            }
 
-        const certHtml = `
+            const certHtml = `
             <!DOCTYPE html>
             <html>
             <head>
@@ -456,135 +465,138 @@ const initAdmin = () => {
             </body>
             </html>
         `;
-        printWindow.document.write(certHtml);
-        printWindow.document.close();
-    };
+            printWindow.document.write(certHtml);
+            printWindow.document.close();
+        };
 
-    // Backup & Restore
-    window.backupData = async () => {
-        const data = await DataStore.getAll();
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "fish_data_backup_" + new Date().toISOString().split('T')[0] + ".json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-    };
+        // Backup & Restore
+        window.backupData = async () => {
+            const data = await DataStore.getAll();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "fish_data_backup_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        };
 
-    window.restoreData = (input) => {
-        const file = input.files[0];
-        if (!file) return;
+        window.restoreData = (input) => {
+            const file = input.files[0];
+            if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (Array.isArray(data)) {
-                    if (confirm(`Ditemukan ${data.length} data. Apakah anda yakin ingin me-restore (menambahkan) data ini ke database?`)) {
-                        // Loop and save each
-                        let successCount = 0;
-                        for (const item of data) {
-                            try {
-                                await DataStore.save(item);
-                                successCount++;
-                            } catch (err) {
-                                console.error("Failed to restore item", item, err);
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) {
+                        if (confirm(`Ditemukan ${data.length} data. Apakah anda yakin ingin me-restore (menambahkan) data ini ke database?`)) {
+                            // Loop and save each
+                            let successCount = 0;
+                            for (const item of data) {
+                                try {
+                                    await DataStore.save(item);
+                                    successCount++;
+                                } catch (err) {
+                                    console.error("Failed to restore item", item, err);
+                                }
                             }
-                        }
 
-                        alert(`Berhasil memulihkan ${successCount} data!`);
-                        renderHistory('');
+                            alert(`Berhasil memulihkan ${successCount} data!`);
+                            renderHistory('');
+                        }
+                    } else {
+                        alert('Format file tidak valid!');
                     }
-                } else {
-                    alert('Format file tidak valid!');
+                } catch (err) {
+                    alert('Gagal membaca file backup.');
+                    console.error(err);
                 }
-            } catch (err) {
-                alert('Gagal membaca file backup.');
-                console.error(err);
+            };
+            reader.readAsText(file);
+            input.value = '';
+        };
+
+        window.deleteFish = async (id) => {
+            if (confirm('Apakah anda yakin ingin menghapus data ini?')) {
+                await DataStore.delete(id);
+                renderHistory(document.getElementById('searchInput').value);
             }
         };
-        reader.readAsText(file);
-        input.value = '';
-    };
 
-    window.deleteFish = async (id) => {
-        if (confirm('Apakah anda yakin ingin menghapus data ini?')) {
-            await DataStore.delete(id);
-            renderHistory(document.getElementById('searchInput').value);
+        // Handle Method Change
+        const methodSelect = document.getElementById('method');
+        const importDateContainer = document.getElementById('importDateContainer');
+
+        const importDateInput = document.getElementById('importDate');
+        const hatchDateContainer = document.getElementById('hatchDateContainer');
+        const hatchDateInput = document.getElementById('catchDate');
+
+        if (methodSelect && importDateContainer && importDateInput && hatchDateContainer && hatchDateInput) {
+            methodSelect.addEventListener('change', () => {
+                if (methodSelect.value.toLowerCase().includes('import')) {
+                    // Show Import, Hide Hatch
+                    importDateContainer.style.display = 'block';
+                    importDateInput.required = true;
+
+                    hatchDateContainer.style.display = 'none';
+                    hatchDateInput.required = false;
+                    hatchDateInput.value = '';
+                } else {
+                    // Hide Import, Show Hatch
+                    importDateContainer.style.display = 'none';
+                    importDateInput.required = false;
+                    importDateInput.value = '';
+
+                    hatchDateContainer.style.display = 'block';
+                    hatchDateInput.required = true;
+                }
+            });
         }
-    };
 
-    // Handle Method Change
-    const methodSelect = document.getElementById('method');
-    const importDateContainer = document.getElementById('importDateContainer');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-    const importDateInput = document.getElementById('importDate');
-    const hatchDateContainer = document.getElementById('hatchDateContainer');
-    const hatchDateInput = document.getElementById('catchDate');
+            const formData = {
+                species: document.getElementById('species').value,
+                origin: document.getElementById('origin').value,
+                catchDate: document.getElementById('catchDate').value,
+                weight: document.getElementById('weight').value,
+                method: document.getElementById('method').value,
+                importDate: document.getElementById('importDate').value
+            };
 
-    if (methodSelect && importDateContainer && importDateInput && hatchDateContainer && hatchDateInput) {
-        methodSelect.addEventListener('change', () => {
-            if (methodSelect.value.toLowerCase().includes('import')) {
-                // Show Import, Hide Hatch
-                importDateContainer.style.display = 'block';
-                importDateInput.required = true;
+            const editId = document.getElementById('editId').value;
+            try {
+                if (editId) {
+                    formData.id = editId;
+                    await DataStore.save(formData);
+                    alert('Data Berhasil Diupdate!');
 
-                hatchDateContainer.style.display = 'none';
-                hatchDateInput.required = false;
-                hatchDateInput.value = '';
-            } else {
-                // Hide Import, Show Hatch
-                importDateContainer.style.display = 'none';
-                importDateInput.required = false;
-                importDateInput.value = '';
+                    // Reset state
+                    document.getElementById('editId').value = '';
+                    document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
+                } else {
+                    // Let the DataStore (and potentially server) handle ID if not provided, 
+                    // but our logic above generates ID.
+                    const result = await DataStore.save(formData);
+                    alert(`Data Tersimpan!\nID Batch: ${result.id}`);
+                }
 
-                hatchDateContainer.style.display = 'block';
-                hatchDateInput.required = true;
+                form.reset();
+                // Reset hiding logic
+                methodSelect.dispatchEvent(new Event('change'));
+                renderHistory();
+            } catch (error) {
+                console.error('Submission failed:', error);
+                alert('Gagal menyimpan data: ' + error.message);
             }
         });
+
+        renderHistory();
+    } catch (criticalError) {
+        console.error("CRITICAL ADMIN ERROR:", criticalError);
     }
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const formData = {
-            species: document.getElementById('species').value,
-            origin: document.getElementById('origin').value,
-            catchDate: document.getElementById('catchDate').value,
-            weight: document.getElementById('weight').value,
-            method: document.getElementById('method').value,
-            importDate: document.getElementById('importDate').value
-        };
-
-        const editId = document.getElementById('editId').value;
-        try {
-            if (editId) {
-                formData.id = editId;
-                await DataStore.save(formData);
-                alert('Data Berhasil Diupdate!');
-
-                // Reset state
-                document.getElementById('editId').value = '';
-                document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
-            } else {
-                // Let the DataStore (and potentially server) handle ID if not provided, 
-                // but our logic above generates ID.
-                const result = await DataStore.save(formData);
-                alert(`Data Tersimpan!\nID Batch: ${result.id}`);
-            }
-
-            form.reset();
-            // Reset hiding logic
-            methodSelect.dispatchEvent(new Event('change'));
-            renderHistory();
-        } catch (error) {
-            console.error('Submission failed:', error);
-            alert('Gagal menyimpan data: ' + error.message);
-        }
-    });
-
-    renderHistory();
 };
 
 // Customer Logic
@@ -633,12 +645,7 @@ const initCustomer = () => {
             document.querySelector('#resultCard h2').innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
 
             // Play Sound
-            const audio = document.getElementById('premiumSound');
-            if (audio) {
-                audio.volume = 0.5;
-                audio.currentTime = 0;
-                audio.play().catch(e => console.log("Audio autoplay blocked:", e));
-            }
+            playSound('premiumSound');
 
             // Override Origin for Premium
             document.getElementById('res-origin-label').textContent = 'Variety / Species';
