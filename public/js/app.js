@@ -775,19 +775,48 @@ window.loadProducts = async () => {
     }
 };
 
-window.showPaymentModal = (name, price) => {
-    const modal = document.getElementById('paymentModal');
-    if (modal) {
-        document.getElementById('paymentTotal').innerText = 'Rp ' + price.toLocaleString('id-ID');
-        document.getElementById('paymentItem').innerText = name;
+window.showPaymentModal = async (name, price) => {
+    // Show a basic loading alert or spinner
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = 'Processing...';
+    btn.disabled = true;
 
-        // Dynamic QR (Simulation)
-        // In real app, this would be a static image of the shop's QRIS
-        const qrisUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Bayar ${price} ke Sndaily`;
-        const qrisImg = document.getElementById('qrisImage');
-        if (qrisImg) qrisImg.src = qrisUrl;
+    try {
+        // 1. Get Snap Token from our server
+        const response = await fetch('/api/payment/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productName: name, amount: price })
+        });
+        const data = await response.json();
 
-        modal.style.display = 'flex';
+        if (data.token) {
+            // 2. Trigger Snap Popup
+            window.snap.pay(data.token, {
+                onSuccess: function (result) {
+                    console.log('success', result);
+                    alert("Pembayaran Berhasil! Terima kasih.");
+                },
+                onPending: function (result) {
+                    console.log('pending', result);
+                    alert("Menunggu pembayaran Anda.");
+                },
+                onError: function (result) {
+                    console.log('error', result);
+                    alert("Pembayaran Gagal.");
+                },
+                onClose: function () {
+                    console.log('customer closed the popup without finishing the payment');
+                }
+            });
+        }
+    } catch (err) {
+        console.error("Payment Error:", err);
+        alert("Gagal memulai pembayaran. Cek koneksi.");
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
     }
 };
 

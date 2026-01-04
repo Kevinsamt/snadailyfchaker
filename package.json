@@ -22,7 +22,9 @@
   "dependencies": {
     "body-parser": "^2.2.1",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "midtrans-client": "^1.4.3",
     "pg": "^8.11.3",
     "sqlite3": "^5.1.7"
   }

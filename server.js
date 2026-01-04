@@ -3,8 +3,17 @@ const { Pool } = require('pg');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const midtransClient = require('midtrans-client');
+require('dotenv').config();
 
 const app = express();
+
+// Midtrans Core Configuration
+const snap = new midtransClient.Snap({
+    isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
+    serverKey: process.env.MIDTRANS_SERVER_KEY,
+    clientKey: process.env.MIDTRANS_CLIENT_KEY
+});
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -301,6 +310,41 @@ app.get('/api/products', async (req, res) => {
         });
     } catch (err) {
         res.status(400).json({ "error": err.message });
+    }
+});
+
+// Midtrans: Create Transaction Token
+app.post('/api/payment/token', async (req, res) => {
+    try {
+        const { productName, amount } = req.body;
+
+        // Basic unique order ID
+        const orderId = `ORDER-${Date.now()}`;
+
+        const parameter = {
+            transaction_details: {
+                order_id: orderId,
+                gross_amount: amount
+            },
+            item_details: [{
+                id: 'PROD-001',
+                price: amount,
+                quantity: 1,
+                name: productName
+            }],
+            credit_card: {
+                secure: true
+            }
+        };
+
+        const transaction = await snap.createTransaction(parameter);
+        res.json({
+            token: transaction.token,
+            orderId: orderId
+        });
+    } catch (err) {
+        console.error("Midtrans Error:", err);
+        res.status(500).json({ error: err.message });
     }
 });
 

@@ -115,49 +115,12 @@
         <span class="cart-badge" id="cartCount">0</span>
     </div>
 
-    <!-- Payment Modal -->
-    <div id="paymentModal"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-        <div class="glass-panel animate-reveal"
-            style="background: rgba(20, 20, 20, 0.95); max-width: 400px; width: 90%; padding: 2rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); text-align: center; position: relative;">
-            <button onclick="closePaymentModal()"
-                style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+    <!-- Midtrans Snap will handle the payment popup -->
 
-            <h2 style="color: white; margin-bottom: 0.5rem;">Pembayaran</h2>
-            <p style="color: #a0aec0; font-size: 0.9rem; margin-bottom: 2rem;">Scan QRIS di bawah untuk membayar</p>
-
-            <div
-                style="background: white; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 1.5rem;">
-                <img id="qrisImage"
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Pembayaran Sndaily" alt="QRIS"
-                    style="width: 200px; height: 200px;">
-            </div>
-
-            <div style="margin-bottom: 2rem;">
-                <div style="color: #a0aec0; font-size: 0.8rem; text-transform: uppercase;">Total Pembayaran</div>
-                <div id="paymentTotal" style="color: var(--secondary); font-size: 1.8rem; font-weight: bold;">Rp 0</div>
-                <div id="paymentItem" style="color: white; font-size: 1rem; margin-top: 5px;"></div>
-            </div>
-
-            <button onclick="finishPayment()" class="btn-primary" style="width: 100%; justify-content: center;">
-                <i class="ri-whatsapp-line" style="margin-right: 8px;"></i> Konfirmasi via WhatsApp
-            </button>
-        </div>
-    </div>
-
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-xxxxxxxxxxxx"></script>
     <script src="js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Expose modal helper
-            window.closePaymentModal = () => {
-                document.getElementById('paymentModal').style.display = 'none';
-            };
-
-            window.finishPayment = () => {
-                alert('Terima kasih! Kami akan memproses pesanan Anda setelah konfirmasi.');
-                closePaymentModal();
-            };
-
             if (window.loadProducts) {
                 window.loadProducts();
             }
