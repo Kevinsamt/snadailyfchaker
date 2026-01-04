@@ -3,8 +3,6 @@
  * Handles data persistence and UI interactions
  * Now using Node.js + SQLite Backend
  */
-console.log("app.js version 2.1 loading...");
-alert("SnaDaily Script Loaded!"); // Temporary alert to confirm script execution
 
 // API Configuration
 const API_URL = '/api/fish';
@@ -782,9 +780,17 @@ window.addToCart = (id) => {
 
 // Initialize based on page
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.location.pathname.includes('admin.html')) {
+    console.log("DOM Loaded. Path:", window.location.pathname);
+
+    // Detect page based on core elements instead of URL
+    if (document.getElementById('fishForm')) {
+        console.log("Admin form found - Initializing Admin");
         initAdmin();
-    } else {
+    } else if (document.getElementById('searchBtn')) {
+        console.log("Search button found - Initializing Customer");
         initCustomer();
+    } else if (document.getElementById('productGrid')) {
+        console.log("Product grid found - Initializing Shop");
+        loadProducts();
     }
 });
