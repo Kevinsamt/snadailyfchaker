@@ -132,30 +132,36 @@ const initAdmin = () => {
             (item.id && item.id.toLowerCase().includes(filterText.toLowerCase()))
         );
 
-        <div class="history-item animate-fade-in" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <div style="font-weight: bold;">${item.species}</div>
-                <div style="font-size: 0.8rem; color: #a0aec0;">${item.id}</div>
-            </div>
-            <div style="text-align: right; display: flex; align-items: center; gap: 1rem;">
+        if (filteredData.length === 0) {
+            historyContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada data yang diinput hari ini.</div>';
+            return;
+        }
+
+        historyContainer.innerHTML = filteredData.map(item => `
+            <div class="history-item animate-fade-in" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <div style="font-size: 0.9rem;">${item.origin}</div>
-                    ${item.catchDate ? `<div style="font-size: 0.8rem; color: var(--secondary);">${formatDate(item.catchDate)}</div>` : ''}
-                    ${item.importDate ? `<div style="font-size: 0.8rem; color: #fbbf24;">Import From: ${item.importDate}</div>` : ''}
+                    <div style="font-weight: bold;">${item.species}</div>
+                    <div style="font-size: 0.8rem; color: #a0aec0;">${item.id}</div>
                 </div>
-                <div style="display: flex;">
-                    <button class="action-btn btn-edit" onclick="window.editFish('${item.id}')" title="Edit Data">
-                        <i class="ri-pencil-line"></i>
-                    </button>
-                    <button class="action-btn btn-print" onclick="window.printCertificate('${item.id}')" title="Print Sertifikat">
-                        <i class="ri-printer-line"></i>
-                    </button>
-                    <button class="action-btn btn-delete" onclick="window.deleteFish('${item.id}')" title="Hapus Data">
-                        <i class="ri-delete-bin-line"></i>
-                    </button>
+                <div style="text-align: right; display: flex; align-items: center; gap: 1rem;">
+                    <div>
+                        <div style="font-size: 0.9rem;">${item.origin}</div>
+                        ${item.catchDate ? `<div style="font-size: 0.8rem; color: var(--secondary);">${formatDate(item.catchDate)}</div>` : ''}
+                        ${item.importDate ? `<div style="font-size: 0.8rem; color: #fbbf24;">Import From: ${item.importDate}</div>` : ''}
+                    </div>
+                    <div style="display: flex;">
+                        <button class="action-btn btn-edit" onclick="window.editFish('${item.id}')" title="Edit Data">
+                            <i class="ri-pencil-line"></i>
+                        </button>
+                        <button class="action-btn btn-print" onclick="window.printCertificate('${item.id}')" title="Print Sertifikat">
+                            <i class="ri-printer-line"></i>
+                        </button>
+                        <button class="action-btn btn-delete" onclick="window.deleteFish('${item.id}')" title="Hapus Data">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
         `).join('');
     };
 
