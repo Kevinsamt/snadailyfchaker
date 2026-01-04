@@ -64,7 +64,10 @@ const DataStore = {
                     },
                     body: JSON.stringify(fishData)
                 });
-                if (!response.ok) throw new Error('Update failed');
+                if (!response.ok) {
+                    const errorJson = await response.json();
+                    throw new Error(errorJson.error || 'Update failed');
+                }
                 const res = await response.json();
                 return { ...fishData, ...res.data };
             } else {
@@ -85,14 +88,17 @@ const DataStore = {
                     },
                     body: JSON.stringify(fishData)
                 });
-                if (!response.ok) throw new Error('Create failed');
+                if (!response.ok) {
+                    const errorJson = await response.json();
+                    throw new Error(errorJson.error || 'Create failed');
+                }
                 const res = await response.json();
                 return { ...fishData, id: fishData.id };
             }
         } catch (error) {
             console.error('Error saving data:', error);
             // Show detailed alert to user
-            alert(`GAGAL SIMPAN: ${error.message}\nCek Console (F12) untuk detail.`);
+            alert(`GAGAL SIMPAN: ${error.message}`);
             throw error;
         }
     },

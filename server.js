@@ -211,7 +211,7 @@ app.post('/api/fish', authMiddleware, async (req, res) => {
         id: req.body.id,
         species: req.body.species,
         origin: req.body.origin,
-        weight: req.body.weight,
+        weight: req.body.weight ? parseFloat(req.body.weight) : null,
         method: req.body.method,
         catchDate: req.body.catchDate,
         importDate: req.body.importDate,
@@ -239,7 +239,7 @@ app.put('/api/fish/:id', authMiddleware, async (req, res) => {
     const data = {
         species: req.body.species,
         origin: req.body.origin,
-        weight: req.body.weight,
+        weight: req.body.weight ? parseFloat(req.body.weight) : null,
         method: req.body.method,
         catchDate: req.body.catchDate,
         importDate: req.body.importDate,
