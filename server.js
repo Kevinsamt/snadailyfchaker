@@ -79,14 +79,23 @@ app.get('/api/shipping/search', apiLimiter, async (req, res) => {
     if (!query) return res.json([]);
 
     try {
+        console.log("Komerce Search Request:", query);
         const response = await fetch(`https://rajaongkir.komerce.id/api/v1/destination/domestic-search?search=${encodeURIComponent(query)}`, {
             headers: { 'x-api-key': KOMERCE_API_COST }
         });
+
         const data = await response.json();
+        console.log("Komerce Search Response Status:", response.status);
+
+        if (!response.ok) {
+            console.error("Komerce API Error:", data);
+            return res.status(response.status).json({ error: data.message || "Komerce API Error" });
+        }
+
         res.json(data.data || []);
     } catch (err) {
-        console.error("Komerce Search Error:", err);
-        res.status(500).json({ error: "Gagal mencari lokasi" });
+        console.error("Komerce Search System Error:", err);
+        res.status(500).json({ error: "Sistem pengiriman sedang sibuk. Coba lagi." });
     }
 });
 

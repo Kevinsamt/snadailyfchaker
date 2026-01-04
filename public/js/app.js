@@ -809,18 +809,24 @@ window.searchLocation = (query) => {
     clearTimeout(searchTimeout);
     const resultsDiv = document.getElementById('locResults');
 
-    if (query.length < 3) {
+    if (query.length < 2) {
         resultsDiv.style.display = 'none';
         return;
     }
 
+    // Show loading hint
+    resultsDiv.innerHTML = '<div style="color:var(--text-muted); padding:10px;"><i class="ri-loader-4-line ri-spin"></i> Mencari lokasi...</div>';
+    resultsDiv.style.display = 'block';
+
     searchTimeout = setTimeout(async () => {
         try {
+            console.log("Searching for location:", query);
             const response = await fetch(`/api/shipping/search?q=${encodeURIComponent(query)}`);
             const data = await response.json();
+            console.log("Location results:", data);
 
             resultsDiv.innerHTML = '';
-            if (data.length > 0) {
+            if (data && data.length > 0) {
                 data.forEach(loc => {
                     const div = document.createElement('div');
                     div.style.padding = '10px 15px';
