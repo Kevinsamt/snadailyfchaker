@@ -41,6 +41,8 @@ const apiLimiter = rateLimit({
 const allowedOrigins = [
     'https://snadailyfchaker.vercel.app',
     'https://snadigitaltech.com',
+    'https://www.snadigital.shop',
+    'https://snadigital.shop',
     'http://localhost:3000'
 ];
 
@@ -50,7 +52,7 @@ app.use(cors({
         if (!origin) return callback(null, true);
 
         const isVercel = origin.endsWith('.vercel.app');
-        const isSna = origin.endsWith('snadigitaltech.com');
+        const isSna = origin.endsWith('snadigitaltech.com') || origin.endsWith('snadigital.shop');
         const isLocal = origin.includes('localhost');
 
         if (isVercel || isSna || isLocal || allowedOrigins.indexOf(origin) !== -1) {
