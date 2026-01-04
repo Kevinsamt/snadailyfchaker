@@ -201,6 +201,7 @@ app.post('/api/fish', async (req, res) => {
     const params = [data.id, data.species, data.origin, data.weight, data.method, data.catchDate, data.importDate, data.timestamp]
 
     try {
+        console.log("Saving Fish:", params); // Debug log
         const result = await pool.query(sql, params);
         res.json({
             "message": "success",
@@ -208,6 +209,7 @@ app.post('/api/fish', async (req, res) => {
             "id": result.rows[0].id
         });
     } catch (err) {
+        console.error("Insert Error:", err); // Debug log
         res.status(400).json({ "error": err.message });
     }
 });
