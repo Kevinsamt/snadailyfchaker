@@ -7,6 +7,11 @@
 // API Configuration
 const API_URL = '/api/fish';
 
+// Protocol Check
+if (window.location.protocol === 'file:') {
+    alert("⚠️ PERHATIAN: Aplikasi tidak akan berjalan jika dibuka langsung dari file (file://).\n\nSilahkan buka via browser: http://localhost:3000/admin");
+}
+
 // Utils
 const generateId = () => {
     // ID generation is now handled partially by frontend but persisted by backend.
