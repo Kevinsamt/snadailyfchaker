@@ -148,7 +148,8 @@ const initAdmin = () => {
         );
 
         if (filteredData.length === 0) {
-            historyContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada data yang diinput hari ini.</div>';
+            console.log("Empty data filtered from:", data);
+            historyContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada data yang diinput hari ini.<br><small>(Total Data: ' + data.length + ')</small></div>';
             return;
         }
 
