@@ -197,72 +197,73 @@ const initAdmin = () => {
             console.error("Render History Error:", e);
             if (historyContainer) historyContainer.innerHTML = '<div style="color:red; padding:1rem;">Error Rendering Data: ' + e.message + '</div>';
         }
+    };
 
-        // Search Handler
-        const searchInput = document.getElementById('searchInput');
-        const clearSearchBtn = document.getElementById('clearSearchBtn');
+    // Search Handler
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
 
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const val = e.target.value;
-                renderHistory(val);
-                if (clearSearchBtn) {
-                    clearSearchBtn.style.display = val ? 'block' : 'none';
-                }
-            });
-        }
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            renderHistory(val);
+            if (clearSearchBtn) {
+                clearSearchBtn.style.display = val ? 'block' : 'none';
+            }
+        });
+    }
 
-        if (clearSearchBtn) {
-            clearSearchBtn.addEventListener('click', () => {
-                searchInput.value = '';
-                renderHistory('');
-                clearSearchBtn.style.display = 'none';
-            });
-        }
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            renderHistory('');
+            clearSearchBtn.style.display = 'none';
+        });
+    }
 
-        // Expose actions globally
-        window.editFish = async (id) => {
-            const data = await DataStore.find(id);
-            if (!data) return;
+    // Expose actions globally
+    window.editFish = async (id) => {
+        const data = await DataStore.find(id);
+        if (!data) return;
 
-            document.getElementById('editId').value = data.id;
-            document.getElementById('species').value = data.species;
-            document.getElementById('origin').value = data.origin;
-            document.getElementById('weight').value = data.weight;
+        document.getElementById('editId').value = data.id;
+        document.getElementById('species').value = data.species;
+        document.getElementById('origin').value = data.origin;
+        document.getElementById('weight').value = data.weight;
 
-            const methodSelect = document.getElementById('method');
-            methodSelect.value = data.method;
-            // Trigger change to toggle fields
-            methodSelect.dispatchEvent(new Event('change'));
+        const methodSelect = document.getElementById('method');
+        methodSelect.value = data.method;
+        // Trigger change to toggle fields
+        methodSelect.dispatchEvent(new Event('change'));
 
-            if (data.catchDate) document.getElementById('catchDate').value = data.catchDate;
-            if (data.importDate) document.getElementById('importDate').value = data.importDate;
+        if (data.catchDate) document.getElementById('catchDate').value = data.catchDate;
+        if (data.importDate) document.getElementById('importDate').value = data.importDate;
 
-            // Visual cue
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            const btn = document.querySelector('button[type="submit"]');
-            btn.innerHTML = '<i class="ri-save-line" style="margin-right: 8px;"></i> Update Data';
-            btn.classList.add('pulse-animation');
-        };
+        // Visual cue
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const btn = document.querySelector('button[type="submit"]');
+        btn.innerHTML = '<i class="ri-save-line" style="margin-right: 8px;"></i> Update Data';
+        btn.classList.add('pulse-animation');
+    };
 
-        window.printCertificate = async (id) => {
-            const data = await DataStore.find(id);
-            if (!data) return;
+    window.printCertificate = async (id) => {
+        const data = await DataStore.find(id);
+        if (!data) return;
 
-            const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
-                (data.importDate && data.importDate.length > 0);
+        const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
+            (data.importDate && data.importDate.length > 0);
 
-            const verificationUrl = `https://snadailyfchaker.vercel.app/?id=${data.id}`;
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verificationUrl)}`;
+        const verificationUrl = `https://snadailyfchaker.vercel.app/?id=${data.id}`;
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verificationUrl)}`;
 
-            const printWindow = window.open('', '', 'width=800,height=600');
+        const printWindow = window.open('', '', 'width=800,height=600');
 
-            // CSS Styles based on Type
-            let styles, contentHtml;
+        // CSS Styles based on Type
+        let styles, contentHtml;
 
-            if (isPremium) {
-                // PREMIUM LUXURY DESIGN (Landscape Card - 700x500)
-                styles = `
+        if (isPremium) {
+            // PREMIUM LUXURY DESIGN (Landscape Card - 700x500)
+            styles = `
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700&display=swap');
                 body { margin: 0; padding: 0; background: #0a0a0a; color: #d4af37; font-family: 'Playfair Display', serif; -webkit-print-color-adjust: exact; }
                 .cert-container { 
@@ -325,7 +326,7 @@ const initAdmin = () => {
                 .footer-id { font-family: 'Courier New', monospace; letter-spacing: 3px; color: #555; font-size: 0.8rem; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); }
             `;
 
-                contentHtml = `
+            contentHtml = `
                 <div class="cert-container">
                     <div class="watermark">PREMIUM</div>
                     <div class="inner-border">
@@ -372,9 +373,9 @@ const initAdmin = () => {
                     </div>
                 </div>
             `;
-            } else {
-                // STANDARD BUT CLASSY DESIGN (Regular)
-                styles = `
+        } else {
+            // STANDARD BUT CLASSY DESIGN (Regular)
+            styles = `
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap');
                 body { margin: 0; padding: 0; background: #fff; color: #1f2937; font-family: 'Outfit', sans-serif; -webkit-print-color-adjust: exact; }
                 .cert-card {
@@ -403,7 +404,7 @@ const initAdmin = () => {
                 .qr-placeholder { width: 80px; height: 80px;}
             `;
 
-                contentHtml = `
+            contentHtml = `
                 <div class="cert-card">
                     <div class="accent-bar"></div>
                     <div class="top-header">
@@ -438,9 +439,9 @@ const initAdmin = () => {
                     </div>
                 </div>
             `;
-            }
+        }
 
-            const certHtml = `
+        const certHtml = `
             <!DOCTYPE html>
             <html>
             <head>
@@ -455,258 +456,258 @@ const initAdmin = () => {
             </body>
             </html>
         `;
-            printWindow.document.write(certHtml);
-            printWindow.document.close();
-        };
+        printWindow.document.write(certHtml);
+        printWindow.document.close();
+    };
 
-        // Backup & Restore
-        window.backupData = async () => {
-            const data = await DataStore.getAll();
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "fish_data_backup_" + new Date().toISOString().split('T')[0] + ".json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        };
+    // Backup & Restore
+    window.backupData = async () => {
+        const data = await DataStore.getAll();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "fish_data_backup_" + new Date().toISOString().split('T')[0] + ".json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    };
 
-        window.restoreData = (input) => {
-            const file = input.files[0];
-            if (!file) return;
+    window.restoreData = (input) => {
+        const file = input.files[0];
+        if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data)) {
-                        if (confirm(`Ditemukan ${data.length} data. Apakah anda yakin ingin me-restore (menambahkan) data ini ke database?`)) {
-                            // Loop and save each
-                            let successCount = 0;
-                            for (const item of data) {
-                                try {
-                                    await DataStore.save(item);
-                                    successCount++;
-                                } catch (err) {
-                                    console.error("Failed to restore item", item, err);
-                                }
-                            }
-
-                            alert(`Berhasil memulihkan ${successCount} data!`);
-                            renderHistory('');
-                        }
-                    } else {
-                        alert('Format file tidak valid!');
-                    }
-                } catch (err) {
-                    alert('Gagal membaca file backup.');
-                    console.error(err);
-                }
-            };
-            reader.readAsText(file);
-            input.value = '';
-        };
-
-        window.deleteFish = async (id) => {
-            if (confirm('Apakah anda yakin ingin menghapus data ini?')) {
-                await DataStore.delete(id);
-                renderHistory(document.getElementById('searchInput').value);
-            }
-        };
-
-        // Handle Method Change
-        const methodSelect = document.getElementById('method');
-        const importDateContainer = document.getElementById('importDateContainer');
-
-        const importDateInput = document.getElementById('importDate');
-        const hatchDateContainer = document.getElementById('hatchDateContainer');
-        const hatchDateInput = document.getElementById('catchDate');
-
-        if (methodSelect && importDateContainer && importDateInput && hatchDateContainer && hatchDateInput) {
-            methodSelect.addEventListener('change', () => {
-                if (methodSelect.value.toLowerCase().includes('import')) {
-                    // Show Import, Hide Hatch
-                    importDateContainer.style.display = 'block';
-                    importDateInput.required = true;
-
-                    hatchDateContainer.style.display = 'none';
-                    hatchDateInput.required = false;
-                    hatchDateInput.value = '';
-                } else {
-                    // Hide Import, Show Hatch
-                    importDateContainer.style.display = 'none';
-                    importDateInput.required = false;
-                    importDateInput.value = '';
-
-                    hatchDateContainer.style.display = 'block';
-                    hatchDateInput.required = true;
-                }
-            });
-        }
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const formData = {
-                species: document.getElementById('species').value,
-                origin: document.getElementById('origin').value,
-                catchDate: document.getElementById('catchDate').value,
-                weight: document.getElementById('weight').value,
-                method: document.getElementById('method').value,
-                importDate: document.getElementById('importDate').value
-            };
-
-            const editId = document.getElementById('editId').value;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
             try {
-                if (editId) {
-                    formData.id = editId;
-                    await DataStore.save(formData);
-                    alert('Data Berhasil Diupdate!');
+                const data = JSON.parse(e.target.result);
+                if (Array.isArray(data)) {
+                    if (confirm(`Ditemukan ${data.length} data. Apakah anda yakin ingin me-restore (menambahkan) data ini ke database?`)) {
+                        // Loop and save each
+                        let successCount = 0;
+                        for (const item of data) {
+                            try {
+                                await DataStore.save(item);
+                                successCount++;
+                            } catch (err) {
+                                console.error("Failed to restore item", item, err);
+                            }
+                        }
 
-                    // Reset state
-                    document.getElementById('editId').value = '';
-                    document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
+                        alert(`Berhasil memulihkan ${successCount} data!`);
+                        renderHistory('');
+                    }
                 } else {
-                    // Let the DataStore (and potentially server) handle ID if not provided, 
-                    // but our logic above generates ID.
-                    const result = await DataStore.save(formData);
-                    alert(`Data Tersimpan!\nID Batch: ${result.id}`);
+                    alert('Format file tidak valid!');
                 }
-
-                form.reset();
-                // Reset hiding logic
-                methodSelect.dispatchEvent(new Event('change'));
-                renderHistory();
-            } catch (error) {
-                console.error('Submission failed:', error);
-                alert('Gagal menyimpan data: ' + error.message);
+            } catch (err) {
+                alert('Gagal membaca file backup.');
+                console.error(err);
             }
-        });
-
-        renderHistory();
+        };
+        reader.readAsText(file);
+        input.value = '';
     };
 
-    // Customer Logic
-    const initCustomer = () => {
-        const searchBtn = document.getElementById('searchBtn');
-        const input = document.getElementById('batchIdInput');
-        const resultCard = document.getElementById('resultCard');
-        const errorMsg = document.getElementById('errorMsg');
-
-        if (!searchBtn) return;
-
-        const showResult = (data) => {
-            resultCard.style.display = 'block';
-            resultCard.classList.add('animate-fade-in');
-            errorMsg.style.display = 'none';
-
-            document.getElementById('res-species').textContent = data.species;
-            document.getElementById('res-origin').textContent = data.origin;
-
-            const resDateEl = document.getElementById('res-date');
-            if (data.catchDate) {
-                resDateEl.parentElement.style.display = 'block';
-                resDateEl.textContent = formatDate(data.catchDate);
-            } else {
-                resDateEl.parentElement.style.display = 'none';
-            }
-
-            document.getElementById('res-weight').textContent = data.weight + ' kg';
-            document.getElementById('res-method').textContent = data.method;
-            document.getElementById('res-id').textContent = data.id;
-
-            const importDateContainer = document.getElementById('res-import-date-container');
-            const importDateEl = document.getElementById('res-import-date');
-
-            const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
-                (data.importDate && data.importDate.length > 0);
-
-            // Reset animation
-            resultCard.classList.remove('animate-reveal');
-            void resultCard.offsetWidth; // Trigger reflow
-
-            if (isPremium) {
-                resultCard.classList.add('premium-card');
-                resultCard.classList.add('animate-reveal'); // Trigger entrance animation
-
-                document.querySelector('#resultCard h2').innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
-
-                // Play Sound
-                const audio = document.getElementById('premiumSound');
-                if (audio) {
-                    audio.volume = 0.5;
-                    audio.currentTime = 0;
-                    audio.play().catch(e => console.log("Audio autoplay blocked:", e));
-                }
-
-                // Override Origin for Premium
-                document.getElementById('res-origin-label').textContent = 'Variety / Species';
-                document.getElementById('res-origin').textContent = data.species;
-            } else {
-                resultCard.classList.remove('premium-card');
-                document.querySelector('#resultCard h2').innerHTML = '<i class="ri-checkbox-circle-fill" style="color: var(--success); margin-right: 8px;"></i> Data Terverifikasi';
-
-                // Revert Origin for Standard
-                document.getElementById('res-origin-label').textContent = 'Asal (Origin)';
-                document.getElementById('res-origin').textContent = data.origin;
-            }
-
-            if (data.importDate) {
-                importDateContainer.style.display = 'block';
-                importDateEl.textContent = data.importDate;
-            } else {
-                importDateContainer.style.display = 'none';
-            }
-        };
-
-        const showError = () => {
-            resultCard.style.display = 'none';
-            errorMsg.style.display = 'block';
-            errorMsg.textContent = "Data tidak ditemukan. Mohon periksa kembali ID Batch anda.";
-        };
-
-        searchBtn.addEventListener('click', () => {
-            const id = input.value.trim().toUpperCase();
-            if (!id) return;
-
-            // Simulate loading
-            searchBtn.textContent = 'Verifying...';
-
-            // 800ms delay for UX + async fetch
-            setTimeout(async () => {
-                const data = await DataStore.find(id);
-                searchBtn.textContent = 'Check Authenticity';
-
-                if (data) {
-                    showResult(data);
-                    // Play simplified success sound
-                    playSound('premiumSound');
-                } else {
-                    showError();
-                }
-            }, 800);
-        });
-
-        // Auto-Search if ID is in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const idFromUrl = urlParams.get('id');
-        if (idFromUrl) {
-            input.value = idFromUrl;
-            searchBtn.click();
+    window.deleteFish = async (id) => {
+        if (confirm('Apakah anda yakin ingin menghapus data ini?')) {
+            await DataStore.delete(id);
+            renderHistory(document.getElementById('searchInput').value);
         }
     };
 
-    // Shop Logic
-    window.loadProducts = async () => {
-        const grid = document.getElementById('productGrid');
-        if (!grid) return;
+    // Handle Method Change
+    const methodSelect = document.getElementById('method');
+    const importDateContainer = document.getElementById('importDateContainer');
 
+    const importDateInput = document.getElementById('importDate');
+    const hatchDateContainer = document.getElementById('hatchDateContainer');
+    const hatchDateInput = document.getElementById('catchDate');
+
+    if (methodSelect && importDateContainer && importDateInput && hatchDateContainer && hatchDateInput) {
+        methodSelect.addEventListener('change', () => {
+            if (methodSelect.value.toLowerCase().includes('import')) {
+                // Show Import, Hide Hatch
+                importDateContainer.style.display = 'block';
+                importDateInput.required = true;
+
+                hatchDateContainer.style.display = 'none';
+                hatchDateInput.required = false;
+                hatchDateInput.value = '';
+            } else {
+                // Hide Import, Show Hatch
+                importDateContainer.style.display = 'none';
+                importDateInput.required = false;
+                importDateInput.value = '';
+
+                hatchDateContainer.style.display = 'block';
+                hatchDateInput.required = true;
+            }
+        });
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = {
+            species: document.getElementById('species').value,
+            origin: document.getElementById('origin').value,
+            catchDate: document.getElementById('catchDate').value,
+            weight: document.getElementById('weight').value,
+            method: document.getElementById('method').value,
+            importDate: document.getElementById('importDate').value
+        };
+
+        const editId = document.getElementById('editId').value;
         try {
-            const response = await fetch('/api/products');
-            const json = await response.json();
+            if (editId) {
+                formData.id = editId;
+                await DataStore.save(formData);
+                alert('Data Berhasil Diupdate!');
 
-            if (json.data && json.data.length > 0) {
-                grid.innerHTML = json.data.map(product => `
+                // Reset state
+                document.getElementById('editId').value = '';
+                document.querySelector('button[type="submit"]').innerHTML = '<i class="ri-qr-code-line" style="margin-right: 8px;"></i> Generate ID & Simpan';
+            } else {
+                // Let the DataStore (and potentially server) handle ID if not provided, 
+                // but our logic above generates ID.
+                const result = await DataStore.save(formData);
+                alert(`Data Tersimpan!\nID Batch: ${result.id}`);
+            }
+
+            form.reset();
+            // Reset hiding logic
+            methodSelect.dispatchEvent(new Event('change'));
+            renderHistory();
+        } catch (error) {
+            console.error('Submission failed:', error);
+            alert('Gagal menyimpan data: ' + error.message);
+        }
+    });
+
+    renderHistory();
+};
+
+// Customer Logic
+const initCustomer = () => {
+    const searchBtn = document.getElementById('searchBtn');
+    const input = document.getElementById('batchIdInput');
+    const resultCard = document.getElementById('resultCard');
+    const errorMsg = document.getElementById('errorMsg');
+
+    if (!searchBtn) return;
+
+    const showResult = (data) => {
+        resultCard.style.display = 'block';
+        resultCard.classList.add('animate-fade-in');
+        errorMsg.style.display = 'none';
+
+        document.getElementById('res-species').textContent = data.species;
+        document.getElementById('res-origin').textContent = data.origin;
+
+        const resDateEl = document.getElementById('res-date');
+        if (data.catchDate) {
+            resDateEl.parentElement.style.display = 'block';
+            resDateEl.textContent = formatDate(data.catchDate);
+        } else {
+            resDateEl.parentElement.style.display = 'none';
+        }
+
+        document.getElementById('res-weight').textContent = data.weight + ' kg';
+        document.getElementById('res-method').textContent = data.method;
+        document.getElementById('res-id').textContent = data.id;
+
+        const importDateContainer = document.getElementById('res-import-date-container');
+        const importDateEl = document.getElementById('res-import-date');
+
+        const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
+            (data.importDate && data.importDate.length > 0);
+
+        // Reset animation
+        resultCard.classList.remove('animate-reveal');
+        void resultCard.offsetWidth; // Trigger reflow
+
+        if (isPremium) {
+            resultCard.classList.add('premium-card');
+            resultCard.classList.add('animate-reveal'); // Trigger entrance animation
+
+            document.querySelector('#resultCard h2').innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
+
+            // Play Sound
+            const audio = document.getElementById('premiumSound');
+            if (audio) {
+                audio.volume = 0.5;
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log("Audio autoplay blocked:", e));
+            }
+
+            // Override Origin for Premium
+            document.getElementById('res-origin-label').textContent = 'Variety / Species';
+            document.getElementById('res-origin').textContent = data.species;
+        } else {
+            resultCard.classList.remove('premium-card');
+            document.querySelector('#resultCard h2').innerHTML = '<i class="ri-checkbox-circle-fill" style="color: var(--success); margin-right: 8px;"></i> Data Terverifikasi';
+
+            // Revert Origin for Standard
+            document.getElementById('res-origin-label').textContent = 'Asal (Origin)';
+            document.getElementById('res-origin').textContent = data.origin;
+        }
+
+        if (data.importDate) {
+            importDateContainer.style.display = 'block';
+            importDateEl.textContent = data.importDate;
+        } else {
+            importDateContainer.style.display = 'none';
+        }
+    };
+
+    const showError = () => {
+        resultCard.style.display = 'none';
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = "Data tidak ditemukan. Mohon periksa kembali ID Batch anda.";
+    };
+
+    searchBtn.addEventListener('click', () => {
+        const id = input.value.trim().toUpperCase();
+        if (!id) return;
+
+        // Simulate loading
+        searchBtn.textContent = 'Verifying...';
+
+        // 800ms delay for UX + async fetch
+        setTimeout(async () => {
+            const data = await DataStore.find(id);
+            searchBtn.textContent = 'Check Authenticity';
+
+            if (data) {
+                showResult(data);
+                // Play simplified success sound
+                playSound('premiumSound');
+            } else {
+                showError();
+            }
+        }, 800);
+    });
+
+    // Auto-Search if ID is in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const idFromUrl = urlParams.get('id');
+    if (idFromUrl) {
+        input.value = idFromUrl;
+        searchBtn.click();
+    }
+};
+
+// Shop Logic
+window.loadProducts = async () => {
+    const grid = document.getElementById('productGrid');
+    if (!grid) return;
+
+    try {
+        const response = await fetch('/api/products');
+        const json = await response.json();
+
+        if (json.data && json.data.length > 0) {
+            grid.innerHTML = json.data.map(product => `
                 <div class="product-card animate-fade-in">
                     <img src="${product.image}" alt="${product.name}" class="product-image">
                     <div class="product-info">
@@ -722,42 +723,42 @@ const initAdmin = () => {
                     </div>
                 </div>
             `).join('');
-            } else {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: white;">No products found.</div>';
-            }
-
-        } catch (err) {
-            console.error("Error loading products:", err);
-            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: white;">Failed to load products. Enable backend to view.</div>';
-        }
-    };
-
-    window.showPaymentModal = (name, price) => {
-        const modal = document.getElementById('paymentModal');
-        if (modal) {
-            document.getElementById('paymentTotal').innerText = 'Rp ' + price.toLocaleString('id-ID');
-            document.getElementById('paymentItem').innerText = name;
-
-            // Dynamic QR (Simulation)
-            // In real app, this would be a static image of the shop's QRIS
-            const qrisUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Bayar ${price} ke Sndaily`;
-            const qrisImg = document.getElementById('qrisImage');
-            if (qrisImg) qrisImg.src = qrisUrl;
-
-            modal.style.display = 'flex';
-        }
-    };
-
-    // Deprecated addToCart, kept for compatibility if referenced elsewhere
-    window.addToCart = (id) => {
-        console.log("Add to cart clicked");
-    };
-
-    // Initialize based on page
-    document.addEventListener('DOMContentLoaded', () => {
-        if (window.location.pathname.includes('admin.html')) {
-            initAdmin();
         } else {
-            initCustomer();
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: white;">No products found.</div>';
         }
-    });
+
+    } catch (err) {
+        console.error("Error loading products:", err);
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: white;">Failed to load products. Enable backend to view.</div>';
+    }
+};
+
+window.showPaymentModal = (name, price) => {
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+        document.getElementById('paymentTotal').innerText = 'Rp ' + price.toLocaleString('id-ID');
+        document.getElementById('paymentItem').innerText = name;
+
+        // Dynamic QR (Simulation)
+        // In real app, this would be a static image of the shop's QRIS
+        const qrisUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Bayar ${price} ke Sndaily`;
+        const qrisImg = document.getElementById('qrisImage');
+        if (qrisImg) qrisImg.src = qrisUrl;
+
+        modal.style.display = 'flex';
+    }
+};
+
+// Deprecated addToCart, kept for compatibility if referenced elsewhere
+window.addToCart = (id) => {
+    console.log("Add to cart clicked");
+};
+
+// Initialize based on page
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.includes('admin.html')) {
+        initAdmin();
+    } else {
+        initCustomer();
+    }
+});
