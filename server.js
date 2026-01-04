@@ -47,6 +47,9 @@ async function query(text, params) {
             sqliteText = sqliteText.replace(/RETURNING\s+\*/gi, '');
             sqliteText = sqliteText.replace(/RETURNING\s+\w+/gi, ''); // Handle RETURNING id etc
 
+            console.log("SQL Input:", text);
+            console.log("SQLite Transformed:", sqliteText);
+
             if (text.trim().toUpperCase().startsWith('SELECT')) {
                 sqliteDb.all(sqliteText, params, (err, rows) => {
                     if (err) reject(err);
@@ -54,12 +57,18 @@ async function query(text, params) {
                 });
             } else if (text.trim().toUpperCase().startsWith('INSERT') || text.trim().toUpperCase().startsWith('UPDATE') || text.trim().toUpperCase().startsWith('DELETE')) {
                 sqliteDb.run(sqliteText, params, function (err) {
-                    if (err) reject(err);
+                    if (err) {
+                        console.error("SQLite Run Error:", err);
+                        reject(err);
+                    }
                     else resolve({ rows: [], rowCount: this.changes });
                 });
             } else {
                 sqliteDb.run(sqliteText, params, (err) => {
-                    if (err) reject(err);
+                    if (err) {
+                        console.error("SQLite Error:", err);
+                        reject(err);
+                    }
                     else resolve({ rows: [], rowCount: 0 });
                 });
             }
