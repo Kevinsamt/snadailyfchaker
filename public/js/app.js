@@ -193,7 +193,10 @@ const initAdmin = () => {
                 </div>
             </div>
         `).join('');
-        };
+        } catch (e) {
+            console.error("Render History Error:", e);
+            if (historyContainer) historyContainer.innerHTML = '<div style="color:red; padding:1rem;">Error Rendering Data: ' + e.message + '</div>';
+        }
 
         // Search Handler
         const searchInput = document.getElementById('searchInput');
