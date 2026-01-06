@@ -882,6 +882,7 @@ window.selectLocation = async (loc) => {
             body: JSON.stringify({ destination_id: loc.id, weight: 1000 }) // Default 1kg for fish
         });
         const services = await response.json();
+        console.log("Komerce Services Received:", services);
 
         if (!response.ok) {
             throw new Error(services.error || "Gagal menghitung ongkos kirim.");
@@ -899,12 +900,17 @@ window.selectLocation = async (loc) => {
                 card.style.alignItems = 'center';
                 card.style.border = '1px solid rgba(255,255,255,0.1)';
 
+                const courierName = (s.courier || 'Kurir').toUpperCase();
+                const serviceName = s.service || 'Reguler';
+                const etd = s.etd || '-';
+                const cost = s.cost || 0;
+
                 card.innerHTML = `
                     <div>
-                        <div style="font-weight:bold; color:white;">${s.courier.toUpperCase()} - ${s.service}</div>
-                        <div style="font-size:0.8rem; color:var(--text-muted);">Estimasi: ${s.etd} hari</div>
+                        <div style="font-weight:bold; color:white;">${courierName} - ${serviceName}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">Estimasi: ${etd} hari</div>
                     </div>
-                    <div style="color:var(--secondary); font-weight:bold;">Rp ${s.cost.toLocaleString('id-ID')}</div>
+                    <div style="color:var(--secondary); font-weight:bold;">Rp ${cost.toLocaleString('id-ID')}</div>
                 `;
 
                 card.onclick = () => {
