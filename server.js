@@ -134,10 +134,10 @@ app.post('/api/shipping/cost', apiLimiter, async (req, res) => {
                 'key': KOMERCE_API_COST // Fallback header
             },
             body: JSON.stringify({
-                origin: KOMERCE_ORIGIN_ID,
-                destination: destination_id,
-                weight: weight || 1000,
-                courier: 'jne,tiki'
+                Origin: parseInt(KOMERCE_ORIGIN_ID),
+                Destination: parseInt(destination_id),
+                Weight: parseInt(weight || 1000),
+                Courier: 'jne,tiki'
             })
         });
 
