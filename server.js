@@ -102,9 +102,9 @@ app.get('/api/shipping/search', apiLimiter, async (req, res) => {
 
         if (!response.ok) {
             console.error("Komerce Search API Error Details:", JSON.stringify(data, null, 2));
-            const msg = data.message || "Invalid Response (No message field)";
+            const msg = (data.meta && data.meta.message) || data.message || "Invalid Response";
             return res.status(response.status).json({
-                error: `Komerce Search Error [${response.status}]: ${msg}. Raw: ${JSON.stringify(data)}`,
+                error: `Komerce Search Error [${response.status}]: ${msg}`,
                 details: data
             });
         }
@@ -144,8 +144,9 @@ app.post('/api/shipping/cost', apiLimiter, async (req, res) => {
         const data = await response.json();
         if (!response.ok) {
             console.error("Komerce Cost API Error Details:", JSON.stringify(data, null, 2));
+            const msg = (data.meta && data.meta.message) || data.message || "Gagal menghitung ongkir";
             return res.status(response.status).json({
-                error: "Komerce API Cost Error: " + (data.message || "Gagal menghitung ongkir"),
+                error: `Komerce Cost Error [${response.status}]: ${msg}`,
                 details: data
             });
         }
