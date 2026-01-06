@@ -71,7 +71,7 @@ app.use('/api/', apiLimiter);
 // Komerce Configuration
 const KOMERCE_API_COST = process.env.KOMERCE_API_KEY_COST;
 const KOMERCE_API_DELIVERY = process.env.KOMERCE_API_KEY_DELIVERY;
-const KOMERCE_ORIGIN_ID = process.env.KOMERCE_ORIGIN_ID || '256'; // Medan id
+const KOMERCE_ORIGIN_ID = process.env.KOMERCE_ORIGIN_ID || '1553'; // Kutalimbaru, Deli Serdang
 
 console.log("--- Shipping System Init ---");
 console.log("KOMERCE_API_KEY_COST:", KOMERCE_API_COST ? "LOADED (Starts with " + KOMERCE_API_COST.substring(0, 4) + "...)" : "MISSING");
@@ -99,7 +99,6 @@ app.get('/api/shipping/search', apiLimiter, async (req, res) => {
 
         const data = await response.json();
         console.log("Komerce Search Response Status:", response.status);
-        console.log("Komerce Search Data:", JSON.stringify(data, null, 2));
 
         if (!response.ok) {
             console.error("Komerce Search API Error Details:", JSON.stringify(data, null, 2));
@@ -131,7 +130,7 @@ app.post('/api/shipping/cost', apiLimiter, async (req, res) => {
         const params = new URLSearchParams();
         params.append('origin', KOMERCE_ORIGIN_ID);
         params.append('destination', destination_id);
-        params.append('weight', weight || 1000);
+        params.append('weight', weight || 500); // 500g default for 1 fish pack
         params.append('courier', 'jne');
 
         const response = await fetch('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', {
