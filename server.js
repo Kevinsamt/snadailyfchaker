@@ -131,7 +131,7 @@ app.post('/api/shipping/cost', apiLimiter, async (req, res) => {
         params.append('origin', KOMERCE_ORIGIN_ID);
         params.append('destination', destination_id);
         params.append('weight', weight || 1000);
-        params.append('courier', 'jne,tiki');
+        params.append('courier', 'jne');
 
         const response = await fetch('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', {
             method: 'POST',
