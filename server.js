@@ -73,6 +73,12 @@ const KOMERCE_API_COST = process.env.KOMERCE_API_KEY_COST;
 const KOMERCE_API_DELIVERY = process.env.KOMERCE_API_KEY_DELIVERY;
 const KOMERCE_ORIGIN_ID = process.env.KOMERCE_ORIGIN_ID || '256'; // Medan id
 
+console.log("--- Shipping System Init ---");
+console.log("KOMERCE_API_KEY_COST:", KOMERCE_API_COST ? "LOADED (Starts with " + KOMERCE_API_COST.substring(0, 4) + "...)" : "MISSING");
+console.log("KOMERCE_API_KEY_DELIVERY:", KOMERCE_API_DELIVERY ? "LOADED" : "MISSING");
+console.log("KOMERCE_ORIGIN_ID:", KOMERCE_ORIGIN_ID);
+console.log("----------------------------");
+
 // Shipping: Search Destination (City/Subdistrict)
 app.get('/api/shipping/search', apiLimiter, async (req, res) => {
     const query = req.query.q;
@@ -85,21 +91,27 @@ app.get('/api/shipping/search', apiLimiter, async (req, res) => {
     try {
         console.log("Komerce Search Request:", query);
         const response = await fetch(`https://rajaongkir.komerce.id/api/v1/destination/domestic-destination?search=${encodeURIComponent(query)}`, {
-            headers: { 'x-api-key': KOMERCE_API_COST }
+            headers: {
+                'x-api-key': KOMERCE_API_COST,
+                'key': KOMERCE_API_COST // Added for compatibility
+            }
         });
 
         const data = await response.json();
         console.log("Komerce Search Response Status:", response.status);
 
         if (!response.ok) {
-            console.error("Komerce API Error:", data);
-            return res.status(response.status).json({ error: data.message || "Komerce API Error" });
+            console.error("Komerce Search API Error Details:", JSON.stringify(data, null, 2));
+            return res.status(response.status).json({
+                error: "Komerce API Search Error: " + (data.message || "Invalid Response"),
+                details: data
+            });
         }
 
         res.json(data.data || []);
     } catch (err) {
         console.error("Komerce Search System Error:", err);
-        res.status(500).json({ error: "Sistem pengiriman sedang sibuk. Coba lagi." });
+        res.status(500).json({ error: "Sistem pengiriman sedang sibuk: " + err.message });
     }
 });
 
@@ -130,8 +142,11 @@ app.post('/api/shipping/cost', apiLimiter, async (req, res) => {
 
         const data = await response.json();
         if (!response.ok) {
-            console.error("Komerce Cost API Error:", data);
-            return res.status(response.status).json({ error: data.message || "Gagal menghitung ongkir kerna API error" });
+            console.error("Komerce Cost API Error Details:", JSON.stringify(data, null, 2));
+            return res.status(response.status).json({
+                error: "Komerce API Cost Error: " + (data.message || "Gagal menghitung ongkir"),
+                details: data
+            });
         }
         res.json(data.data || []);
     } catch (err) {
@@ -403,6 +418,10 @@ app.get('/api/products', apiLimiter, async (req, res) => {
 app.post('/api/payment/token', apiLimiter, async (req, res) => {
     try {
         const { productName, amount, customer } = req.body;
+
+        if (!process.env.MIDTRANS_SERVER_KEY) {
+            return res.status(500).json({ error: "MIDTRANS_SERVER_KEY belum diatur di environment variables!" });
+        }
 
         // Basic unique order ID
         const orderId = `ORDER-${Date.now()}`;
