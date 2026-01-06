@@ -883,6 +883,10 @@ window.selectLocation = async (loc) => {
         });
         const services = await response.json();
 
+        if (!response.ok) {
+            throw new Error(services.error || "Gagal menghitung ongkos kirim.");
+        }
+
         optionsDiv.innerHTML = '';
         if (services.length > 0) {
             services.forEach(s => {
@@ -920,7 +924,8 @@ window.selectLocation = async (loc) => {
             optionsDiv.innerHTML = '<div style="color:red; padding:10px;">Maaf, tidak ada layanan pengiriman tersedia.</div>';
         }
     } catch (err) {
-        optionsDiv.innerHTML = '<div style="color:red; padding:10px;">Gagal mengambil data ongkir.</div>';
+        console.error("Shipping Cost Error:", err);
+        optionsDiv.innerHTML = `<div style="color:#ff5e5e; padding:10px;">Gagal mengambil data ongkir: ${err.message}</div>`;
     }
 };
 
