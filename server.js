@@ -126,19 +126,21 @@ app.post('/api/shipping/cost', apiLimiter, async (req, res) => {
 
     try {
         console.log("Komerce Cost Request for Origin:", KOMERCE_ORIGIN_ID, "Dest:", destination_id);
+
+        const params = new URLSearchParams();
+        params.append('origin', KOMERCE_ORIGIN_ID);
+        params.append('destination', destination_id);
+        params.append('weight', weight || 1000);
+        params.append('courier', 'jne,tiki');
+
         const response = await fetch('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'x-api-key': KOMERCE_API_COST,
-                'key': KOMERCE_API_COST // Fallback header
+                'key': KOMERCE_API_COST
             },
-            body: JSON.stringify({
-                Origin: parseInt(KOMERCE_ORIGIN_ID),
-                Destination: parseInt(destination_id),
-                Weight: parseInt(weight || 1000),
-                Courier: 'jne,tiki'
-            })
+            body: params
         });
 
         const data = await response.json();
