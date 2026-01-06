@@ -102,8 +102,9 @@ app.get('/api/shipping/search', apiLimiter, async (req, res) => {
 
         if (!response.ok) {
             console.error("Komerce Search API Error Details:", JSON.stringify(data, null, 2));
+            const msg = data.message || "Invalid Response (No message field)";
             return res.status(response.status).json({
-                error: "Komerce API Search Error: " + (data.message || "Invalid Response"),
+                error: `Komerce Search Error [${response.status}]: ${msg}. Raw: ${JSON.stringify(data)}`,
                 details: data
             });
         }
