@@ -99,6 +99,7 @@ app.get('/api/shipping/search', apiLimiter, async (req, res) => {
 
         const data = await response.json();
         console.log("Komerce Search Response Status:", response.status);
+        console.log("Komerce Search Data:", JSON.stringify(data, null, 2));
 
         if (!response.ok) {
             console.error("Komerce Search API Error Details:", JSON.stringify(data, null, 2));
