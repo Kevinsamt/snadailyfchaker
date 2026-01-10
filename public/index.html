@@ -294,6 +294,46 @@
                 transform: rotate(5deg);
             }
         }
+
+        /* Mini Fish for Badge */
+        .mini-fish {
+            width: 24px;
+            height: 14px;
+            animation: mini-swim 2s infinite ease-in-out alternate;
+        }
+
+        @keyframes mini-swim {
+            from {
+                transform: translateX(-3px) rotate(-10deg);
+            }
+
+            to {
+                transform: translateX(3px) rotate(10deg);
+            }
+        }
+
+        /* Premium Shine */
+        .premium-shine {
+            background: linear-gradient(90deg, #fff, var(--secondary), #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .result-card-centered {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center !important;
+        }
     </style>
 </head>
 
@@ -367,12 +407,24 @@
         </div>
 
         <!-- Result Section (Initially Hidden) -->
-        <div id="resultCard" class="result-card" style="display: none; margin-top: 3rem; text-align: left;">
+        <div id="resultCard" class="result-card result-card-centered" style="display: none; margin-top: 3rem;">
             <div class="verified-badge"
-                style="background: rgba(0,212,255,0.1); padding: 0.8rem 1.2rem; border-radius: 12px; border: 1px solid var(--primary); margin-bottom: 2rem; display: inline-flex; align-items: center; gap: 10px; width: fit-content; max-width: 100%;">
-                <i class="ri-checkbox-circle-fill" style="color: var(--secondary); font-size: 1.4rem;"></i>
-                <span style="font-weight: bold; font-size: 0.85rem; letter-spacing: 1px; white-space: nowrap;">VERIFIED
+                style="background: rgba(0,212,255,0.1); padding: 0.8rem 1.5rem; border-radius: 50px; border: 1px solid var(--primary); margin-bottom: 2rem; display: inline-flex; align-items: center; gap: 12px; width: fit-content; max-width: 100%; position: relative; overflow: hidden;">
+
+                <!-- Animated Mini Fish -->
+                <svg class="mini-fish" viewBox="0 0 100 60">
+                    <path d="M 20 30 Q 20 10 50 10 Q 80 10 90 30 Q 80 50 50 50 Q 20 50 20 30" fill="var(--secondary)" />
+                    <path d="M 22 30 Q 5 10 5 30 Q 5 50 22 30" fill="var(--secondary)" />
+                </svg>
+
+                <span
+                    style="font-weight: 800; font-size: 0.85rem; letter-spacing: 2px; white-space: nowrap; color: white;">VERIFIED
                     ORIGINAL</span>
+
+                <svg class="mini-fish" viewBox="0 0 100 60" style="transform: scaleX(-1);">
+                    <path d="M 20 30 Q 20 10 50 10 Q 80 10 90 30 Q 80 50 50 50 Q 20 50 20 30" fill="var(--secondary)" />
+                    <path d="M 22 30 Q 5 10 5 30 Q 5 50 22 30" fill="var(--secondary)" />
+                </svg>
             </div>
 
             <h2 id="res-species" style="font-size: 2.2rem; margin-bottom: 0.5rem; color: #fff;">Species Name</h2>

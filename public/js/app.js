@@ -679,7 +679,10 @@ const initCustomer = () => {
             resultCard.classList.add('animate-reveal'); // Trigger entrance animation
 
             const h2 = document.querySelector('#resultCard h2');
-            if (h2) h2.innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
+            if (h2) {
+                h2.innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
+                h2.classList.add('premium-shine');
+            }
 
             // Play Sound
             playSound('premiumSound');
@@ -691,7 +694,10 @@ const initCustomer = () => {
         } else {
             resultCard.classList.remove('premium-card');
             const h2 = document.querySelector('#resultCard h2');
-            if (h2) h2.innerHTML = '<i class="ri-checkbox-circle-fill" style="color: var(--success); margin-right: 8px;"></i> Data Terverifikasi';
+            if (h2) {
+                h2.innerHTML = '<i class="ri-checkbox-circle-fill" style="color: var(--success); margin-right: 8px;"></i> Data Terverifikasi';
+                h2.classList.remove('premium-shine');
+            }
 
             // Revert Origin for Standard
             const originLabel = document.getElementById('res-origin-label');
