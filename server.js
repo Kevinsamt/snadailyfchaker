@@ -483,12 +483,16 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 Catch-all for API (since Vercel handles frontend 404s via vercel.json)
+// 404 Catch-all
 app.get('*', (req, res) => {
-    res.status(404).json({
-        error: "API endpoint not found",
-        path: req.path
-    });
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+            error: "API endpoint not found",
+            path: req.path
+        });
+    }
+    // Serve aquarium for all other unmatched routes
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 // Export for Vercel
