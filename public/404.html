@@ -74,85 +74,68 @@
             }
         }
 
-        /* Fish Animation */
-        .fish {
+        /* Realistic SVG Fish Animation */
+        .fish-container {
             position: absolute;
-            width: 100px;
-            height: 60px;
             z-index: 2;
+            width: 150px;
+            animation: swim 20s infinite linear;
+            pointer-events: none;
         }
 
-        .fish-body {
-            position: relative;
-            width: 80px;
-            height: 40px;
-            background: var(--accent);
-            border-radius: 50%;
-            top: 10px;
+        .fish {
+            width: 120px;
+            transform-origin: center;
         }
 
-        .fish-tail {
-            position: absolute;
-            right: -10px;
-            top: 10px;
-            width: 0;
-            height: 0;
-            border-top: 20px solid transparent;
-            border-bottom: 20px solid transparent;
-            border-left: 30px solid var(--accent);
-            animation: wag 0.5s infinite ease-in-out alternate;
+        /* Wavy motion for the whole fish */
+        .fish-body-group {
+            animation: wiggle 1s infinite ease-in-out alternate;
         }
 
-        .fish-eye {
-            position: absolute;
-            left: 15px;
-            top: 12px;
-            width: 8px;
-            height: 8px;
-            background: black;
-            border-radius: 50%;
-            border: 2px solid white;
+        .tail {
+            animation: tail-wag 0.5s infinite ease-in-out alternate;
+            transform-origin: 40px 30px;
         }
 
-        @keyframes wag {
+        .fin {
+            animation: fin-flap 1.5s infinite ease-in-out alternate;
+            transform-origin: 50px 30px;
+        }
+
+        @keyframes wiggle {
             from {
-                transform: rotate(-10deg);
+                transform: skewX(-5deg) rotate(-2deg);
             }
 
             to {
-                transform: rotate(10deg);
+                transform: skewX(5deg) rotate(2deg);
             }
         }
 
-        /* Movement */
-        .fish-container {
-            position: absolute;
-            width: 100%;
-            animation: swim 20s infinite linear;
+        @keyframes tail-wag {
+            from {
+                transform: rotate(-15deg);
+            }
+
+            to {
+                transform: rotate(15deg);
+            }
         }
 
-        .fish-1 {
-            top: 20%;
-            animation-duration: 25s;
-        }
+        @keyframes fin-flap {
+            from {
+                transform: rotateY(0deg) scaleX(1);
+            }
 
-        .fish-2 {
-            top: 50%;
-            animation-duration: 18s;
-            animation-delay: -5s;
-            transform: scale(0.7);
-        }
-
-        .fish-3 {
-            top: 80%;
-            animation-duration: 30s;
-            animation-delay: -10s;
-            transform: scale(1.2);
+            to {
+                transform: rotateY(40deg) scaleX(0.8);
+            }
         }
 
         @keyframes swim {
             0% {
-                left: -150px;
+                left: -200px;
                 transform: rotateY(0deg);
             }
 
@@ -170,9 +153,28 @@
             }
 
             100% {
-                left: -150px;
+                left: -200px;
                 transform: rotateY(0deg);
             }
+        }
+
+        .fish-1 {
+            top: 15%;
+            animation-duration: 25s;
+        }
+
+        .fish-2 {
+            top: 45%;
+            animation-duration: 18s;
+            animation-delay: -5s;
+            transform: scale(0.7);
+        }
+
+        .fish-3 {
+            top: 75%;
+            animation-duration: 35s;
+            animation-delay: -10s;
+            transform: scale(1.3);
         }
 
         /* Content Overlay */
@@ -180,13 +182,14 @@
             position: relative;
             z-index: 10;
             text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
             padding: 3rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-width: 90%;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            max-width: 95%;
+            width: 500px;
             animation: fadeIn 1s ease-out;
         }
 
@@ -204,86 +207,99 @@
 
         h1 {
             font-size: 8rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             background: linear-gradient(45deg, #fff, var(--water-light));
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            font-weight: 800;
         }
 
         h2 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 1.5rem;
-            font-weight: 300;
+            font-weight: 400;
+            color: #94d2bd;
         }
 
         p {
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
             opacity: 0.8;
             line-height: 1.6;
+            font-size: 1.1rem;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             background: var(--accent);
             color: white;
             text-decoration: none;
-            padding: 1rem 2rem;
+            padding: 1.2rem 2.5rem;
             border-radius: 50px;
             font-weight: bold;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 4px 15px rgba(238, 155, 0, 0.4);
         }
 
         .btn:hover {
-            transform: scale(1.05);
+            transform: scale(1.05) translateY(-3px);
             background: #ca8a04;
-            box-shadow: 0 6px 20px rgba(238, 155, 0, 0.6);
+            box-shadow: 0 10px 25px rgba(238, 155, 0, 0.6);
         }
 
         /* Plants */
         .plant {
             position: absolute;
-            bottom: -10px;
-            width: 40px;
-            height: 150px;
-            background: #1b4332;
+            bottom: -5px;
+            width: 50px;
+            height: 180px;
+            background: linear-gradient(to top, #081c15, #1b4332);
             border-radius: 50% 50% 0 0;
             transform-origin: bottom;
-            animation: sway 4s infinite ease-in-out alternate;
+            animation: sway 5s infinite ease-in-out alternate;
             z-index: 3;
+            opacity: 0.8;
         }
 
         @keyframes sway {
             from {
-                transform: rotate(-5deg);
+                transform: rotate(-8deg) scaleY(0.95);
             }
 
             to {
-                transform: rotate(5deg);
+                transform: rotate(8deg) scaleY(1.05);
             }
         }
 
         .plant-1 {
-            left: 10%;
-            height: 180px;
+            left: 8%;
+            height: 220px;
             animation-delay: 0s;
+            width: 60px;
         }
 
         .plant-2 {
-            left: 25%;
-            height: 120px;
-            animation-delay: -1s;
-            opacity: 0.7;
+            left: 22%;
+            height: 140px;
+            animation-delay: -1.5s;
+            opacity: 0.6;
         }
 
         .plant-3 {
-            right: 15%;
-            height: 200px;
-            animation-delay: -2s;
+            right: 12%;
+            height: 250px;
+            animation-delay: -3s;
+            width: 70px;
+        }
+
+        .plant-4 {
+            right: 30%;
+            height: 100px;
+            animation-delay: -0.5s;
+            opacity: 0.4;
         }
     </style>
 </head>
@@ -292,36 +308,60 @@
     <div class="aquarium">
         <div class="bubbles" id="bubbleContainer"></div>
 
+        <!-- Realistic SVG Fish 1 -->
         <div class="fish-container fish-1">
-            <div class="fish">
-                <div class="fish-body">
-                    <div class="fish-eye"></div>
-                    <div class="fish-tail"></div>
-                </div>
-            </div>
+            <svg class="fish" viewBox="0 0 100 60">
+                <g class="fish-body-group">
+                    <!-- Top Fin -->
+                    <path d="M 40 20 Q 50 5 65 20" fill="#ee9b00" opacity="0.8" />
+                    <!-- Main Body -->
+                    <path d="M 20 30 Q 20 10 50 10 Q 80 10 90 30 Q 80 50 50 50 Q 20 50 20 30" fill="#ee9b00" />
+                    <!-- Detail/Scales -->
+                    <path d="M 35 25 Q 40 30 35 35 M 45 20 Q 50 30 45 40 M 55 25 Q 60 30 55 35"
+                        stroke="rgba(255,255,255,0.2)" fill="none" stroke-width="1" />
+                    <!-- Side Fin -->
+                    <path class="fin" d="M 45 35 Q 35 45 45 50" fill="#ca8a04" />
+                    <!-- Eye -->
+                    <circle cx="75" cy="25" r="4" fill="black" />
+                    <circle cx="76.5" cy="23.5" r="1.5" fill="white" />
+                    <!-- Tail -->
+                    <path class="tail" d="M 22 30 Q 5 10 5 30 Q 5 50 22 30" fill="#ee9b00" />
+                </g>
+            </svg>
         </div>
 
+        <!-- Realistic SVG Fish 2 (Smaller/Blue) -->
         <div class="fish-container fish-2">
-            <div class="fish" style="filter: hue-rotate(90deg);">
-                <div class="fish-body">
-                    <div class="fish-eye"></div>
-                    <div class="fish-tail"></div>
-                </div>
-            </div>
+            <svg class="fish" viewBox="0 0 100 60" style="filter: hue-rotate(180deg);">
+                <g class="fish-body-group">
+                    <path d="M 40 20 Q 50 5 65 20" fill="#ee9b00" opacity="0.8" />
+                    <path d="M 20 30 Q 20 10 50 10 Q 80 10 90 30 Q 80 50 50 50 Q 20 50 20 30" fill="#ee9b00" />
+                    <path class="fin" d="M 45 35 Q 35 45 45 50" fill="#ca8a04" />
+                    <circle cx="75" cy="25" r="4" fill="black" />
+                    <circle cx="76.5" cy="23.5" r="1.5" fill="white" />
+                    <path class="tail" d="M 22 30 Q 5 10 5 30 Q 5 50 22 30" fill="#ee9b00" />
+                </g>
+            </svg>
         </div>
 
+        <!-- Realistic SVG Fish 3 (Gold) -->
         <div class="fish-container fish-3">
-            <div class="fish" style="filter: hue-rotate(240deg);">
-                <div class="fish-body">
-                    <div class="fish-eye"></div>
-                    <div class="fish-tail"></div>
-                </div>
-            </div>
+            <svg class="fish" viewBox="0 0 100 60" style="filter: saturate(1.5) brightness(1.2);">
+                <g class="fish-body-group">
+                    <path d="M 40 20 Q 50 5 65 20" fill="#ffb703" opacity="0.8" />
+                    <path d="M 20 30 Q 20 10 50 10 Q 80 10 90 30 Q 80 50 50 50 Q 20 50 20 30" fill="#fb8500" />
+                    <path class="fin" d="M 45 35 Q 35 45 45 50" fill="#ffb703" />
+                    <circle cx="75" cy="25" r="4" fill="black" />
+                    <circle cx="76.5" cy="23.5" r="1.5" fill="white" />
+                    <path class="tail" d="M 22 30 Q 5 10 5 30 Q 5 50 22 30" fill="#fb8500" />
+                </g>
+            </svg>
         </div>
 
         <div class="plant plant-1"></div>
         <div class="plant plant-2"></div>
         <div class="plant plant-3"></div>
+        <div class="plant plant-4"></div>
     </div>
 
     <div class="content">
@@ -336,15 +376,15 @@
 
     <script>
         const container = document.getElementById('bubbleContainer');
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 25; i++) {
             const bubble = document.createElement('div');
             bubble.classList.add('bubble');
-            const size = Math.random() * 15 + 5 + 'px';
+            const size = Math.random() * 12 + 4 + 'px';
             bubble.style.width = size;
             bubble.style.height = size;
             bubble.style.left = Math.random() * 100 + '%';
-            bubble.style.animationDelay = Math.random() * 10 + 's';
-            bubble.style.animationDuration = Math.random() * 5 + 7 + 's';
+            bubble.style.animationDelay = Math.random() * 8 + 's';
+            bubble.style.animationDuration = Math.random() * 4 + 6 + 's';
             container.appendChild(bubble);
         }
     </script>
