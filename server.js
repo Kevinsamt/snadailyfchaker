@@ -283,7 +283,11 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-initDb();
+if (connectionString) {
+    initDb().catch(err => console.error("Async initDb failed:", err));
+} else {
+    console.warn("No DATABASE_URL found. Database features will be disabled.");
+}
 
 // Health Check
 app.get('/api/status', async (req, res) => {
