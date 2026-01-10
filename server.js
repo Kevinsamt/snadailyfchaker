@@ -479,6 +479,11 @@ app.use((err, req, res, next) => {
     });
 });
 
+// 404 Catch-all
+app.get('*', (req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
 // Export for Vercel
 module.exports = app;
 
