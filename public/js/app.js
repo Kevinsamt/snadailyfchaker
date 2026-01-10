@@ -646,16 +646,23 @@ const initCustomer = () => {
         document.getElementById('res-origin').textContent = data.origin;
 
         const resDateEl = document.getElementById('res-date');
-        if (data.catchDate) {
-            resDateEl.parentElement.style.display = 'block';
-            resDateEl.textContent = formatDate(data.catchDate);
-        } else {
-            resDateEl.parentElement.style.display = 'none';
+        if (resDateEl) {
+            if (data.catchDate) {
+                if (resDateEl.parentElement) resDateEl.parentElement.style.display = 'block';
+                resDateEl.textContent = formatDate(data.catchDate);
+            } else {
+                if (resDateEl.parentElement) resDateEl.parentElement.style.display = 'none';
+            }
         }
 
-        document.getElementById('res-weight').textContent = data.weight + ' kg';
-        document.getElementById('res-method').textContent = data.method;
-        document.getElementById('res-id').textContent = data.id;
+        const resWeightEl = document.getElementById('res-weight');
+        if (resWeightEl) resWeightEl.textContent = data.weight + ' kg';
+
+        const resMethodEl = document.getElementById('res-method');
+        if (resMethodEl) resMethodEl.textContent = data.method;
+
+        const resIdEl = document.getElementById('res-id');
+        if (resIdEl) resIdEl.textContent = data.id;
 
         const importDateContainer = document.getElementById('res-import-date-container');
         const importDateEl = document.getElementById('res-import-date');
@@ -671,27 +678,31 @@ const initCustomer = () => {
             resultCard.classList.add('premium-card');
             resultCard.classList.add('animate-reveal'); // Trigger entrance animation
 
-            document.querySelector('#resultCard h2').innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
+            const h2 = document.querySelector('#resultCard h2');
+            if (h2) h2.innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
 
             // Play Sound
             playSound('premiumSound');
 
             // Override Origin for Premium
-            document.getElementById('res-origin-label').textContent = 'Variety / Species';
-            document.getElementById('res-origin').textContent = data.species;
+            const originLabel = document.getElementById('res-origin-label');
+            if (originLabel) originLabel.textContent = 'Variety / Species';
+            if (document.getElementById('res-origin')) document.getElementById('res-origin').textContent = data.species;
         } else {
             resultCard.classList.remove('premium-card');
-            document.querySelector('#resultCard h2').innerHTML = '<i class="ri-checkbox-circle-fill" style="color: var(--success); margin-right: 8px;"></i> Data Terverifikasi';
+            const h2 = document.querySelector('#resultCard h2');
+            if (h2) h2.innerHTML = '<i class="ri-checkbox-circle-fill" style="color: var(--success); margin-right: 8px;"></i> Data Terverifikasi';
 
             // Revert Origin for Standard
-            document.getElementById('res-origin-label').textContent = 'Asal (Origin)';
-            document.getElementById('res-origin').textContent = data.origin;
+            const originLabel = document.getElementById('res-origin-label');
+            if (originLabel) originLabel.textContent = 'Asal (Origin)';
+            if (document.getElementById('res-origin')) document.getElementById('res-origin').textContent = data.origin;
         }
 
-        if (data.importDate) {
-            importDateContainer.style.display = 'block';
+        if (data.importDate && importDateEl) {
+            if (importDateContainer) importDateContainer.style.display = 'block';
             importDateEl.textContent = data.importDate;
-        } else {
+        } else if (importDateContainer) {
             importDateContainer.style.display = 'none';
         }
     };
