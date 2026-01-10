@@ -1,14 +1,18 @@
 {
     "version": 2,
     "cleanUrls": true,
-    "rewrites": [
+    "routes": [
         {
-            "source": "/api/(.*)",
-            "destination": "/server.js"
+            "src": "/api/(.*)",
+            "dest": "/server.js"
         },
         {
-            "source": "/(.*)",
-            "destination": "/404.html"
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "status": 404,
+            "dest": "/404.html"
         }
     ]
 }

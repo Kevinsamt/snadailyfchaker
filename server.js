@@ -479,9 +479,12 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 Catch-all
+// 404 Catch-all for API (since Vercel handles frontend 404s via vercel.json)
 app.get('*', (req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+    res.status(404).json({
+        error: "API endpoint not found",
+        path: req.path
+    });
 });
 
 // Export for Vercel
