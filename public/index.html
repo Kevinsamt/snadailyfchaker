@@ -124,82 +124,101 @@
             }
         }
 
-        /* Realistic Fish */
+        /* Realistic Fish - Ultra Fluid Upgrade */
         .fish-container {
             position: absolute;
             z-index: 2;
             width: 150px;
-            animation: swim 20s infinite linear;
+            animation: swim 20s infinite linear, buoyancy 4s infinite ease-in-out;
             transition: transform 0.2s ease-out;
-            /* For parallax */
+            transform-style: preserve-3d;
+        }
+
+        @keyframes buoyancy {
+
+            0%,
+            100% {
+                margin-top: 0;
+            }
+
+            50% {
+                margin-top: -15px;
+            }
         }
 
         @keyframes swim {
             0% {
                 left: -200px;
-                transform: rotateY(0deg);
+                transform: rotateY(0deg) rotateZ(0deg);
             }
 
             49% {
-                transform: rotateY(0deg);
+                transform: rotateY(0deg) rotateZ(0deg);
             }
 
             50% {
                 left: 100%;
-                transform: rotateY(180deg);
+                transform: rotateY(180deg) rotateZ(0deg);
             }
 
             99% {
-                transform: rotateY(180deg);
+                transform: rotateY(180deg) rotateZ(0deg);
             }
 
             100% {
                 left: -200px;
-                transform: rotateY(0deg);
+                transform: rotateY(0deg) rotateZ(0deg);
             }
         }
 
         .fish-body-group {
-            animation: wiggle 1s infinite ease-in-out alternate;
+            animation: body-wave 2s infinite ease-in-out;
+            transform-origin: 70% 50%;
+        }
+
+        @keyframes body-wave {
+
+            0%,
+            100% {
+                transform: rotateZ(-2deg) skewX(-2deg);
+            }
+
+            50% {
+                transform: rotateZ(2deg) skewX(2deg);
+            }
         }
 
         .tail {
-            animation: tail-wag 0.5s infinite ease-in-out alternate;
-            transform-origin: 40px 30px;
+            animation: tail-fluid 0.8s infinite ease-in-out;
+            transform-origin: 35px 30px;
+        }
+
+        @keyframes tail-fluid {
+
+            0%,
+            100% {
+                transform: rotate(-18deg) scaleX(0.9);
+            }
+
+            50% {
+                transform: rotate(18deg) scaleX(1.1);
+            }
         }
 
         .fin {
-            animation: fin-flap 1.5s infinite ease-in-out alternate;
-            transform-origin: 50px 30px;
+            animation: fin-fluid 2s infinite ease-in-out;
+            transform-origin: 50% 50%;
         }
 
-        @keyframes wiggle {
-            from {
-                transform: skewX(-5deg);
+        @keyframes fin-fluid {
+
+            0%,
+            100% {
+                transform: rotateY(0) scaleX(1);
             }
 
-            to {
-                transform: skewX(5deg);
-            }
-        }
-
-        @keyframes tail-wag {
-            from {
-                transform: rotate(-15deg);
-            }
-
-            to {
-                transform: rotate(15deg);
-            }
-        }
-
-        @keyframes fin-flap {
-            from {
-                transform: rotateY(0deg);
-            }
-
-            to {
-                transform: rotateY(40deg);
+            50% {
+                transform: rotateY(45deg) scaleX(0.7);
             }
         }
 
@@ -218,7 +237,6 @@
             text-align: center;
             animation: cardAppear 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transition: transform 0.1s ease-out;
-            /* For parallax */
         }
 
         @keyframes cardAppear {
