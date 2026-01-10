@@ -237,6 +237,70 @@
             text-align: center;
             animation: cardAppear 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transition: transform 0.1s ease-out;
+            /* For parallax */
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0;
+            }
+
+            .hero-card {
+                padding: 3rem 1.5rem;
+                width: 95%;
+                border-radius: 30px;
+            }
+
+            h1 {
+                font-size: 2.5rem !important;
+            }
+
+            p {
+                font-size: 1rem !important;
+            }
+
+            .search-input {
+                padding: 1rem 1.5rem !important;
+                font-size: 1rem !important;
+            }
+
+            .check-btn {
+                padding: 1rem !important;
+                width: 100% !important;
+                border-radius: 15px !important;
+            }
+
+            .fish-container {
+                width: 100px !important;
+            }
+
+            .verified-badge {
+                padding: 0.6rem 1.2rem !important;
+                font-size: 0.7rem !important;
+            }
+
+            .premium-card {
+                padding: 2.5rem 1.5rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem !important;
+            }
+
+            .hero-card {
+                padding: 2.5rem 1.25rem;
+            }
+
+            .brand-logo {
+                width: 80px !important;
+            }
+
+            .god-rays {
+                opacity: 0.4;
+            }
         }
 
         @keyframes cardAppear {
