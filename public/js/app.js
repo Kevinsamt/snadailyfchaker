@@ -979,21 +979,33 @@ window.proceedToPayment = async () => {
                 onSuccess: function (result) {
                     alert("Pembayaran Berhasil! Pesanan akan segera diproses.");
                     document.getElementById('checkoutModal').style.display = 'none';
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 },
                 onPending: function (result) {
                     alert("Menunggu pembayaran. Silakan selesaikan transaksi anda.");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 },
                 onError: function (result) {
                     alert("Pembayaran Gagal. Silakan coba lagi.");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                onClose: function () {
+                    console.log('Customer closed the popup without finishing the payment');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }
             });
         } else {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
             throw new Error(data.error || "Gagal mendapatkan token pembayaran");
         }
     } catch (err) {
         console.error("Payment Error:", err);
         alert("Terjadi kesalahan: " + err.message);
-    } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
