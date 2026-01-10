@@ -422,58 +422,89 @@
         <div class="marine-snow" id="snowContainer"></div>
         <div id="bubbleContainer"></div>
 
-        <!-- Diverse Fish Components -->
+        <!-- defs for gradients -->
+        <svg width="0" height="0" style="position:absolute;">
+            <defs>
+                <linearGradient id="gradBetta" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#ff0054;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#7209b7;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="gradKoi" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="gradAngel" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4361ee;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#4cc9f0;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+        </svg>
 
-        <!-- 1. Betta Fish (Cupang) - Long flowing fins -->
+        <!-- Diverse Fish Components - REFINED ULTRA PREMIUM -->
+
+        <!-- 1. Betta Fish (Cupang) - Organic & Flowing -->
         <div class="fish-container" style="top: 25%; animation-duration: 25s;">
-            <svg viewBox="0 0 120 80" width="140">
+            <svg viewBox="0 0 160 100" width="180">
+                <g class="fish-body-group">
+                    <!-- Flowing Fins -->
+                    <path class="fin-glow" d="M 60 30 C 80 0 130 10 145 35" fill="url(#gradBetta)" opacity="0.4" />
+                    <path d="M 60 70 C 80 100 130 90 145 65" fill="url(#gradBetta)" opacity="0.4" />
+                    <!-- Realistic Body -->
+                    <path
+                        d="M 40 50 C 40 35 60 30 90 30 C 120 30 140 40 145 50 C 140 60 120 70 90 70 C 60 70 40 65 40 50 Z"
+                        fill="url(#gradBetta)" />
+                    <!-- Eye -->
+                    <circle cx="125" cy="45" r="3" fill="black" />
+                    <circle cx="126" cy="44" r="1" fill="white" />
+                    <!-- Tail - Sine Wave Movement -->
+                    <path class="tail" d="M 42 50 C 10 20 0 40 0 50 C 0 60 10 80 42 50 Z" fill="url(#gradBetta)"
+                        opacity="0.8" />
+                    <!-- Pectoral Fin -->
+                    <path class="fin" d="M 85 55 C 75 65 70 55 80 50" fill="url(#gradBetta)" opacity="0.6" />
+                </g>
+            </svg>
+        </div>
+
+        <!-- 2. Angelfish - Elegant Pterophyllum Silhouette -->
+        <div class="fish-container" style="top: 60%; left: 20%; animation-duration: 20s; transform: scale(0.9);">
+            <svg viewBox="0 0 120 140" width="120">
                 <g class="fish-body-group">
                     <!-- Long Dorsal Fin -->
-                    <path d="M 40 25 Q 60 -10 90 20" fill="#ff0054" opacity="0.6" />
-                    <!-- Body -->
-                    <path d="M 30 40 Q 30 20 60 20 Q 95 20 105 40 Q 95 60 60 60 Q 30 60 30 40" fill="#ff0054" />
+                    <path d="M 40 60 C 35 30 50 10 65 0 L 70 55 Z" fill="url(#gradAngel)" />
+                    <!-- Circular/Diamond Body -->
+                    <path
+                        d="M 30 70 C 30 50 50 45 80 50 C 105 55 110 70 105 80 C 110 90 105 105 80 110 C 50 115 30 100 30 70 Z"
+                        fill="url(#gradAngel)" />
                     <!-- Long Anal Fin -->
-                    <path d="M 40 55 Q 60 90 90 60" fill="#9e0059" opacity="0.6" />
-                    <circle cx="90" cy="35" r="3" fill="black" />
-                    <!-- Flowing Tail -->
-                    <path class="tail" d="M 32 40 Q 0 0 0 40 Q 0 80 32 40" fill="#ff0054" opacity="0.8" />
-                    <!-- Side Fin -->
-                    <path class="fin" d="M 60 45 Q 50 60 65 65" fill="#ff0054" opacity="0.5" />
+                    <path d="M 40 90 C 35 120 50 140 65 150 L 70 105 Z" fill="url(#gradAngel)" />
+                    <!-- Eye -->
+                    <circle cx="85" cy="70" r="3" fill="black" />
+                    <!-- Flowing Thin Tail -->
+                    <path class="tail" d="M 32 70 C 15 60 5 65 0 70 C 5 75 15 80 32 70 Z" fill="url(#gradAngel)"
+                        opacity="0.8" />
                 </g>
             </svg>
         </div>
 
-        <!-- 2. Angelfish - Triangular & Flat -->
-        <div class="fish-container" style="top: 60%; left: 20%; animation-duration: 20s; transform: scale(0.9);">
-            <svg viewBox="0 0 100 100" width="100">
-                <g class="fish-body-group">
-                    <!-- Top Long Fin -->
-                    <path d="M 50 40 L 40 0 L 60 35 Z" fill="#7209b7" />
-                    <!-- Triangular Body -->
-                    <path d="M 20 50 L 70 20 L 90 50 L 70 80 Z" fill="#b5179e" />
-                    <!-- Bottom Long Fin -->
-                    <path d="M 50 60 L 40 100 L 60 65 Z" fill="#7209b7" />
-                    <circle cx="75" cy="45" r="3" fill="black" />
-                    <!-- Thin Tail -->
-                    <path class="tail" d="M 22 50 L 0 35 L 5 50 L 0 65 Z" fill="#7209b7" />
-                </g>
-            </svg>
-        </div>
-
-        <!-- 3. Koi Fish - Patterned & Elegant -->
+        <!-- 3. Koi Fish - Torpedo Patterned -->
         <div class="fish-container" style="top: 15%; right: 10%; animation-duration: 30s; animation-delay: -5s;">
-            <svg viewBox="0 0 120 60" width="150">
+            <svg viewBox="0 0 160 80" width="180">
                 <g class="fish-body-group">
-                    <!-- Body (White/Orange mix) -->
-                    <path d="M 25 30 Q 25 10 60 10 Q 100 10 110 30 Q 100 50 60 50 Q 25 50 25 30" fill="#f8f9fa" />
-                    <!-- Orange Patches -->
-                    <path d="M 50 15 Q 65 10 75 25 Q 60 35 50 15" fill="#f94144" />
-                    <path d="M 80 35 Q 95 30 100 45 Q 85 50 80 35" fill="#f3722c" />
-                    <circle cx="95" cy="25" r="3" fill="black" />
+                    <!-- Torpedo Body -->
+                    <path
+                        d="M 30 40 C 30 25 50 20 90 20 C 130 20 150 30 155 40 C 150 50 130 60 90 60 C 50 60 30 55 30 40"
+                        fill="url(#gradKoi)" />
+                    <!-- Organic Patterns -->
+                    <path d="M 60 25 C 75 22 85 30 80 40 C 70 45 60 35 60 25" fill="#f94144" opacity="0.9" />
+                    <path d="M 100 35 C 115 30 125 45 110 55 C 95 58 90 45 100 35" fill="#f3722c" opacity="0.9" />
+                    <path d="M 40 38 C 50 35 55 45 45 48 C 35 50 35 42 40 38" fill="#343a40" opacity="0.7" />
+                    <!-- Eye -->
+                    <circle cx="135" cy="35" r="3" fill="black" />
                     <!-- Fan Tail -->
-                    <path class="tail" d="M 27 30 Q 5 15 5 30 Q 5 45 27 30" fill="#f8f9fa" opacity="0.8" />
-                    <!-- Side Fins -->
-                    <path class="fin" d="M 55 35 Q 45 45 55 50" fill="#f8f9fa" opacity="0.6" />
+                    <path class="tail" d="M 32 40 C 10 20 0 30 0 40 C 0 50 10 60 32 40 Z" fill="url(#gradKoi)"
+                        opacity="0.7" />
+                    <!-- Fins -->
+                    <path class="fin" d="M 80 50 C 70 65 60 60 75 55" fill="url(#gradKoi)" opacity="0.5" />
                 </g>
             </svg>
         </div>
