@@ -41,6 +41,63 @@
             height: 100vh;
             z-index: 1;
             pointer-events: none;
+            perspective: 1000px;
+        }
+
+        /* God Rays */
+        .god-rays {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(60deg,
+                    transparent 0, transparent 40px,
+                    rgba(255, 255, 255, 0.03) 50px,
+                    rgba(255, 255, 255, 0.03) 80px,
+                    transparent 100px);
+            filter: blur(20px);
+            opacity: 0.6;
+            animation: rays-shift 20s infinite linear;
+        }
+
+        @keyframes rays-shift {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: 1000px 0;
+            }
+        }
+
+        /* Marine Snow (Particles) */
+        .marine-snow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .snow-flake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.3;
+            filter: blur(1px);
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            from {
+                transform: translateY(-100px) translateX(0);
+            }
+
+            to {
+                transform: translateY(110vh) translateX(50px);
+            }
         }
 
         .bubble {
@@ -73,6 +130,8 @@
             z-index: 2;
             width: 150px;
             animation: swim 20s infinite linear;
+            transition: transform 0.2s ease-out;
+            /* For parallax */
         }
 
         @keyframes swim {
@@ -158,6 +217,8 @@
             width: 90%;
             text-align: center;
             animation: cardAppear 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.1s ease-out;
+            /* For parallax */
         }
 
         @keyframes cardAppear {
@@ -339,6 +400,8 @@
 
 <body>
     <div class="aquarium">
+        <div class="god-rays"></div>
+        <div class="marine-snow" id="snowContainer"></div>
         <div id="bubbleContainer"></div>
 
         <!-- Fish SVG components -->
@@ -475,6 +538,42 @@
             bubble.style.animationDuration = Math.random() * 5 + 7 + 's';
             container.appendChild(bubble);
         }
+
+        // Marine Snow generator
+        const snowContainer = document.getElementById('snowContainer');
+        for (let i = 0; i < 50; i++) {
+            const flake = document.createElement('div');
+            flake.classList.add('snow-flake');
+            const size = Math.random() * 3 + 1 + 'px';
+            flake.style.width = size;
+            flake.style.height = size;
+            flake.style.left = Math.random() * 100 + '%';
+            flake.style.top = Math.random() * 100 + '%';
+            flake.style.animationDelay = Math.random() * 20 + 's';
+            flake.style.animationDuration = Math.random() * 10 + 15 + 's';
+            snowContainer.appendChild(flake);
+        }
+
+        // Mouse Parallax Effect
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 50;
+            const y = (window.innerHeight / 2 - e.pageY) / 50;
+
+            // Parallax for Hero Card (Subtle)
+            const heroCard = document.querySelector('.hero-card');
+            if (heroCard) {
+                heroCard.style.transform = `translate(${x}px, ${y}px)`;
+            }
+
+            // Parallax for Fish (Stronger)
+            const fish = document.querySelectorAll('.fish-container');
+            fish.forEach((f, idx) => {
+                const depth = (idx + 1) * 20;
+                const fx = (window.innerWidth / 2 - e.pageX) / depth;
+                const fy = (window.innerHeight / 2 - e.pageY) / depth;
+                f.style.transform = `translate(${fx}px, ${fy}px)`;
+            });
+        });
 
         // Bridge to app.js
         window.checkAuth = () => {

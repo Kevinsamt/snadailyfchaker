@@ -41,6 +41,65 @@
             width: 100%;
             height: 100vh;
             z-index: 1;
+            perspective: 1000px;
+        }
+
+        /* God Rays */
+        .god-rays {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(60deg,
+                    transparent 0, transparent 40px,
+                    rgba(255, 255, 255, 0.03) 50px,
+                    rgba(255, 255, 255, 0.03) 80px,
+                    transparent 100px);
+            filter: blur(20px);
+            opacity: 0.6;
+            animation: rays-shift 20s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes rays-shift {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: 1000px 0;
+            }
+        }
+
+        /* Marine Snow */
+        .marine-snow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .snow-flake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.3;
+            filter: blur(1px);
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            from {
+                transform: translateY(-100px) translateX(0);
+            }
+
+            to {
+                transform: translateY(110vh) translateX(50px);
+            }
         }
 
         .bubbles {
@@ -48,6 +107,7 @@
             bottom: 0;
             width: 100%;
             height: 100%;
+            pointer-events: none;
         }
 
         .bubble {
@@ -81,103 +141,12 @@
             width: 150px;
             animation: swim 20s infinite linear;
             pointer-events: none;
+            transition: transform 0.2s ease-out;
+            /* For parallax */
         }
 
-        .fish {
-            width: 120px;
-            transform-origin: center;
-        }
+        /* ... existing fish styles ... */
 
-        /* Wavy motion for the whole fish */
-        .fish-body-group {
-            animation: wiggle 1s infinite ease-in-out alternate;
-        }
-
-        .tail {
-            animation: tail-wag 0.5s infinite ease-in-out alternate;
-            transform-origin: 40px 30px;
-        }
-
-        .fin {
-            animation: fin-flap 1.5s infinite ease-in-out alternate;
-            transform-origin: 50px 30px;
-        }
-
-        @keyframes wiggle {
-            from {
-                transform: skewX(-5deg) rotate(-2deg);
-            }
-
-            to {
-                transform: skewX(5deg) rotate(2deg);
-            }
-        }
-
-        @keyframes tail-wag {
-            from {
-                transform: rotate(-15deg);
-            }
-
-            to {
-                transform: rotate(15deg);
-            }
-        }
-
-        @keyframes fin-flap {
-            from {
-                transform: rotateY(0deg) scaleX(1);
-            }
-
-            to {
-                transform: rotateY(40deg) scaleX(0.8);
-            }
-        }
-
-        @keyframes swim {
-            0% {
-                left: -200px;
-                transform: rotateY(0deg);
-            }
-
-            49% {
-                transform: rotateY(0deg);
-            }
-
-            50% {
-                left: 100%;
-                transform: rotateY(180deg);
-            }
-
-            99% {
-                transform: rotateY(180deg);
-            }
-
-            100% {
-                left: -200px;
-                transform: rotateY(0deg);
-            }
-        }
-
-        .fish-1 {
-            top: 15%;
-            animation-duration: 25s;
-        }
-
-        .fish-2 {
-            top: 45%;
-            animation-duration: 18s;
-            animation-delay: -5s;
-            transform: scale(0.7);
-        }
-
-        .fish-3 {
-            top: 75%;
-            animation-duration: 35s;
-            animation-delay: -10s;
-            transform: scale(1.3);
-        }
-
-        /* Content Overlay */
         .content {
             position: relative;
             z-index: 10;
@@ -191,6 +160,8 @@
             max-width: 95%;
             width: 500px;
             animation: fadeIn 1s ease-out;
+            transition: transform 0.1s ease-out;
+            /* For parallax */
         }
 
         @keyframes fadeIn {
@@ -306,6 +277,8 @@
 
 <body>
     <div class="aquarium">
+        <div class="god-rays"></div>
+        <div class="marine-snow" id="snowContainer"></div>
         <div class="bubbles" id="bubbleContainer"></div>
 
         <!-- Realistic SVG Fish 1 -->
@@ -375,6 +348,7 @@
     </div>
 
     <script>
+        // Bubble generator
         const container = document.getElementById('bubbleContainer');
         for (let i = 0; i < 25; i++) {
             const bubble = document.createElement('div');
@@ -387,6 +361,42 @@
             bubble.style.animationDuration = Math.random() * 4 + 6 + 's';
             container.appendChild(bubble);
         }
+
+        // Marine Snow generator
+        const snowContainer = document.getElementById('snowContainer');
+        for (let i = 0; i < 40; i++) {
+            const flake = document.createElement('div');
+            flake.classList.add('snow-flake');
+            const size = Math.random() * 3 + 1 + 'px';
+            flake.style.width = size;
+            flake.style.height = size;
+            flake.style.left = Math.random() * 100 + '%';
+            flake.style.top = Math.random() * 100 + '%';
+            flake.style.animationDelay = Math.random() * 20 + 's';
+            flake.style.animationDuration = Math.random() * 10 + 15 + 's';
+            snowContainer.appendChild(flake);
+        }
+
+        // Mouse Parallax Effect
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 60;
+            const y = (window.innerHeight / 2 - e.pageY) / 60;
+
+            // Parallax for Content Overlay
+            const content = document.querySelector('.content');
+            if (content) {
+                content.style.transform = `translate(${x}px, ${y}px)`;
+            }
+
+            // Parallax for Fish (Stronger)
+            const fish = document.querySelectorAll('.fish-container');
+            fish.forEach((f, idx) => {
+                const depth = (idx + 1) * 25;
+                const fx = (window.innerWidth / 2 - e.pageX) / depth;
+                const fy = (window.innerHeight / 2 - e.pageY) / depth;
+                f.style.transform = `translate(${fx}px, ${fy}px)`;
+            });
+        });
     </script>
 </body>
 
