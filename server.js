@@ -539,6 +539,27 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
     }
 });
 
+// Debug Route: Check Models
+app.get('/api/ai/debug', async (req, res) => {
+    try {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) return res.json({ error: "No API Key found" });
+
+        const genAI = new GoogleGenerativeAI(apiKey.trim());
+        // We can't easily list models with the basic SDK without a function call
+        // but we can try a very basic ping
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        res.json({
+            message: "Route active",
+            key_length: apiKey.trim().length,
+            key_preview: apiKey.trim().substring(0, 4) + "...",
+            note: "Jika bapak melihat 404, berarti 'Generative Language API' belum aktif di Google Cloud Console."
+        });
+    } catch (err) {
+        res.json({ error: err.message });
+    }
+});
+
 // Global Error Handler (Ensures JSON response instead of HTML)
 app.use((err, req, res, next) => {
     console.error("Global Error Handled:", err.message);
