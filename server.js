@@ -478,8 +478,8 @@ app.post('/api/payment/token', apiLimiter, async (req, res) => {
 
 // AI Assistant Route
 app.post('/api/ai/chat', apiLimiter, async (req, res) => {
+    const { message } = req.body;
     try {
-        const { message } = req.body;
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey || apiKey.trim() === "") {
