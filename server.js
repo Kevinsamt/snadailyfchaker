@@ -493,9 +493,13 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
         // List of models to try in order of preference
         const modelsToTry = [
             "gemini-1.5-flash",
+            "models/gemini-1.5-flash",
             "gemini-1.5-flash-latest",
+            "models/gemini-1.5-flash-latest",
             "gemini-pro",
-            "gemini-1.0-pro"
+            "models/gemini-pro",
+            "gemini-1.0-pro",
+            "models/gemini-1.0-pro"
         ];
 
         let lastError = null;
