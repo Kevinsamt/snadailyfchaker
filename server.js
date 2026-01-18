@@ -6,6 +6,7 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const midtransClient = require('midtrans-client');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
 const app = express();
@@ -471,6 +472,30 @@ app.post('/api/payment/token', apiLimiter, async (req, res) => {
     } catch (err) {
         console.error("Midtrans Error:", err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+// AI Assistant Route
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+app.post('/api/ai/chat', apiLimiter, async (req, res) => {
+    try {
+        const { message } = req.body;
+        if (!process.env.GEMINI_API_KEY) {
+            return res.status(500).json({ error: "GEMINI_API_KEY belum dikonfigurasi!" });
+        }
+
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang. Jika ditanya hal di luar ikan cupang, arahkan kembali dengan sopan ke topik ikan cupang.";
+
+        const result = await model.generateContent([systemPrompt, message]);
+        const response = await result.response;
+        const text = response.text();
+
+        res.json({ reply: text });
+    } catch (err) {
+        console.error("AI Error:", err);
+        res.status(500).json({ error: "Gagal memproses permintaan AI." });
     }
 });
 
