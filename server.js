@@ -295,7 +295,12 @@ if (connectionString) {
 app.get('/api/status', async (req, res) => {
     try {
         await pool.query('SELECT 1');
-        res.json({ status: 'ok', database: 'connected' });
+        res.json({
+            status: 'ok',
+            database: 'connected',
+            ai_key_configured: !!process.env.GEMINI_API_KEY,
+            ai_key_length: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().length : 0
+        });
     } catch (err) {
         res.status(500).json({ status: 'error', database: 'disconnected', details: err.message });
     }
@@ -553,25 +558,20 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
     }
 });
 
-// Debug Route: Check Models
-app.get('/api/ai/debug', async (req, res) => {
-    try {
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) return res.json({ error: "No API Key found" });
-
-        const genAI = new GoogleGenerativeAI(apiKey.trim());
-        // We can't easily list models with the basic SDK without a function call
-        // but we can try a very basic ping
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        res.json({
-            message: "Route active",
-            key_length: apiKey.trim().length,
-            key_preview: apiKey.trim().substring(0, 4) + "...",
-            note: "Jika bapak melihat 404, berarti 'Generative Language API' belum aktif di Google Cloud Console."
-        });
-    } catch (err) {
-        res.json({ error: err.message });
+// Debug Route: Check AI Configuration
+app.get('/api/ai/debug', (req, res) => {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) {
+        return res.json({ error: "Kunci API (GEMINI_API_KEY) tidak ditemukan di sistem environment server." });
     }
+    const cleanKey = key.trim();
+    res.json({
+        message: "Sistem AI SNR Daily Terdeteksi",
+        key_status: "Terdeteksi",
+        key_length: cleanKey.length,
+        key_preview: cleanKey.substring(0, 7) + "...",
+        tip: "Jika bapak melihat status ini tapi AI tetap error, pastikan tidak ada spasi di awal/akhir kunci di Vercel."
+    });
 });
 
 // Global Error Handler (Ensures JSON response instead of HTML)
