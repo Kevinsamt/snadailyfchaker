@@ -483,15 +483,20 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey || apiKey.trim() === "") {
-            console.error("AI Error: GEMINI_API_KEY is missing or empty in process.env");
-            return res.status(500).json({
-                error: "GEMINI_API_KEY belum dikonfigurasi!",
-                tip: "Mohon cek Vercel Settings > Environment Variables. Pastikan Key adalah GEMINI_API_KEY (tanpa spasi)."
-            });
+            console.error("AI Error: GEMINI_API_KEY is missing");
+            return res.status(500).json({ error: "GEMINI_API_KEY belum dikonfigurasi!" });
         }
 
         const genAI = new GoogleGenerativeAI(apiKey.trim());
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        // Try Gemini 1.5 Flash (Fast & Efficient)
+        let model;
+        try {
+            model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        } catch (e) {
+            console.warn("Fallback to gemini-pro due to initialization error");
+            model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        }
 
         const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang. Jika ditanya hal di luar ikan cupang, arahkan kembali dengan sopan ke topik ikan cupang.";
 
@@ -502,6 +507,20 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
         res.json({ reply: text });
     } catch (err) {
         console.error("AI Runtime Error:", err);
+        // If 1.5 Flash failed (404), try gemini-pro as last resort
+        if (err.message.includes('404') || err.message.includes('not found')) {
+            try {
+                const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
+                const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const result = await fallbackModel.generateContent([
+                    "Anda adalah pakar ikan cupang. Jawab pertanyaan ini dalam Bahasa Indonesia: " + message
+                ]);
+                const response = await result.response;
+                return res.json({ reply: response.text() + " (Note: Using fallback engine)" });
+            } catch (fallbackErr) {
+                return res.status(500).json({ error: "Gagal memproses AI: " + fallbackErr.message });
+            }
+        }
         res.status(500).json({ error: "Gagal memproses permintaan AI: " + err.message });
     }
 });
