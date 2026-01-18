@@ -502,8 +502,10 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
         // Use v1 for better stability
         const modelsToTry = [
             "gemini-1.5-flash",
+            "models/gemini-1.5-flash",
             "gemini-1.5-flash-latest",
-            "gemini-pro"
+            "gemini-pro",
+            "models/gemini-pro"
         ];
 
         let lastError = null;
@@ -511,30 +513,29 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
         let responseText = "";
 
         for (const modelName of modelsToTry) {
-            try {
-                console.log(`AI Attempt: Trying ${modelName} on v1 API...`);
-                // Force v1 API version
-                const model = genAI.getGenerativeModel(
-                    { model: modelName },
-                    { apiVersion: 'v1' }
-                );
+            for (const apiVer of ["v1", "v1beta"]) {
+                try {
+                    console.log(`AI Attempt: Trying ${modelName} on ${apiVer}...`);
+                    const model = genAI.getGenerativeModel(
+                        { model: modelName },
+                        { apiVersion: apiVer }
+                    );
 
-                const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang.";
+                    const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang.";
 
-                const result = await model.generateContent([systemPrompt, message]);
-                const response = await result.response;
-                responseText = response.text();
-                success = true;
-                console.log(`AI Success: ${modelName} responded.`);
-                break;
-            } catch (e) {
-                console.warn(`AI Warning: ${modelName} failed: ${e.message}`);
-                lastError = e;
-                // If it's a key error, don't bother trying other models
-                if (e.message.includes("API key") || e.message.includes("400") || e.message.includes("401")) {
+                    const result = await model.generateContent([systemPrompt, message]);
+                    const response = await result.response;
+                    responseText = response.text();
+                    success = true;
+                    console.log(`AI Success: ${modelName} on ${apiVer} responded.`);
                     break;
+                } catch (e) {
+                    console.warn(`AI Warning: ${modelName} on ${apiVer} failed: ${e.message}`);
+                    lastError = e;
+                    if (e.message.includes("API key") || e.message.includes("401")) break;
                 }
             }
+            if (success) break;
         }
 
         if (success) {
