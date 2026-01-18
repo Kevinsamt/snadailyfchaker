@@ -487,16 +487,15 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
             return res.status(500).json({ error: "GEMINI_API_KEY belum dikonfigurasi!" });
         }
 
-        const genAI = new GoogleGenerativeAI(apiKey.trim());
+        const cleanKey = apiKey.trim();
+        console.log(`AI Info: Initializing with key length ${cleanKey.length}`);
 
-        // Try Gemini 1.5 Flash (Fast & Efficient)
-        let model;
-        try {
-            model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        } catch (e) {
-            console.warn("Fallback to gemini-pro due to initialization error");
-            model = genAI.getGenerativeModel({ model: "gemini-pro" });
-        }
+        // Forcing v1 API version as v1beta seems to have 404 issues in some environments
+        const genAI = new GoogleGenerativeAI(cleanKey);
+        const model = genAI.getGenerativeModel(
+            { model: "gemini-1.5-flash" },
+            { apiVersion: 'v1' }
+        );
 
         const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang. Jika ditanya hal di luar ikan cupang, arahkan kembali dengan sopan ke topik ikan cupang.";
 
@@ -506,22 +505,22 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
 
         res.json({ reply: text });
     } catch (err) {
-        console.error("AI Runtime Error:", err);
-        // If 1.5 Flash failed (404), try gemini-pro as last resort
-        if (err.message.includes('404') || err.message.includes('not found')) {
-            try {
-                const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
-                const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-                const result = await fallbackModel.generateContent([
-                    "Anda adalah pakar ikan cupang. Jawab pertanyaan ini dalam Bahasa Indonesia: " + message
-                ]);
-                const response = await result.response;
-                return res.json({ reply: response.text() + " (Note: Using fallback engine)" });
-            } catch (fallbackErr) {
-                return res.status(500).json({ error: "Gagal memproses AI: " + fallbackErr.message });
-            }
+        console.error("AI Runtime Error Details:", {
+            message: err.message,
+            stack: err.stack,
+            name: err.name
+        });
+
+        let errorMsg = "Gagal memproses permintaan AI.";
+        if (err.message.includes('404')) {
+            errorMsg = "Error 404: Model Gemini tidak ditemukan atau API belum aktif. Pastikan 'Generative Language API' sudah Enable di Google Cloud.";
+        } else if (err.message.includes('API key not valid')) {
+            errorMsg = "API Key tidak valid. Mohon cek kembali kuncinya.";
+        } else {
+            errorMsg += " (" + err.message + ")";
         }
-        res.status(500).json({ error: "Gagal memproses permintaan AI: " + err.message });
+
+        res.status(500).json({ error: errorMsg });
     }
 });
 
