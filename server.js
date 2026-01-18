@@ -78,6 +78,7 @@ console.log("--- Shipping System Init ---");
 console.log("KOMERCE_API_KEY_COST:", KOMERCE_API_COST ? "LOADED (Starts with " + KOMERCE_API_COST.substring(0, 4) + "...)" : "MISSING");
 console.log("KOMERCE_API_KEY_DELIVERY:", KOMERCE_API_DELIVERY ? "LOADED" : "MISSING");
 console.log("KOMERCE_ORIGIN_ID:", KOMERCE_ORIGIN_ID);
+console.log("GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "LOADED" : "MISSING");
 console.log("----------------------------");
 
 // Shipping: Search Destination (City/Subdistrict)
@@ -476,14 +477,20 @@ app.post('/api/payment/token', apiLimiter, async (req, res) => {
 });
 
 // AI Assistant Route
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 app.post('/api/ai/chat', apiLimiter, async (req, res) => {
     try {
         const { message } = req.body;
-        if (!process.env.GEMINI_API_KEY) {
-            return res.status(500).json({ error: "GEMINI_API_KEY belum dikonfigurasi!" });
+        const apiKey = process.env.GEMINI_API_KEY;
+
+        if (!apiKey || apiKey.trim() === "") {
+            console.error("AI Error: GEMINI_API_KEY is missing or empty in process.env");
+            return res.status(500).json({
+                error: "GEMINI_API_KEY belum dikonfigurasi!",
+                tip: "Mohon cek Vercel Settings > Environment Variables. Pastikan Key adalah GEMINI_API_KEY (tanpa spasi)."
+            });
         }
 
+        const genAI = new GoogleGenerativeAI(apiKey.trim());
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang. Jika ditanya hal di luar ikan cupang, arahkan kembali dengan sopan ke topik ikan cupang.";
@@ -494,8 +501,8 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
 
         res.json({ reply: text });
     } catch (err) {
-        console.error("AI Error:", err);
-        res.status(500).json({ error: "Gagal memproses permintaan AI." });
+        console.error("AI Runtime Error:", err);
+        res.status(500).json({ error: "Gagal memproses permintaan AI: " + err.message });
     }
 });
 
