@@ -488,39 +488,54 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
         }
 
         const cleanKey = apiKey.trim();
-        console.log(`AI Info: Initializing with key length ${cleanKey.length}`);
-
-        // Forcing v1 API version as v1beta seems to have 404 issues in some environments
         const genAI = new GoogleGenerativeAI(cleanKey);
-        const model = genAI.getGenerativeModel(
-            { model: "gemini-1.5-flash" },
-            { apiVersion: 'v1' }
-        );
 
-        const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang. Jika ditanya hal di luar ikan cupang, arahkan kembali dengan sopan ke topik ikan cupang.";
+        // List of models to try in order of preference
+        const modelsToTry = [
+            "gemini-1.5-flash",
+            "gemini-1.5-flash-latest",
+            "gemini-pro",
+            "gemini-1.0-pro"
+        ];
 
-        const result = await model.generateContent([systemPrompt, message]);
-        const response = await result.response;
-        const text = response.text();
+        let lastError = null;
+        let success = false;
+        let responseText = "";
 
-        res.json({ reply: text });
-    } catch (err) {
-        console.error("AI Runtime Error Details:", {
-            message: err.message,
-            stack: err.stack,
-            name: err.name
-        });
+        for (const modelName of modelsToTry) {
+            try {
+                console.log(`AI Attempt: Trying model ${modelName}...`);
+                const model = genAI.getGenerativeModel({ model: modelName });
+                const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang.";
 
-        let errorMsg = "Gagal memproses permintaan AI.";
-        if (err.message.includes('404')) {
-            errorMsg = "Error 404: Model Gemini tidak ditemukan atau API belum aktif. Pastikan 'Generative Language API' sudah Enable di Google Cloud.";
-        } else if (err.message.includes('API key not valid')) {
-            errorMsg = "API Key tidak valid. Mohon cek kembali kuncinya.";
-        } else {
-            errorMsg += " (" + err.message + ")";
+                const result = await model.generateContent([systemPrompt, message]);
+                const response = await result.response;
+                responseText = response.text();
+                success = true;
+                console.log(`AI Success: Model ${modelName} worked!`);
+                break;
+            } catch (e) {
+                console.warn(`AI Warning: Model ${modelName} failed: ${e.message}`);
+                lastError = e;
+            }
         }
 
-        res.status(500).json({ error: errorMsg });
+        if (success) {
+            res.json({ reply: responseText });
+        } else {
+            throw lastError;
+        }
+    } catch (err) {
+        console.error("AI Final Error:", err);
+
+        let msg = "Gagal memproses AI.";
+        if (err.message.includes('404')) {
+            msg = "Error 404: Model tidak ditemukan. Hal ini biasanya terjadi jika API Key belum sepenuhnya aktif atau region bapak belum didukung. Mohon tunggu 5-10 menit atau coba buat API Key baru di AI Studio.";
+        } else {
+            msg += " (" + err.message + ")";
+        }
+
+        res.status(500).json({ error: msg });
     }
 });
 
