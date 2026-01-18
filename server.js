@@ -477,29 +477,28 @@ app.post('/api/payment/token', apiLimiter, async (req, res) => {
 });
 
 // AI Assistant Route
+// AI Assistant Route
 app.post('/api/ai/chat', apiLimiter, async (req, res) => {
     const { message } = req.body;
     try {
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey || apiKey.trim() === "") {
-            console.error("AI Error: GEMINI_API_KEY is missing");
-            return res.status(500).json({ error: "GEMINI_API_KEY belum dikonfigurasi!" });
+            console.error("AI Error: GEMINI_API_KEY is missing from environment");
+            return res.status(500).json({ error: "GEMINI_API_KEY belum dikonfigurasi di server!" });
         }
 
         const cleanKey = apiKey.trim();
+        // Log basic info for debugging without exposing the whole key
+        console.log(`AI Chat: Request received. Key length: ${cleanKey.length}. Key starts with: ${cleanKey.substring(0, 7)}`);
+
         const genAI = new GoogleGenerativeAI(cleanKey);
 
-        // List of models to try in order of preference
+        // Use v1 for better stability
         const modelsToTry = [
             "gemini-1.5-flash",
-            "models/gemini-1.5-flash",
             "gemini-1.5-flash-latest",
-            "models/gemini-1.5-flash-latest",
-            "gemini-pro",
-            "models/gemini-pro",
-            "gemini-1.0-pro",
-            "models/gemini-1.0-pro"
+            "gemini-pro"
         ];
 
         let lastError = null;
@@ -508,19 +507,28 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
 
         for (const modelName of modelsToTry) {
             try {
-                console.log(`AI Attempt: Trying model ${modelName}...`);
-                const model = genAI.getGenerativeModel({ model: modelName });
+                console.log(`AI Attempt: Trying ${modelName} on v1 API...`);
+                // Force v1 API version
+                const model = genAI.getGenerativeModel(
+                    { model: modelName },
+                    { apiVersion: 'v1' }
+                );
+
                 const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang.";
 
                 const result = await model.generateContent([systemPrompt, message]);
                 const response = await result.response;
                 responseText = response.text();
                 success = true;
-                console.log(`AI Success: Model ${modelName} worked!`);
+                console.log(`AI Success: ${modelName} responded.`);
                 break;
             } catch (e) {
-                console.warn(`AI Warning: Model ${modelName} failed: ${e.message}`);
+                console.warn(`AI Warning: ${modelName} failed: ${e.message}`);
                 lastError = e;
+                // If it's a key error, don't bother trying other models
+                if (e.message.includes("API key") || e.message.includes("400") || e.message.includes("401")) {
+                    break;
+                }
             }
         }
 
@@ -530,11 +538,13 @@ app.post('/api/ai/chat', apiLimiter, async (req, res) => {
             throw lastError;
         }
     } catch (err) {
-        console.error("AI Final Error:", err);
+        console.error("AI Final Error Details:", err);
 
         let msg = "Gagal memproses AI.";
-        if (err.message.includes('404')) {
-            msg = "Error 404: Model tidak ditemukan. Hal ini biasanya terjadi jika API Key belum sepenuhnya aktif atau region bapak belum didukung. Mohon tunggu 5-10 menit atau coba buat API Key baru di AI Studio.";
+        if (err.message.includes('API key not found') || err.message.includes('API_KEY_INVALID')) {
+            msg = "Kunci API tidak valid atau tidak terbaca oleh Google. Mohon pastikan bapak sudah meng-update kuncinya di Vercel dengan benar (tanpa spasi tambahan).";
+        } else if (err.message.includes('404')) {
+            msg = "Error 404: Model tidak ditemukan atau API belum aktif di project ini.";
         } else {
             msg += " (" + err.message + ")";
         }
