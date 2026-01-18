@@ -6,7 +6,6 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const midtransClient = require('midtrans-client');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
 const app = express();
@@ -78,7 +77,6 @@ console.log("--- Shipping System Init ---");
 console.log("KOMERCE_API_KEY_COST:", KOMERCE_API_COST ? "LOADED (Starts with " + KOMERCE_API_COST.substring(0, 4) + "...)" : "MISSING");
 console.log("KOMERCE_API_KEY_DELIVERY:", KOMERCE_API_DELIVERY ? "LOADED" : "MISSING");
 console.log("KOMERCE_ORIGIN_ID:", KOMERCE_ORIGIN_ID);
-console.log("GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "LOADED" : "MISSING");
 console.log("----------------------------");
 
 // Shipping: Search Destination (City/Subdistrict)
@@ -295,12 +293,7 @@ if (connectionString) {
 app.get('/api/status', async (req, res) => {
     try {
         await pool.query('SELECT 1');
-        res.json({
-            status: 'ok',
-            database: 'connected',
-            ai_key_configured: !!process.env.GEMINI_API_KEY,
-            ai_key_length: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim().length : 0
-        });
+        res.json({ status: 'ok', database: 'connected' });
     } catch (err) {
         res.status(500).json({ status: 'error', database: 'disconnected', details: err.message });
     }
@@ -479,100 +472,6 @@ app.post('/api/payment/token', apiLimiter, async (req, res) => {
         console.error("Midtrans Error:", err);
         res.status(500).json({ error: err.message });
     }
-});
-
-// AI Assistant Route
-// AI Assistant Route
-app.post('/api/ai/chat', apiLimiter, async (req, res) => {
-    const { message } = req.body;
-    try {
-        const apiKey = process.env.GEMINI_API_KEY;
-
-        if (!apiKey || apiKey.trim() === "") {
-            console.error("AI Error: GEMINI_API_KEY is missing from environment");
-            return res.status(500).json({ error: "GEMINI_API_KEY belum dikonfigurasi di server!" });
-        }
-
-        const cleanKey = apiKey.trim();
-        // Log basic info for debugging without exposing the whole key
-        console.log(`AI Chat: Request received. Key length: ${cleanKey.length}. Key starts with: ${cleanKey.substring(0, 7)}`);
-
-        const genAI = new GoogleGenerativeAI(cleanKey);
-
-        // Use v1 for better stability
-        const modelsToTry = [
-            "gemini-1.5-flash",
-            "models/gemini-1.5-flash",
-            "gemini-1.5-flash-latest",
-            "gemini-pro",
-            "models/gemini-pro"
-        ];
-
-        let lastError = null;
-        let success = false;
-        let responseText = "";
-
-        for (const modelName of modelsToTry) {
-            for (const apiVer of ["v1", "v1beta"]) {
-                try {
-                    console.log(`AI Attempt: Trying ${modelName} on ${apiVer}...`);
-                    const model = genAI.getGenerativeModel(
-                        { model: modelName },
-                        { apiVersion: apiVer }
-                    );
-
-                    const systemPrompt = "Anda adalah pakar ikan cupang (Betta fish) dari SNA Daily. Jawablah pertanyaan pengguna dengan ramah, akurat, dan profesional dalam Bahasa Indonesia. Fokuslah pada tips perawatan, jenis-jenis cupang, kesehatan ikan, dan produk perlengkapan cupang.";
-
-                    const result = await model.generateContent([systemPrompt, message]);
-                    const response = await result.response;
-                    responseText = response.text();
-                    success = true;
-                    console.log(`AI Success: ${modelName} on ${apiVer} responded.`);
-                    break;
-                } catch (e) {
-                    console.warn(`AI Warning: ${modelName} on ${apiVer} failed: ${e.message}`);
-                    lastError = e;
-                    if (e.message.includes("API key") || e.message.includes("401")) break;
-                }
-            }
-            if (success) break;
-        }
-
-        if (success) {
-            res.json({ reply: responseText });
-        } else {
-            throw lastError;
-        }
-    } catch (err) {
-        console.error("AI Final Error Details:", err);
-
-        let msg = "Gagal memproses AI.";
-        if (err.message.includes('API key not found') || err.message.includes('API_KEY_INVALID')) {
-            msg = "Kunci API tidak valid atau tidak terbaca oleh Google. Mohon pastikan bapak sudah meng-update kuncinya di Vercel dengan benar (tanpa spasi tambahan).";
-        } else if (err.message.includes('404')) {
-            msg = "Error 404: Model tidak ditemukan atau API belum aktif di project ini.";
-        } else {
-            msg += " (" + err.message + ")";
-        }
-
-        res.status(500).json({ error: msg });
-    }
-});
-
-// Debug Route: Check AI Configuration
-app.get('/api/ai/debug', (req, res) => {
-    const key = process.env.GEMINI_API_KEY;
-    if (!key) {
-        return res.json({ error: "Kunci API (GEMINI_API_KEY) tidak ditemukan di sistem environment server." });
-    }
-    const cleanKey = key.trim();
-    res.json({
-        message: "Sistem AI SNR Daily Terdeteksi",
-        key_status: "Terdeteksi",
-        key_length: cleanKey.length,
-        key_preview: cleanKey.substring(0, 7) + "...",
-        tip: "Jika bapak melihat status ini tapi AI tetap error, pastikan tidak ada spasi di awal/akhir kunci di Vercel."
-    });
 });
 
 // Global Error Handler (Ensures JSON response instead of HTML)

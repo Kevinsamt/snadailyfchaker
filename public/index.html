@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SnaDailyCheker | Cek Keaslian Produk</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="/css/ai-assistant.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         :root {
@@ -670,11 +668,10 @@
         preload="auto"></audio>
 
     <script src="js/app.js"></script>
-    <script src="/js/ai-assistant.js"></script>
     <script>
         // Bubble generator
         const container = document.getElementById('bubbleContainer');
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 10; i++) { // Reduced from 20 to 10
             const bubble = document.createElement('div');
             bubble.classList.add('bubble');
             const size = Math.random() * 15 + 5 + 'px';
@@ -688,7 +685,7 @@
 
         // Marine Snow generator
         const snowContainer = document.getElementById('snowContainer');
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 20; i++) { // Reduced from 50 to 20
             const flake = document.createElement('div');
             flake.classList.add('snow-flake');
             const size = Math.random() * 3 + 1 + 'px';
@@ -701,25 +698,32 @@
             snowContainer.appendChild(flake);
         }
 
-        // Mouse Parallax Effect
+        // Optimized Mouse Parallax Effect (Throttled)
+        let ticking = false;
         document.addEventListener('mousemove', (e) => {
-            const x = (window.innerWidth / 2 - e.pageX) / 50;
-            const y = (window.innerHeight / 2 - e.pageY) / 50;
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const x = (window.innerWidth / 2 - e.pageX) / 50;
+                    const y = (window.innerHeight / 2 - e.pageY) / 50;
 
-            // Parallax for Hero Card (Subtle)
-            const heroCard = document.querySelector('.hero-card');
-            if (heroCard) {
-                heroCard.style.transform = `translate(${x}px, ${y}px)`;
+                    // Parallax for Hero Card
+                    const heroCard = document.querySelector('.hero-card');
+                    if (heroCard) {
+                        heroCard.style.transform = `translate(${x}px, ${y}px)`;
+                    }
+
+                    // Parallax for Fish
+                    const fish = document.querySelectorAll('.fish-container');
+                    fish.forEach((f, idx) => {
+                        const depth = (idx + 1) * 20;
+                        const fx = (window.innerWidth / 2 - e.pageX) / depth;
+                        const fy = (window.innerHeight / 2 - e.pageY) / depth;
+                        f.style.transform = `translate(${fx}px, ${fy}px)`;
+                    });
+                    ticking = false;
+                });
+                ticking = true;
             }
-
-            // Parallax for Fish (Stronger)
-            const fish = document.querySelectorAll('.fish-container');
-            fish.forEach((f, idx) => {
-                const depth = (idx + 1) * 20;
-                const fx = (window.innerWidth / 2 - e.pageX) / depth;
-                const fy = (window.innerHeight / 2 - e.pageY) / depth;
-                f.style.transform = `translate(${fx}px, ${fy}px)`;
-            });
         });
 
         // Bridge to app.js
