@@ -406,7 +406,12 @@
                     <div class="glass-panel" style="margin-bottom: 1rem; padding: 1rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--secondary);">
                         <img src="${ev.image_url}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold;">${ev.title}</div>
+                            <div style="font-weight: bold; display: flex; justify-content: space-between;">
+                                <span>${ev.title}</span>
+                                <span style="background: rgba(0,255,136,0.1); color: var(--secondary); font-size: 0.75rem; padding: 2px 8px; border-radius: 20px;">
+                                    <i class="ri-medal-2-line"></i> ${ev.registration_count} Terdaftar
+                                </span>
+                            </div>
                             <div style="font-size: 0.8rem; color: var(--text-muted);">${ev.event_date} | ${ev.location}</div>
                         </div>
                         <div style="display: flex; gap: 5px;">
