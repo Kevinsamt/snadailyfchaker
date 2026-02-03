@@ -575,6 +575,7 @@ app.get('/api/events', async (req, res) => {
             ORDER BY e.event_date ASC
         `;
         const result = await pool.query(sql);
+        console.log("Fetch Events Success: " + result.rows.length + " events found.");
         res.json({ success: true, data: result.rows });
     } catch (err) {
         console.error("Fetch Events API Error:", err);

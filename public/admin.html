@@ -309,281 +309,314 @@
     </style>
 
     <script src="js/app.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchStats();
-        });
+    let allEvents = []; // Global store for event data
 
-        function switchTab(tab) {
-            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`section-${tab}`).classList.add('active');
+    document.addEventListener('DOMContentLoaded', () => {
+    fetchStats();
+    });
 
-            // Highlight the correct button
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            tabButtons.forEach(btn => {
-                if (btn.getAttribute('onclick').includes(`'${tab}'`)) btn.classList.add('active');
-            });
+    function switchTab(tab) {
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`section-${tab}`).classList.add('active');
 
-            if (tab === 'overview') fetchStats();
-            if (tab === 'users') fetchUsers();
-            if (tab === 'events') fetchEvents();
-            if (tab === 'registrations') fetchRegistrations();
-        }
+    // Highlight the correct button
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+    if (btn.getAttribute('onclick').includes(`'${tab}'`)) btn.classList.add('active');
+    });
 
-        async function fetchStats() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch('/api/admin/stats?t=' + Date.now(), { headers: { 'Authorization': token } });
-                const data = await res.json();
-                if (data.success) {
-                    const s = data.data;
-                    document.getElementById('stat-users').innerText = s.totalUsers;
-                    document.getElementById('stat-events').innerText = s.totalEvents;
-                    document.getElementById('stat-regs').innerText = s.totalRegistrations;
-                    document.getElementById('stat-pending').innerText = s.totalPending;
+    if (tab === 'overview') fetchStats();
+    if (tab === 'users') fetchUsers();
+    if (tab === 'events') fetchEvents();
+    if (tab === 'registrations') fetchRegistrations();
+    }
 
-                    if (s.recentPending.length > 0) {
-                        document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
-                            <tr>
-                                <td style="font-weight: 600;">${r.user_name}</td>
-                                <td>${r.fish_name} (${r.fish_type})</td>
-                                <td style="color: var(--primary); font-size: 0.85rem;">${r.contest_name}</td>
-                                <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(r.created_at).toLocaleDateString()}</td>
-                                <td>
-                                    <div style="display: flex; gap: 5px;">
-                                        <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: #00ff88;" title="Approve"><i class="ri-check-line"></i></button>
-                                        <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: #ff4d4d;" title="Reject"><i class="ri-close-line"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('');
-                    } else {
-                        document.getElementById('pendingTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Tidak ada pendaftaran pending.</td></tr>';
-                    }
-                }
-            } catch (err) {
-                console.error('Fetch Stats Error:', err);
-            }
-        }
+    async function fetchStats() {
+    const token = sessionStorage.getItem('sna_admin_token');
+    try {
+    const res = await fetch('/api/admin/stats?t=' + Date.now(), { headers: { 'Authorization': token } });
+    const data = await res.json();
+    if (data.success) {
+    const s = data.data;
+    document.getElementById('stat-users').innerText = s.totalUsers;
+    document.getElementById('stat-events').innerText = s.totalEvents;
+    document.getElementById('stat-regs').innerText = s.totalRegistrations;
+    document.getElementById('stat-pending').innerText = s.totalPending;
 
-        async function quickAction(id, status) {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/contest/status`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
-                    body: JSON.stringify({ id, status })
-                });
-                if (res.ok) {
-                    fetchStats();
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
+    if (s.recentPending.length > 0) {
+    document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
+    <tr>
+        <td style="font-weight: 600;">${r.user_name}</td>
+        <td>${r.fish_name} (${r.fish_type})</td>
+        <td style="color: var(--primary); font-size: 0.85rem;">${r.contest_name}</td>
+        <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(r.created_at).toLocaleDateString()}</td>
+        <td>
+            <div style="display: flex; gap: 5px;">
+                <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: #00ff88;"
+                    title="Approve"><i class="ri-check-line"></i></button>
+                <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: #ff4d4d;"
+                    title="Reject"><i class="ri-close-line"></i></button>
+            </div>
+        </td>
+    </tr>
+    `).join('');
+    } else {
+    document.getElementById('pendingTableBody').innerHTML = '<tr>
+        <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Tidak ada pendaftaran
+            pending.</td>
+    </tr>';
+    }
+    }
+    } catch (err) {
+    console.error('Fetch Stats Error:', err);
+    }
+    }
 
-        async function fetchUsers() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            const res = await fetch('/api/admin/users', { headers: { 'Authorization': token } });
-            const data = await res.json();
-            if (data.success) {
-                document.getElementById('userTableBody').innerHTML = data.data.map(u => `
-                    <tr>
-                        <td>${u.username}</td>
-                        <td style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${u.password}">${u.password}</td>
-                        <td style="color: var(--primary); font-weight: 600;">${u.full_name}</td>
-                        <td>${u.phone}</td>
-                        <td><span style="background: rgba(0,212,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${u.role}</span></td>
-                        <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(u.created_at).toLocaleDateString()}</td>
-                        <td>
-                            <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--error);" title="Hapus User">
-                                <i class="ri-delete-bin-line"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-        }
+    async function quickAction(id, status) {
+    const token = sessionStorage.getItem('sna_admin_token');
+    try {
+    const res = await fetch(`/api/admin/contest/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+    body: JSON.stringify({ id, status })
+    });
+    if (res.ok) {
+    fetchStats();
+    }
+    } catch (err) {
+    console.error(err);
+    }
+    }
 
-        async function deleteUser(id) {
-            if (!confirm('Hapus akun user ini selamanya? (Semua pendaftaran kontes milik user ini juga akan dihapus)')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/users/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': token }
-                });
-                if (res.ok) {
-                    alert('User berhasil dihapus!');
-                    fetchUsers();
-                } else {
-                    alert('Gagal menghapus user.');
-                }
-            } catch (err) {
-                console.error('Delete User Error:', err);
-            }
-        }
+    async function fetchUsers() {
+    const token = sessionStorage.getItem('sna_admin_token');
+    const res = await fetch('/api/admin/users', { headers: { 'Authorization': token } });
+    const data = await res.json();
+    if (data.success) {
+    document.getElementById('userTableBody').innerHTML = data.data.map(u => `
+    <tr>
+        <td>${u.username}</td>
+        <td style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+            title="${u.password}">${u.password}</td>
+        <td style="color: var(--primary); font-weight: 600;">${u.full_name}</td>
+        <td>${u.phone}</td>
+        <td><span
+                style="background: rgba(0,212,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${u.role}</span>
+        </td>
+        <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(u.created_at).toLocaleDateString()}</td>
+        <td>
+            <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--error);" title="Hapus User">
+                <i class="ri-delete-bin-line"></i>
+            </button>
+        </td>
+    </tr>
+    `).join('');
+    }
+    }
 
-        async function fetchEvents() {
-            try {
-                const res = await fetch('/api/events?t=' + Date.now());
-                const data = await res.json();
-                if (data.success) {
-                    if (data.data.length === 0) {
-                        document.getElementById('eventList').innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada event yang dibuat.</div>';
-                        return;
-                    }
-                    document.getElementById('eventList').innerHTML = data.data.map(ev => `
-                        <div class="glass-panel" style="margin-bottom: 1rem; padding: 1rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--secondary);">
-                            <img src="${ev.image_url}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
-                            <div style="flex: 1;">
-                                <div style="font-weight: bold; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 8px;">
-                                    <span style="background: #ffdf00; color: #000; font-size: 0.8rem; padding: 2px 10px; border-radius: 4px; font-weight: 800; min-width: 30px; text-align: center; box-shadow: 0 0 10px rgba(255, 223, 0, 0.5);">
-                                        ${ev.registration_count || 0}
-                                    </span>
-                                    <span>${ev.title}</span>
-                                </div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted);">${ev.event_date} | ${ev.location}</div>
-                            </div>
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="editEvent(${JSON.stringify(ev).replace(/"/g, '&quot;')})" class="action-btn"><i class="ri-edit-line"></i></button>
-                                <button onclick="deleteEvent(${ev.id})" class="action-btn" style="color: var(--error);"><i class="ri-delete-bin-line"></i></button>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    document.getElementById('eventList').innerHTML = `<div style="color:var(--error); padding:10px;">Gagal memuat: ${data.error || 'Server error'}</div>`;
-                }
-            } catch (err) {
-                console.error('Fetch Events Error:', err);
-                document.getElementById('eventList').innerHTML = '<div style="color:var(--error); padding:10px;">Error koneksi: ' + err.message + '</div>';
-            }
-        }
+    async function deleteUser(id) {
+    if (!confirm('Hapus akun user ini selamanya? (Semua pendaftaran kontes milik user ini juga akan dihapus)')) return;
+    const token = sessionStorage.getItem('sna_admin_token');
+    try {
+    const res = await fetch(`/api/admin/users/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': token }
+    });
+    if (res.ok) {
+    alert('User berhasil dihapus!');
+    fetchUsers();
+    } else {
+    alert('Gagal menghapus user.');
+    }
+    } catch (err) {
+    console.error('Delete User Error:', err);
+    }
+    }
 
-        function editEvent(ev) {
-            document.getElementById('eventId').value = ev.id;
-            document.getElementById('eventTitle').value = ev.title;
-            document.getElementById('eventLocation').value = ev.location;
-            document.getElementById('eventDate').value = ev.event_date;
-            document.getElementById('eventImage').value = ev.image_url;
-            document.getElementById('eventDesc').value = ev.description;
-            document.getElementById('eventStatus').value = ev.status;
-            document.querySelector('#section-events h2').innerText = 'Edit Event';
-        }
+    async function fetchEvents() {
+    try {
+    console.log('Fetching events...');
+    const res = await fetch('/api/events?t=' + Date.now());
+    const data = await res.json();
+    console.log('Events Data:', data);
+    if (data.success) {
+    allEvents = data.data;
+    if (allEvents.length === 0) {
+    document.getElementById('eventList').innerHTML = '<div
+        style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada event yang dibuat.</div>';
+    return;
+    }
+    document.getElementById('eventList').innerHTML = allEvents.map((ev, index) => `
+    <div class="glass-panel"
+        style="margin-bottom: 1rem; padding: 1rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--secondary);">
+        <img src="${ev.image_url || 'https://via.placeholder.com/60'}"
+            style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+        <div style="flex: 1;">
+            <div style="font-weight: bold; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 8px;">
+                <span
+                    style="background: #ffdf00; color: #000; font-size: 0.8rem; padding: 2px 10px; border-radius: 4px; font-weight: 800; min-width: 30px; text-align: center; box-shadow: 0 0 10px rgba(255, 223, 0, 0.5);">
+                    ${ev.registration_count || 0}
+                </span>
+                <span>${ev.title}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${ev.event_date} | ${ev.location}</div>
+        </div>
+        <div style="display: flex; gap: 5px;">
+            <button onclick="editEventByIndex(${index})" class="action-btn" title="Edit"><i
+                    class="ri-edit-line"></i></button>
+            <button onclick="deleteEvent(${ev.id})" class="action-btn" style="color: var(--error);" title="Hapus"><i
+                    class="ri-delete-bin-line"></i></button>
+        </div>
+    </div>
+    `).join('');
+    } else {
+    document.getElementById('eventList').innerHTML = `<div style="color:var(--error); padding:10px;">Gagal memuat:
+        ${data.error || 'Server error'}</div>`;
+    }
+    } catch (err) {
+    console.error('Fetch Events Error:', err);
+    document.getElementById('eventList').innerHTML = '<div style="color:var(--error); padding:10px;">Error koneksi: ' +
+        err.message + '</div>';
+    }
+    }
 
-        document.getElementById('eventForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('eventId').value;
-            const payload = {
-                title: document.getElementById('eventTitle').value,
-                location: document.getElementById('eventLocation').value,
-                eventDate: document.getElementById('eventDate').value,
-                imageUrl: document.getElementById('eventImage').value,
-                description: document.getElementById('eventDesc').value,
-                status: document.getElementById('eventStatus').value
-            };
+    function editEventByIndex(index) {
+    const ev = allEvents[index];
+    if (!ev) return;
+    document.getElementById('eventId').value = ev.id;
+    document.getElementById('eventTitle').value = ev.title;
+    document.getElementById('eventLocation').value = ev.location;
+    document.getElementById('eventDate').value = ev.event_date;
+    document.getElementById('eventImage').value = ev.image_url;
+    document.getElementById('eventDesc').value = ev.description;
+    document.getElementById('eventStatus').value = ev.status;
+    document.querySelector('#section-events h2').innerText = 'Edit Event';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-            const token = sessionStorage.getItem('sna_admin_token');
-            const method = id ? 'PUT' : 'POST';
-            const url = id ? `/api/admin/events/${id}` : '/api/admin/events';
+    document.getElementById('eventForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('eventId').value;
+    const payload = {
+    title: document.getElementById('eventTitle').value,
+    location: document.getElementById('eventLocation').value,
+    eventDate: document.getElementById('eventDate').value,
+    imageUrl: document.getElementById('eventImage').value,
+    description: document.getElementById('eventDesc').value,
+    status: document.getElementById('eventStatus').value
+    };
 
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json', 'Authorization': token },
-                body: JSON.stringify(payload)
-            });
+    const token = sessionStorage.getItem('sna_admin_token');
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/admin/events/${id}` : '/api/admin/events';
 
-            if (res.ok) {
-                alert('Event berhasil disimpan!');
-                e.target.reset();
-                document.getElementById('eventId').value = '';
-                fetchEvents();
-            }
-        });
+    const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+    body: JSON.stringify(payload)
+    });
 
-        async function deleteEvent(id) {
-            if (!confirm('Hapus event ini?')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/events/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': token }
-                });
-                if (res.ok) {
-                    fetchEvents();
-                } else {
-                    const errData = await res.json();
-                    alert('Gagal menghapus: ' + (errData.error || 'Unknown error'));
-                }
-            } catch (err) {
-                console.error('Delete Event Error:', err);
-                alert('Terjadi kesalahan saat menghapus event.');
-            }
-        }
+    if (res.ok) {
+    alert('Event berhasil disimpan!');
+    e.target.reset();
+    document.getElementById('eventId').value = '';
+    fetchEvents();
+    }
+    });
 
-        async function fetchRegistrations() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch('/api/admin/registrations?t=' + Date.now(), { headers: { 'Authorization': token } });
-                const data = await res.json();
-                if (data.success) {
-                    if (data.data.length === 0) {
-                        document.getElementById('regTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada data registrasi.</td></tr>';
-                        return;
-                    }
-                    document.getElementById('regTableBody').innerHTML = data.data.map(r => `
-                        <tr>
-                            <td style="font-weight: 600;">${r.user_name}</td>
-                            <td>
-                                <div>${r.fish_name}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);">${r.fish_type}</div>
-                            </td>
-                            <td style="color: var(--primary);">${r.contest_name}</td>
-                            <td>
-                                <span style="background: ${r.status === 'approved' ? 'rgba(0,255,136,0.1)' : r.status === 'rejected' ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.05)'}; 
+    async function deleteEvent(id) {
+    if (!confirm('Hapus event ini?')) return;
+    const token = sessionStorage.getItem('sna_admin_token');
+    try {
+    const res = await fetch(`/api/admin/events/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': token }
+    });
+    if (res.ok) {
+    fetchEvents();
+    } else {
+    const errData = await res.json();
+    alert('Gagal menghapus: ' + (errData.error || 'Unknown error'));
+    }
+    } catch (err) {
+    console.error('Delete Event Error:', err);
+    alert('Terjadi kesalahan saat menghapus event.');
+    }
+    }
+
+    async function fetchRegistrations() {
+    const token = sessionStorage.getItem('sna_admin_token');
+    try {
+    const res = await fetch('/api/admin/registrations?t=' + Date.now(), { headers: { 'Authorization': token } });
+    const data = await res.json();
+    if (data.success) {
+    if (data.data.length === 0) {
+    document.getElementById('regTableBody').innerHTML = '<tr>
+        <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada data registrasi.
+        </td>
+    </tr>';
+    return;
+    }
+    document.getElementById('regTableBody').innerHTML = data.data.map(r => `
+    <tr>
+        <td style="font-weight: 600;">${r.user_name}</td>
+        <td>
+            <div>${r.fish_name}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${r.fish_type}</div>
+        </td>
+        <td style="color: var(--primary);">${r.contest_name}</td>
+        <td>
+            <span
+                style="background: ${r.status === 'approved' ? 'rgba(0,255,136,0.1)' : r.status === 'rejected' ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.05)'}; 
                                              color: ${r.status === 'approved' ? 'var(--secondary)' : r.status === 'rejected' ? 'var(--error)' : 'white'}; 
                                              padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase;">
-                                    ${r.status}
-                                </span>
-                            </td>
-                            <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(r.created_at).toLocaleDateString()}</td>
-                            <td>
-                                <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--error);" title="Hapus Registrasi">
-                                    <i class="ri-delete-bin-line"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('');
-                } else {
-                    document.getElementById('regTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--error);">Gagal memuat registrasi: ' + data.error + '</td></tr>';
-                }
-            } catch (err) {
-                console.error('Fetch Registrations Error:', err);
-                document.getElementById('regTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--error);">Error koneksi ke server.</td></tr>';
-            }
-        }
+                ${r.status}
+            </span>
+        </td>
+        <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(r.created_at).toLocaleDateString()}</td>
+        <td>
+            <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--error);"
+                title="Hapus Registrasi">
+                <i class="ri-delete-bin-line"></i>
+            </button>
+        </td>
+    </tr>
+    `).join('');
+    } else {
+    document.getElementById('regTableBody').innerHTML = '<tr>
+        <td colspan="6" style="text-align: center; color: var(--error);">Gagal memuat registrasi: ' + data.error + '
+        </td>
+    </tr>';
+    }
+    } catch (err) {
+    console.error('Fetch Registrations Error:', err);
+    document.getElementById('regTableBody').innerHTML = '<tr>
+        <td colspan="6" style="text-align: center; color: var(--error);">Error koneksi ke server.</td>
+    </tr>';
+    }
+    }
 
-        async function deleteRegistration(id) {
-            if (!confirm('Hapus data pendaftaran ini secara permanen?')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/registrations/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': token }
-                });
-                if (res.ok) {
-                    alert('Registrasi berhasil dihapus!');
-                    fetchRegistrations();
-                } else {
-                    const errData = await res.json();
-                    alert('Gagal menghapus: ' + (errData.error || 'Unknown error'));
-                }
-            } catch (err) {
-                console.error('Delete Reg Error:', err);
-                alert('Terjadi kesalahan saat menghapus registrasi.');
-            }
-        }
+    async function deleteRegistration(id) {
+    if (!confirm('Hapus data pendaftaran ini secara permanen?')) return;
+    const token = sessionStorage.getItem('sna_admin_token');
+    try {
+    const res = await fetch(`/api/admin/registrations/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': token }
+    });
+    if (res.ok) {
+    alert('Registrasi berhasil dihapus!');
+    fetchRegistrations();
+    } else {
+    const errData = await res.json();
+    alert('Gagal menghapus: ' + (errData.error || 'Unknown error'));
+    }
+    } catch (err) {
+    console.error('Delete Reg Error:', err);
+    alert('Terjadi kesalahan saat menghapus registrasi.');
+    }
+    }
     </script>
 </body>
 
