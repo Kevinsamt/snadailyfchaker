@@ -31,6 +31,7 @@
                 <button class="tab-btn" onclick="switchTab('fish')">Fish Data</button>
                 <button class="tab-btn" onclick="switchTab('users')">Users</button>
                 <button class="tab-btn" onclick="switchTab('events')">Events</button>
+                <button class="tab-btn" onclick="switchTab('registrations')">Registrasi</button>
             </div>
             <button onclick="logout()" class="action-btn" title="Logout">
                 <i class="ri-logout-box-r-line"></i>
@@ -248,6 +249,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- Section: Registration Management -->
+        <div id="section-registrations" class="admin-section">
+            <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                <h2 style="margin-bottom: 2rem;"><i class="ri-medal-line" style="color: var(--secondary);"></i> Kelola
+                    Semua Registrasi</h2>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; color: white;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                                <th style="padding: 1rem;">User</th>
+                                <th style="padding: 1rem;">Ikan</th>
+                                <th style="padding: 1rem;">Event</th>
+                                <th style="padding: 1rem;">Status</th>
+                                <th style="padding: 1rem;">Tanggal</th>
+                                <th style="padding: 1rem;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="regTableBody">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <style>
@@ -302,6 +328,7 @@
             if (tab === 'overview') fetchStats();
             if (tab === 'users') fetchUsers();
             if (tab === 'events') fetchEvents();
+            if (tab === 'registrations') fetchRegistrations();
         }
 
         async function fetchStats() {
@@ -477,6 +504,54 @@
                 headers: { 'Authorization': token }
             });
             if (res.ok) fetchEvents();
+        }
+
+        async function fetchRegistrations() {
+            const token = sessionStorage.getItem('sna_admin_token');
+            const res = await fetch('/api/admin/registrations?t=' + Date.now(), { headers: { 'Authorization': token } });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('regTableBody').innerHTML = data.data.map(r => `
+                    <tr>
+                        <td style="font-weight: 600;">${r.user_name}</td>
+                        <td>
+                            <div>${r.fish_name}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${r.fish_type}</div>
+                        </td>
+                        <td style="color: var(--primary);">${r.contest_name}</td>
+                        <td>
+                            <span style="background: ${r.status === 'approved' ? 'rgba(0,255,136,0.1)' : r.status === 'rejected' ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.05)'}; 
+                                         color: ${r.status === 'approved' ? 'var(--secondary)' : r.status === 'rejected' ? 'var(--error)' : 'white'}; 
+                                         padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase;">
+                                ${r.status}
+                            </span>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(r.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--error);" title="Hapus Registrasi">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function deleteRegistration(id) {
+            if (!confirm('Hapus data pendaftaran ini secara permanen?')) return;
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch(`/api/admin/registrations/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': token }
+                });
+                if (res.ok) {
+                    alert('Registrasi berhasil dihapus!');
+                    fetchRegistrations();
+                }
+            } catch (err) {
+                console.error('Delete Reg Error:', err);
+            }
         }
     </script>
 </body>

@@ -516,6 +516,31 @@ app.post('/api/admin/contest/status', adminAuthMiddleware, async (req, res) => {
     }
 });
 
+// List All Registrations
+app.get('/api/admin/registrations', adminAuthMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT r.*, u.full_name as user_name 
+            FROM contest_registrations r
+            JOIN users u ON r.user_id = u.id
+            ORDER BY r.created_at DESC
+        `);
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete Registration
+app.delete('/api/admin/registrations/:id', adminAuthMiddleware, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM contest_registrations WHERE id = $1', [req.params.id]);
+        res.json({ success: true, message: 'Registration deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // List All Users
 app.get('/api/admin/users', adminAuthMiddleware, async (req, res) => {
     try {
