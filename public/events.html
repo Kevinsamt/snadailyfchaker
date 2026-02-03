@@ -155,10 +155,10 @@
 
             if (userData) {
                 userNav.innerHTML = `
-                    <div class="user-profile">
+                    <a href="dashboard.html" class="user-profile" style="text-decoration: none; color: white;">
                         <i class="ri-user-smile-line" style="color: var(--primary)"></i>
                         <span style="font-weight: 600;">${userData.fullName}</span>
-                    </div>
+                    </a>
                     <button onclick="logout()" style="background: none; border: none; color: var(--error); cursor: pointer; font-weight: 600;">
                         <i class="ri-logout-box-r-line"></i>
                     </button>

@@ -440,6 +440,34 @@ app.get('/api/contest/my-registrations', userAuthMiddleware, async (req, res) =>
     }
 });
 
+// Get User Profile
+app.get('/api/user/profile', userAuthMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT username, full_name, phone, role FROM users WHERE id = $1', [req.user.id]);
+        if (result.rows.length > 0) {
+            res.json({ success: true, data: result.rows[0] });
+        } else {
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update User Profile
+app.post('/api/user/profile', userAuthMiddleware, async (req, res) => {
+    try {
+        const { fullName, phone } = req.body;
+        const result = await pool.query(
+            'UPDATE users SET full_name = $1, phone = $2 WHERE id = $3 RETURNING username, full_name, phone, role',
+            [fullName, phone, req.user.id]
+        );
+        res.json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
 // --- ADMIN SPECIFIC ROUTES ---
 
 // List All Users

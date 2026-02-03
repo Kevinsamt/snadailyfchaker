@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnaDaily | User Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .profile-card {
+            text-align: center;
+            padding: 2.5rem 2rem;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            background: var(--gradient-main);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            border: 3px solid var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .profile-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-info p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .reg-card {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .reg-card:hover {
+            border-color: var(--primary);
+            transform: translateX(10px);
+        }
+
+        .fish-thumb {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid var(--glass-border);
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 500px;
+            padding: 2.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ocean-background">
+        <div class="bubble x1"></div>
+        <div class="bubble x2"></div>
+        <div class="bubble x3"></div>
+    </div>
+
+    <nav style="padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <a href="events.html"
+            style="color: white; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+            <i class="ri-arrow-left-line"></i> Kembali ke Event
+        </a>
+        <div id="userNav" style="display: flex; gap: 1rem; align-items: center;">
+            <button onclick="logout()" class="action-btn"
+                style="color: var(--error); border: none; background: none; font-weight: 700;">
+                <i class="ri-logout-box-r-line"></i> LOGOUT
+            </button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Sidebar Profile -->
+        <aside>
+            <div class="glass-panel profile-card animate-fade-in">
+                <div class="user-avatar" id="userInitial">U</div>
+                <div class="profile-info">
+                    <h2 id="fullNameDisplay">Memuat...</h2>
+                    <p id="usernameDisplay">@username</p>
+
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalReg">0</div>
+                            <div class="stat-label">Terdaftar</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="approvedReg">0</div>
+                            <div class="stat-label">Disetujui</div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" style="width: 100%; padding: 0.8rem;" onclick="openModal()">
+                        <i class="ri-edit-line"></i> EDIT PROFIL
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <div class="glass-panel animate-fade-in" style="padding: 2rem; margin-bottom: 1rem;">
+                <h1 style="margin-bottom: 2rem;"><i class="ri-medal-2-line" style="color: var(--primary);"></i>
+                    Pendaftaran Kontes Saya</h1>
+                <div id="registrationList">
+                    <!-- Dynamic Content -->
+                    <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                        <i class="ri-history-line"
+                            style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
+                        Belum ada pendaftaran kontes.
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editModal" class="modal">
+        <div class="glass-panel modal-content animate-fade-in">
+            <h2 style="margin-bottom: 1.5rem;">Edit Profil</h2>
+            <form id="profileForm">
+                <div class="input-group">
+                    <label class="input-label">Nama Lengkap</label>
+                    <input type="text" id="editFullName" class="glass-input" required>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Nomor WhatsApp</label>
+                    <input type="tel" id="editPhone" class="glass-input" required placeholder="08xxxxxxx">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" class="btn-primary" style="background: rgba(255,255,255,0.05); color: white;"
+                        onclick="closeModal()">BATAL</button>
+                    <button type="submit" class="btn-primary" style="flex: 1;">SIMPAN PERUBAHAN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('sna_user_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            fetchProfile();
+            fetchRegistrations();
+        });
+
+        async function fetchProfile() {
+            const token = localStorage.getItem('sna_user_token');
+            try {
+                const res = await fetch('/api/user/profile', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const u = data.data;
+                    document.getElementById('fullNameDisplay').innerText = u.full_name;
+                    document.getElementById('usernameDisplay').innerText = '@' + u.username;
+                    document.getElementById('userInitial').innerText = u.full_name.charAt(0).toUpperCase();
+
+                    // Pre-fill modal
+                    document.getElementById('editFullName').value = u.full_name;
+                    document.getElementById('editPhone').value = u.phone;
+
+                    // Update local data
+                    localStorage.setItem('sna_user_data', JSON.stringify({
+                        username: u.username,
+                        fullName: u.full_name
+                    }));
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function fetchRegistrations() {
+            const token = localStorage.getItem('sna_user_token');
+            try {
+                const res = await fetch('/api/contest/my-registrations', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const list = data.data;
+                    document.getElementById('totalReg').innerText = list.length;
+                    document.getElementById('approvedReg').innerText = list.filter(r => r.status === 'approved').length;
+
+                    if (list.length > 0) {
+                        document.getElementById('registrationList').innerHTML = list.map(reg => `
+                            <div class="glass-panel reg-card">
+                                <img src="${reg.fish_image_url || 'https://via.placeholder.com/100'}" class="fish-thumb">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 0.8rem; color: var(--primary); font-weight: 700; margin-bottom: 0.2rem;">${reg.contest_name}</div>
+                                    <h3 style="margin-bottom: 0.3rem;">${reg.fish_name}</h3>
+                                    <div style="color: var(--text-muted); font-size: 0.85rem;">Tipe: ${reg.fish_type}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span class="status-badge" style="background: ${getStatusColor(reg.status)}">
+                                        ${reg.status.toUpperCase()}
+                                    </span>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                        ${new Date(reg.created_at).toLocaleDateString()}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'approved': return 'rgba(0, 255, 136, 0.2); color: #00ff88;';
+                case 'rejected': return 'rgba(255, 77, 77, 0.2); color: #ff4d4d;';
+                default: return 'rgba(255, 215, 0, 0.2); color: #ffd700;';
+            }
+        }
+
+        function openModal() { document.getElementById('editModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('sna_user_token');
+            const fullName = document.getElementById('editFullName').value;
+            const phone = document.getElementById('editPhone').value;
+
+            try {
+                const res = await fetch('/api/user/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ fullName, phone })
+                });
+                if (res.ok) {
+                    alert('Profil berhasil diperbarui!');
+                    closeModal();
+                    fetchProfile();
+                }
+            } catch (err) {
+                alert('Gagal memperbarui profil');
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('sna_user_token');
+            localStorage.removeItem('sna_user_data');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+
+</html>

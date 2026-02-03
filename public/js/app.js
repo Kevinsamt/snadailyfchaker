@@ -1033,9 +1033,46 @@ window.addToCart = (id) => {
     console.log("Add to cart clicked");
 };
 
+// Universal Auth Navigation
+const updateAuthNav = () => {
+    const userData = JSON.parse(localStorage.getItem('sna_user_data'));
+
+    // For Home (index.html)
+    const homeNav = document.getElementById('homeNav');
+    if (homeNav && userData) {
+        homeNav.innerHTML = `
+            <a href="shop.html" class="nav-link"><i class="ri-shopping-bag-3-line"></i> Store</a>
+            <a href="events.html" class="nav-link"><i class="ri-calendar-event-line"></i> Events</a>
+            <a href="track.html" class="nav-link"><i class="ri-truck-line"></i> Tracking</a>
+            <a href="dashboard.html" class="nav-link"><i class="ri-dashboard-line"></i> Dashboard</a>
+        `;
+    }
+
+    // For other pages with #userNav (like events.html)
+    const userNav = document.getElementById('userNav');
+    if (userNav && userData && !userNav.innerHTML.trim().startsWith('<a href="dashboard.html"')) {
+        userNav.innerHTML = `
+            <a href="dashboard.html" class="user-profile" style="text-decoration: none; color: white;">
+                <i class="ri-user-smile-line" style="color: var(--primary)"></i>
+                <span style="font-weight: 600;">${userData.fullName}</span>
+            </a>
+            <button onclick="logout()" style="background: none; border: none; color: var(--error); cursor: pointer; font-weight: 600;">
+                <i class="ri-logout-box-r-line"></i>
+            </button>
+        `;
+    }
+};
+
+window.logout = () => {
+    localStorage.removeItem('sna_user_token');
+    localStorage.removeItem('sna_user_data');
+    window.location.href = 'login.html';
+};
+
 // Initialize based on page
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Loaded. Path:", window.location.pathname);
+    updateAuthNav();
 
     // Detect page based on core elements instead of URL
     if (document.getElementById('fishForm')) {
