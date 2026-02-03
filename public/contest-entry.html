@@ -105,6 +105,14 @@
                     internet untuk sementara (e.g., Unsplash/Imgur)</small>
             </div>
 
+            <div class="input-group">
+                <label class="input-label">Nama Event</label>
+                <select id="eventName" class="glass-input" style="background: rgba(0,0,0,0.5); font-weight: 600;"
+                    required>
+                    <option value="">Memuat event...</option>
+                </select>
+            </div>
+
             <div class="form-grid">
                 <div class="input-group">
                     <label class="input-label">Nama Ikan</label>
@@ -117,14 +125,9 @@
                         <option value="Plakat">Plakat</option>
                         <option value="Crowntail">Crowntail</option>
                         <option value="Double Tail">Double Tail</option>
-                        <option value="Gian">Giant</option>
+                        <option value="Giant">Giant</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="input-group">
-                <label class="input-label">Nama Event</label>
-                <input type="text" id="eventName" class="glass-input" value="Sumatera Betta Championship" readonly>
             </div>
 
             <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" id="submitBtn">
@@ -140,6 +143,28 @@
         if (!localStorage.getItem('sna_user_token')) {
             window.location.href = 'login.html';
         }
+
+        async function fetchEvents() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedEvent = urlParams.get('event');
+
+            try {
+                const res = await fetch('/api/events');
+                const data = await res.json();
+                if (data.success) {
+                    const select = document.getElementById('eventName');
+                    select.innerHTML = '<option value="">Pilih Event...</option>' +
+                        data.data.filter(ev => ev.status !== 'past').map(ev =>
+                            `<option value="${ev.title}" ${selectedEvent === decodeURIComponent(ev.title) ? 'selected' : ''}>${ev.title}</option>`
+                        ).join('');
+                }
+            } catch (err) {
+                console.error('Error fetching events:', err);
+                document.getElementById('eventName').innerHTML = '<option value="">Gagal memuat event</option>';
+            }
+        }
+
+        fetchEvents();
 
         function updatePreview(url) {
             const preview = document.getElementById('previewImage');
@@ -196,12 +221,7 @@
             }
         });
 
-        // Autofill event from URL if needed
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('event')) {
-            const ev = urlParams.get('event');
-            if (ev === 'sumatera2026') document.getElementById('eventName').value = 'Sumatera Betta Championship';
-        }
+        // Autofill logic removed as it's handled in fetchEvents dropdown rendering
     </script>
 </body>
 
