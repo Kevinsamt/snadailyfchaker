@@ -452,10 +452,12 @@
                             </div>
                         </div>
                     `).join('');
+                } else {
+                    document.getElementById('eventList').innerHTML = `<div style="color:var(--error); padding:10px;">Gagal memuat: ${data.error || 'Server error'}</div>`;
                 }
             } catch (err) {
                 console.error('Fetch Events Error:', err);
-                document.getElementById('eventList').innerHTML = '<div style="color:red; padding:10px;">Gagal memuat event.</div>';
+                document.getElementById('eventList').innerHTML = '<div style="color:var(--error); padding:10px;">Error koneksi: ' + err.message + '</div>';
             }
         }
 

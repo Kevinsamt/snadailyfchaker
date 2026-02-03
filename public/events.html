@@ -202,9 +202,12 @@
                             </div>
                         </div>
                     `).join('');
+                } else {
+                    document.getElementById('eventGrid').innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--error);">Gagal memuat event: ${data.error || 'Server error'}</div>`;
                 }
             } catch (err) {
                 console.error('Error fetching events:', err);
+                document.getElementById('eventGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--error);">Terjadi kesalahan koneksi.</div>';
             }
         }
 
