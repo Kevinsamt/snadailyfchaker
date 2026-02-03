@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnaDaily - Betta Contest Events</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .event-hero {
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+        }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            padding: 2rem;
+        }
+
+        .event-card {
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .event-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .event-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .event-content {
+            padding: 1.5rem;
+        }
+
+        .event-tag {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--primary);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .event-title {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: #fff;
+        }
+
+        .event-info {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .event-info i {
+            color: var(--primary);
+        }
+
+        .btn-register {
+            width: 100%;
+            text-align: center;
+            padding: 1rem;
+            background: var(--primary);
+            color: #000;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            display: block;
+            transition: all 0.3s;
+        }
+
+        .btn-register:hover {
+            filter: brightness(1.2);
+            transform: scale(1.02);
+        }
+
+        .user-nav {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ocean-background">
+        <div class="bubble x1"></div>
+        <div class="bubble x2"></div>
+        <div class="bubble x3"></div>
+        <div class="bubble x4"></div>
+        <div class="bubble x5"></div>
+    </div>
+
+    <nav class="user-nav" id="userNav">
+        <!-- Will be populated by JS -->
+    </nav>
+
+    <header class="event-hero">
+        <h1 class="text-gradient animate-fade-in" style="font-size: 3.5rem; margin-bottom: 1rem;">Betta Showdown 2026
+        </h1>
+        <p class="animate-fade-in"
+            style="color: var(--text-muted); font-size: 1.2rem; max-width: 700px; margin: 0 auto;">
+            Panggung tertinggi bagi para jawara cupang. Daftarkan ikan terbaikmu dan rebut total hadiah jutaan rupiah!
+        </p>
+    </header>
+
+    <main class="container">
+        <div class="event-grid">
+            <!-- Event Card 1 -->
+            <div class="glass-panel event-card animate-fade-in">
+                <img src="https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?q=80&w=1412&auto=format&fit=crop"
+                    alt="Halfmoon Contest" class="event-img">
+                <div class="event-content">
+                    <span class="event-tag">REGISTRATION OPEN</span>
+                    <h2 class="event-title">Sumatera Betta Championship</h2>
+                    <div class="event-info">
+                        <span><i class="ri-calendar-line"></i> 15-18 Feb 2026</span>
+                        <span><i class="ri-map-pin-line"></i> Medan Mall</span>
+                    </div>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                        Kontest cupang skala nasional dengan juri internasional. Terbuka untuk kategori Halfmoon,
+                        Plakat, dan Crowntail.
+                    </p>
+                    <a href="contest-entry.html?event=sumatera2026" class="btn-register">DAFTAR KONTES</a>
+                </div>
+            </div>
+
+            <!-- Event Card 2 -->
+            <div class="glass-panel event-card animate-fade-in" style="animation-delay: 0.2s;">
+                <img src="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?q=80&w=1587&auto=format&fit=crop"
+                    alt="Plakat Contest" class="event-img">
+                <div class="event-content">
+                    <span class="event-tag">UPCOMING</span>
+                    <h2 class="event-title">Wild Betta Exhibition</h2>
+                    <div class="event-info">
+                        <span><i class="ri-calendar-line"></i> 02 Mar 2026</span>
+                        <span><i class="ri-map-pin-line"></i> Digital Park</span>
+                    </div>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                        Pameran dan edukasi pelestarian cupang alam nusantara. Raih doorprize ikan hias langka!
+                    </p>
+                    <a href="#" class="btn-register"
+                        style="background: rgba(255,255,255,0.1); color: #fff; cursor: not-allowed;">REMIND ME</a>
+                </div>
+            </div>
+        </div>
+
+        <section id="myRegistrations" style="margin-top: 4rem; display: none;">
+            <h2 style="margin-bottom: 2rem;">Pendaftaran Saya</h2>
+            <div id="regList" class="event-grid" style="padding: 0;">
+                <!-- User's entries will appear here -->
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userData = JSON.parse(localStorage.getItem('sna_user_data'));
+            const userNav = document.getElementById('userNav');
+
+            if (userData) {
+                userNav.innerHTML = `
+                    <div class="user-profile">
+                        <i class="ri-user-smile-line" style="color: var(--primary)"></i>
+                        <span style="font-weight: 600;">${userData.fullName}</span>
+                    </div>
+                    <button onclick="logout()" style="background: none; border: none; color: var(--error); cursor: pointer; font-weight: 600;">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                `;
+                fetchUserRegistrations();
+            } else {
+                userNav.innerHTML = `<a href="login.html" class="btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.9rem;">LOGIN</a>`;
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('sna_user_token');
+            localStorage.removeItem('sna_user_data');
+            window.location.href = 'login.html';
+        }
+
+        async function fetchUserRegistrations() {
+            const token = localStorage.getItem('sna_user_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/contest/my-registrations', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+
+                if (data.success && data.data.length > 0) {
+                    const container = document.getElementById('myRegistrations');
+                    const list = document.getElementById('regList');
+                    container.style.display = 'block';
+
+                    list.innerHTML = data.data.map(reg => `
+                        <div class="glass-panel" style="padding: 1.5rem; display: flex; gap: 1.5rem; align-items: center;">
+                            <img src="${reg.fish_image_url || 'https://via.placeholder.com/100'}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover;">
+                            <div style="flex: 1;">
+                                <h3 style="margin-bottom: 0.2rem;">${reg.fish_name}</h3>
+                                <div style="color: var(--text-muted); font-size: 0.85rem;">Type: ${reg.fish_type}</div>
+                                <div style="margin-top: 0.5rem;">
+                                    <span style="padding: 0.2rem 0.8rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; background: ${getStatusColor(reg.status)}">
+                                        ${reg.status.toUpperCase()}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error fetching registrations:', err);
+            }
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'approved': return 'rgba(0, 255, 136, 0.2); color: #00ff88;';
+                case 'rejected': return 'rgba(255, 77, 77, 0.2); color: #ff4d4d;';
+                default: return 'rgba(255, 215, 0, 0.2); color: #ffd700;';
+            }
+        }
+    </script>
+</body>
+
+</html>

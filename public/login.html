@@ -143,19 +143,30 @@
 </head>
 
 <body>
-    <div class="watermark">ADMIN</div>
+    <div class="watermark" id="watermark">ADMIN</div>
 
     <div class="login-card">
         <div class="logo-area">
-            <i class="ri-shield-keyhole-line logo-icon"></i>
-            <div class="login-title">Admin Access</div>
-            <div style="color: var(--text-secondary); font-size: 0.9rem;">Masuk untuk mengelola data</div>
+            <i class="ri-shield-keyhole-line logo-icon" id="loginIcon"></i>
+            <div class="login-title" id="loginTitle">Admin Access</div>
+            <div id="loginSubtitle" style="color: var(--text-secondary); font-size: 0.9rem;">Masuk untuk mengelola data
+            </div>
+        </div>
+
+        <div class="login-toggle"
+            style="display: flex; gap: 1rem; margin-bottom: 2rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 12px;">
+            <button id="toggleUser"
+                style="flex: 1; padding: 0.8rem; border: none; border-radius: 8px; cursor: pointer; background: transparent; color: var(--text-muted); font-weight: 600; transition: all 0.3s;"
+                onclick="switchMode('user')">User</button>
+            <button id="toggleAdmin"
+                style="flex: 1; padding: 0.8rem; border: none; border-radius: 8px; cursor: pointer; background: var(--primary); color: #000; font-weight: 800; transition: all 0.3s;"
+                onclick="switchMode('admin')">Admin</button>
         </div>
 
         <form id="loginForm">
             <div class="form-group">
                 <label class="form-label">Username</label>
-                <input type="text" id="username" class="form-input" placeholder="Masukkan ID Admin" required>
+                <input type="text" id="username" class="form-input" placeholder="Masukkan Username" required>
             </div>
 
             <div class="form-group">
@@ -167,8 +178,15 @@
                 <span>Masuk</span>
                 <i class="ri-arrow-right-line"></i>
             </button>
-            <div id="errorMsg" class="error-msg">ID atau Password salah!</div>
+            <div id="errorMsg" class="error-msg">Username atau Password salah!</div>
         </form>
+
+        <div id="registerLink" style="text-align: center; margin-top: 1.5rem; display: none;">
+            <span style="color: var(--text-secondary); font-size: 0.9rem;">Belum punya akun? </span>
+            <a href="register.html"
+                style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem;">Daftar
+                Sekarang</a>
+        </div>
 
         <div style="text-align: center; margin-top: 1.5rem;">
             <a href="index.html"
@@ -179,6 +197,50 @@
     </div>
 
     <script>
+        let currentMode = 'admin';
+
+        // Check if just registered
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('registered')) {
+            switchMode('user');
+            // Show toast or alert? Let's just update subtitle
+            document.getElementById('loginSubtitle').innerText = 'Registrasi berhasil! Silakan masuk.';
+            document.getElementById('loginSubtitle').style.color = 'var(--success)';
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const title = document.getElementById('loginTitle');
+            const sub = document.getElementById('loginSubtitle');
+            const icon = document.getElementById('loginIcon');
+            const watermark = document.getElementById('watermark');
+            const regLink = document.getElementById('registerLink');
+            const tAdmin = document.getElementById('toggleAdmin');
+            const tUser = document.getElementById('toggleUser');
+
+            if (mode === 'admin') {
+                title.innerText = 'Admin Access';
+                sub.innerText = 'Masuk untuk mengelola data';
+                icon.className = 'ri-shield-keyhole-line logo-icon';
+                watermark.innerText = 'ADMIN';
+                regLink.style.display = 'none';
+                tAdmin.style.background = 'var(--primary)';
+                tAdmin.style.color = '#000';
+                tUser.style.background = 'transparent';
+                tUser.style.color = 'var(--text-muted)';
+            } else {
+                title.innerText = 'User Login';
+                sub.innerText = 'Masuk untuk daftar kontes';
+                icon.className = 'ri-user-heart-line logo-icon';
+                watermark.innerText = 'USER';
+                regLink.style.display = 'block';
+                tUser.style.background = 'var(--primary)';
+                tUser.style.color = '#000';
+                tAdmin.style.background = 'transparent';
+                tAdmin.style.color = 'var(--text-muted)';
+            }
+        }
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -188,13 +250,13 @@
             const btn = document.querySelector('.btn-login');
             const originalBtnText = btn.innerHTML;
 
-            // Loading State
             btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Memeriksa...';
             btn.disabled = true;
+            err.style.display = 'none';
 
             try {
-                // Server-Side Check
-                const response = await fetch('/api/login', {
+                const endpoint = currentMode === 'admin' ? '/api/admin/login' : '/api/auth/login';
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: u, password: p })
@@ -202,24 +264,21 @@
 
                 const data = await response.json();
 
-                if (data.success) {
-                    // Set Session Token from Server
-                    sessionStorage.setItem('sna_admin_token', data.token);
-
-                    // Success Animation
-                    btn.innerHTML = '<i class="ri-check-line"></i> Berhasil';
-                    btn.style.background = '#10b981';
-
-                    setTimeout(() => {
+                if (response.ok && data.success) {
+                    if (currentMode === 'admin') {
+                        sessionStorage.setItem('sna_admin_token', data.token);
                         window.location.href = 'admin.html';
-                    }, 800);
+                    } else {
+                        localStorage.setItem('sna_user_token', data.token);
+                        localStorage.setItem('sna_user_data', JSON.stringify(data.user));
+                        window.location.href = 'events.html';
+                    }
                 } else {
-                    throw new Error('Invalid credentials');
+                    throw new Error(data.error || 'Invalid credentials');
                 }
             } catch (error) {
-                // Error Animation
+                err.innerText = error.message;
                 err.style.display = 'block';
-                // Reset Button
                 btn.innerHTML = originalBtnText;
                 btn.disabled = false;
 

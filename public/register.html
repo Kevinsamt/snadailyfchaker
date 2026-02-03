@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnaDaily - Registrasi Akun</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 450px;
+            padding: 2.5rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .register-header i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .register-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .register-header p {
+            color: var(--text-muted);
+        }
+
+        .btn-full {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .footer-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .error-msg {
+            background: rgba(255, 77, 77, 0.1);
+            color: var(--error);
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ocean-background">
+        <div class="bubble x1"></div>
+        <div class="bubble x2"></div>
+        <div class="bubble x3"></div>
+        <div class="bubble x4"></div>
+        <div class="bubble x5"></div>
+        <div class="bubble x6"></div>
+    </div>
+
+    <div class="glass-panel register-card">
+        <div class="register-header">
+            <i class="ri-user-add-line"></i>
+            <h1>Buat Akun Baru</h1>
+            <p>Bergabunglah dengan komunitas kolektor cupang kami</p>
+        </div>
+
+        <div id="errorMsg" class="error-msg"></div>
+
+        <form id="registerForm">
+            <div class="input-group">
+                <label class="input-label">Username</label>
+                <input type="text" id="username" class="glass-input" placeholder="pilih username" required>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Nama Lengkap</label>
+                <input type="text" id="fullName" class="glass-input" placeholder="nama sesuai identitas" required>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Nomor WhatsApp</label>
+                <input type="tel" id="phone" class="glass-input" placeholder="0812..." required>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Password</label>
+                <input type="password" id="password" class="glass-input" placeholder="minimal 6 karakter" required
+                    minlength="6">
+            </div>
+
+            <button type="submit" class="btn-primary btn-full" id="submitBtn">
+                Daftar Sekarang
+            </button>
+        </form>
+
+        <div class="footer-link">
+            Sudah punya akun? <a href="login.html">Masuk di sini</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMsg');
+
+            const formData = {
+                username: document.getElementById('username').value,
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Memproses...';
+            errorMsg.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    submitBtn.innerHTML = '<i class="ri-check-line"></i> Berhasil!';
+                    submitBtn.style.background = 'var(--success)';
+
+                    setTimeout(() => {
+                        window.location.href = 'login.html?registered=true';
+                    }, 1500);
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan saat registrasi');
+                }
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Daftar Sekarang';
+            }
+        });
+    </script>
+</body>
+
+</html>
