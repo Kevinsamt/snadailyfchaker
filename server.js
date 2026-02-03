@@ -220,6 +220,17 @@ async function initDb() {
             timestamp TEXT
         )`);
 
+        // Products Table
+        await pool.query(`CREATE TABLE IF NOT EXISTS products (
+            id SERIAL PRIMARY KEY,
+            name TEXT,
+            price REAL,
+            image TEXT,
+            description TEXT,
+            category TEXT,
+            stock INTEGER DEFAULT 10
+        )`);
+
         // Users Table for Contest
         await pool.query(`CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -297,6 +308,10 @@ const adminAuthMiddleware = (req, res, next) => {
         res.status(403).json({ error: 'Access denied. Admin login required.' });
     }
 };
+
+// Alias for compatibility with existing routes
+const authMiddleware = adminAuthMiddleware;
+
 
 // USER AUTHENTICATION & CONTEST ROUTES
 
