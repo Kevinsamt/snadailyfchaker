@@ -570,13 +570,14 @@ app.get('/api/events', async (req, res) => {
         const sql = `
             SELECT e.*, COUNT(r.id) as registration_count 
             FROM events e 
-            LEFT JOIN contest_registrations r ON e.id = r.event_id AND r.status != 'rejected'
+            LEFT JOIN contest_registrations r ON e.title = r.contest_name AND r.status != 'rejected'
             GROUP BY e.id 
             ORDER BY e.event_date ASC
         `;
         const result = await pool.query(sql);
         res.json({ success: true, data: result.rows });
     } catch (err) {
+        console.error("Fetch Events API Error:", err);
         res.status(500).json({ error: err.message });
     }
 });
