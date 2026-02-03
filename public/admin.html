@@ -22,121 +22,309 @@
 <body>
 
     <nav class="glass-panel"
-        style="border-radius: 0; padding: 1rem 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
-        <div style="font-size: 1.5rem; font-weight: 700;">SnaDaily<span class="text-gradient">Cheker</span> Dashboard
+        style="border-radius: 0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+        <div style="font-size: 1.5rem; font-weight: 700;">SnaDaily<span class="text-gradient">Cheker</span> Admin
         </div>
         <div style="display: flex; gap: 1rem; align-items: center;">
-            <button onclick="window.backupData()" class="action-btn" title="Backup Data (Download)"
-                style="color: var(--primary); border-color: var(--primary);">
-                <i class="ri-download-cloud-line"></i>
-            </button>
-            <label for="restoreInput" class="action-btn" title="Restore Data (Upload)"
-                style="color: var(--secondary); border-color: var(--secondary); cursor: pointer; margin: 0;">
-                <i class="ri-upload-cloud-line"></i>
-            </label>
-            <input type="file" id="restoreInput" accept=".json" style="display: none;"
-                onchange="window.restoreData(this)">
-
-            <span style="font-size: 0.9rem; color: var(--text-muted);">Admin Panel</span>
-            <div style="width: 35px; height: 35px; background: var(--gradient-main); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--primary); cursor: pointer;"
-                onclick="logout()" title="Logout">
-                <i class="ri-logout-box-r-line"></i>
+            <div id="adminTabs" style="display: flex; gap: 0.5rem; margin-right: 2rem;">
+                <button class="tab-btn active" onclick="switchTab('fish')">Fish Data</button>
+                <button class="tab-btn" onclick="switchTab('users')">Users</button>
+                <button class="tab-btn" onclick="switchTab('events')">Events</button>
             </div>
+            <button onclick="logout()" class="action-btn" title="Logout">
+                <i class="ri-logout-box-r-line"></i>
+            </button>
         </div>
     </nav>
 
-    <div class="container admin-grid">
-
-        <!-- Input Section -->
-        <div>
-            <div class="glass-panel animate-fade-in" style="padding: 2rem;">
-                <h2
-                    style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
-                    <span>
-                        <i class="ri-file-add-line" style="color: var(--secondary);"></i>
-                        Input Data Ikan
-                    </span>
-                    <button onclick="window.debugFetch()"
-                        style="font-size: 0.8rem; padding: 4px 8px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer;">
-                        Debug: Cek Data
-                    </button>
-                </h2>
-
-                <form id="fishForm">
-                    <input type="hidden" id="editId">
-                    <div class="input-group">
-                        <label class="input-label">Spesies Ikan</label>
-                        <input type="text" id="species" class="glass-input" placeholder="Contoh: Tuna Bluefin" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label class="input-label">Asal (Origin)</label>
-                        <input type="text" id="origin" class="glass-input" placeholder="Contoh: Maluku, Indonesia"
-                            required>
-                    </div>
-
-                    <div class="input-group" id="hatchDateContainer">
-                        <label class="input-label">Tanggal Menetas</label>
-                        <input type="date" id="catchDate" class="glass-input" required>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="input-group">
-                            <label class="input-label">Berat (kg)</label>
-                            <input type="number" step="0.1" id="weight" class="glass-input" placeholder="0.0" required>
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">Metode</label>
-                            <select id="method" class="glass-input" style="background-color: #0a0e17;">
-                                <option>Ternak sendiri</option>
-                                <option>Import dari luar negri</option>
-                                <option>Import dari luar pulau</option>
-                            </select>
-                        </div>
-                    </div>
-
-
-
-                    <div class="input-group" id="importDateContainer" style="display: none; margin-top: 1rem;">
-                        <label class="input-label">Negara Asal Import</label>
-                        <input type="text" id="importDate" class="glass-input" placeholder="Contoh: Thailand">
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-                        <i class="ri-qr-code-line" style="margin-right: 8px;"></i>
-                        Generate ID & Simpan
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- History/Preview Section -->
-        <div>
-            <div class="glass-panel animate-fade-in" style="padding: 2rem; height: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <div style="font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="ri-history-line" style="color: var(--primary);"></i>
-                        Riwayat
-                    </div>
-                    <div class="input-group" style="margin-bottom: 0; width: 60%; position: relative;">
-                        <input type="text" id="searchInput" class="glass-input" placeholder="Cari..."
-                            style="padding: 0.5rem 1rem; padding-right: 2rem; border-color: var(--primary); font-size: 0.9rem;">
-                        <i class="ri-close-line" id="clearSearchBtn"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); display: none;"></i>
+    <div class="container">
+        <!-- Section: Fish Data -->
+        <div id="section-fish" class="admin-section active">
+            <div class="admin-grid">
+                <!-- Input Section -->
+                <div>
+                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                        <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="ri-file-add-line" style="color: var(--secondary);"></i>
+                            Input Data Ikan
+                        </h2>
+                        <form id="fishForm">
+                            <input type="hidden" id="editId">
+                            <div class="input-group">
+                                <label class="input-label">Spesies Ikan</label>
+                                <input type="text" id="species" class="glass-input" placeholder="Contoh: Tuna Bluefin"
+                                    required>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Asal (Origin)</label>
+                                <input type="text" id="origin" class="glass-input"
+                                    placeholder="Contoh: Maluku, Indonesia" required>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Tanggal Menetas</label>
+                                <input type="date" id="catchDate" class="glass-input" required>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="input-group">
+                                    <label class="input-label">Berat (kg)</label>
+                                    <input type="number" step="0.1" id="weight" class="glass-input" placeholder="0.0"
+                                        required>
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label">Metode</label>
+                                    <select id="method" class="glass-input" style="background-color: #0a0e17;">
+                                        <option>Ternak sendiri</option>
+                                        <option>Import dari luar negri</option>
+                                        <option>Import dari luar pulau</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                                <i class="ri-qr-code-line" style="margin-right: 8px;"></i>
+                                Simpan Data Ikan
+                            </button>
+                        </form>
                     </div>
                 </div>
 
-                <div id="historyList" style="max-height: 500px; overflow-y: auto; padding-right: 0.5rem;">
-                    <!-- Items will be injected here by JS -->
-                    <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                        Belum ada data yang diinput hari ini.
+                <!-- History Section -->
+                <div>
+                    <div class="glass-panel animate-fade-in" style="padding: 2rem; height: 100%;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div
+                                style="font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="ri-history-line" style="color: var(--primary);"></i>
+                                Riwayat Ikan
+                            </div>
+                            <input type="text" id="searchInput" class="glass-input" placeholder="Cari..."
+                                style="width: 50%; padding: 0.5rem;">
+                        </div>
+                        <div id="historyList" style="max-height: 500px; overflow-y: auto;">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Users Management -->
+        <div id="section-users" class="admin-section">
+            <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                <h2 style="margin-bottom: 2rem;"><i class="ri-group-line" style="color: var(--primary);"></i> Kelola
+                    Akun User</h2>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; color: white;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                                <th style="padding: 1rem;">Username</th>
+                                <th style="padding: 1rem;">Nama Lengkap</th>
+                                <th style="padding: 1rem;">WhatsApp</th>
+                                <th style="padding: 1rem;">Role</th>
+                                <th style="padding: 1rem;">Terdaftar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Events Management -->
+        <div id="section-events" class="admin-section">
+            <div class="admin-grid">
+                <div>
+                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                        <h2 style="margin-bottom: 1.5rem;"><i class="ri-calendar-event-line"
+                                style="color: var(--secondary);"></i> Event Baru</h2>
+                        <form id="eventForm">
+                            <input type="hidden" id="eventId">
+                            <div class="input-group">
+                                <label class="input-label">Judul Event</label>
+                                <input type="text" id="eventTitle" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Lokasi</label>
+                                <input type="text" id="eventLocation" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Tanggal Pelaksanaan</label>
+                                <input type="date" id="eventDate" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">URL Gambar</label>
+                                <input type="url" id="eventImage" class="glass-input" placeholder="https://..."
+                                    required>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Deskripsi</label>
+                                <textarea id="eventDesc" class="glass-input" style="height: 100px; resize: none;"
+                                    required></textarea>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Status</label>
+                                <select id="eventStatus" class="glass-input" style="background-color: #0a0e17;">
+                                    <option value="upcoming">Upcoming</option>
+                                    <option value="active">Active</option>
+                                    <option value="past">Past</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Simpan
+                                Event</button>
+                        </form>
+                    </div>
+                </div>
+                <div>
+                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                        <h2 style="margin-bottom: 1.5rem;">Daftar Event</h2>
+                        <div id="eventList" style="max-height: 600px; overflow-y: auto;">
+                            <!-- Injected by JS -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <style>
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+
     <script src="js/app.js"></script>
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`section-${tab}`).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (tab === 'users') fetchUsers();
+            if (tab === 'events') fetchEvents();
+        }
+
+        async function fetchUsers() {
+            const token = sessionStorage.getItem('sna_admin_token');
+            const res = await fetch('/api/admin/users', { headers: { 'Authorization': token } });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('userTableBody').innerHTML = data.data.map(u => `
+                    <tr>
+                        <td>${u.username}</td>
+                        <td style="color: var(--primary); font-weight: 600;">${u.full_name}</td>
+                        <td>${u.phone}</td>
+                        <td><span style="background: rgba(0,212,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${u.role}</span></td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(u.created_at).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function fetchEvents() {
+            const res = await fetch('/api/events');
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('eventList').innerHTML = data.data.map(ev => `
+                    <div class="glass-panel" style="margin-bottom: 1rem; padding: 1rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--secondary);">
+                        <img src="${ev.image_url}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold;">${ev.title}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${ev.event_date} | ${ev.location}</div>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="editEvent(${JSON.stringify(ev).replace(/"/g, '&quot;')})" class="action-btn"><i class="ri-edit-line"></i></button>
+                            <button onclick="deleteEvent(${ev.id})" class="action-btn" style="color: var(--error);"><i class="ri-delete-bin-line"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function editEvent(ev) {
+            document.getElementById('eventId').value = ev.id;
+            document.getElementById('eventTitle').value = ev.title;
+            document.getElementById('eventLocation').value = ev.location;
+            document.getElementById('eventDate').value = ev.event_date;
+            document.getElementById('eventImage').value = ev.image_url;
+            document.getElementById('eventDesc').value = ev.description;
+            document.getElementById('eventStatus').value = ev.status;
+            document.querySelector('#section-events h2').innerText = 'Edit Event';
+        }
+
+        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('eventId').value;
+            const payload = {
+                title: document.getElementById('eventTitle').value,
+                location: document.getElementById('eventLocation').value,
+                eventDate: document.getElementById('eventDate').value,
+                imageUrl: document.getElementById('eventImage').value,
+                description: document.getElementById('eventDesc').value,
+                status: document.getElementById('eventStatus').value
+            };
+
+            const token = sessionStorage.getItem('sna_admin_token');
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/admin/events/${id}` : '/api/admin/events';
+
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('Event berhasil disimpan!');
+                e.target.reset();
+                document.getElementById('eventId').value = '';
+                fetchEvents();
+            }
+        });
+
+        async function deleteEvent(id) {
+            if (!confirm('Hapus event ini?')) return;
+            const token = sessionStorage.getItem('sna_admin_token');
+            const res = await fetch(`/api/admin/events/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': token }
+            });
+            if (res.ok) fetchEvents();
+        }
+    </script>
+</body>
+
+</html>
+
+<script src="js/app.js"></script>
 </body>
 
 </html>

@@ -254,6 +254,34 @@ async function initDb() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
+        // Events Table
+        await pool.query(`CREATE TABLE IF NOT EXISTS events (
+            id SERIAL PRIMARY KEY,
+            title TEXT,
+            description TEXT,
+            image_url TEXT,
+            location TEXT,
+            event_date TEXT,
+            status TEXT DEFAULT 'upcoming',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Seed initial event if empty
+        const eventCount = await pool.query('SELECT COUNT(*) FROM events');
+        if (parseInt(eventCount.rows[0].count) === 0) {
+            await pool.query(
+                "INSERT INTO events (title, description, image_url, location, event_date, status) VALUES ($1, $2, $3, $4, $5, $6)",
+                [
+                    'Sumatera Betta Championship',
+                    'Kontest cupang skala nasional dengan juri internasional. Terbuka untuk kategori Halfmoon, Plakat, dan Crowntail.',
+                    'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?q=80&w=1412&auto=format&fit=crop',
+                    'Medan Mall',
+                    '2026-02-15',
+                    'active'
+                ]
+            );
+        }
+
         // Seed products if empty or contains old seafood data
         try {
             const checkOld = await pool.query("SELECT * FROM products WHERE name LIKE '%Salmon%' LIMIT 1");
@@ -409,6 +437,66 @@ app.get('/api/contest/my-registrations', userAuthMiddleware, async (req, res) =>
         res.json({ success: true, data: result.rows });
     } catch (err) {
         res.status(400).json({ error: err.message });
+    }
+});
+
+// --- ADMIN SPECIFIC ROUTES ---
+
+// List All Users
+app.get('/api/admin/users', adminAuthMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, username, full_name, phone, role, created_at FROM users ORDER BY created_at DESC');
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// List All Events (Public)
+app.get('/api/events', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM events ORDER BY event_date ASC');
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Create Event
+app.post('/api/admin/events', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { title, description, imageUrl, location, eventDate, status } = req.body;
+        const result = await pool.query(
+            'INSERT INTO events (title, description, image_url, location, event_date, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [title, description, imageUrl, location, eventDate, status || 'upcoming']
+        );
+        res.json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Update Event
+app.put('/api/admin/events/:id', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { title, description, imageUrl, location, eventDate, status } = req.body;
+        const result = await pool.query(
+            'UPDATE events SET title=$1, description=$2, image_url=$3, location=$4, event_date=$5, status=$6 WHERE id=$7 RETURNING *',
+            [title, description, imageUrl, location, eventDate, status, req.params.id]
+        );
+        res.json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Delete Event
+app.delete('/api/admin/events/:id', adminAuthMiddleware, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM events WHERE id = $1', [req.params.id]);
+        res.json({ success: true, message: 'Event deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 

@@ -135,44 +135,9 @@
     </header>
 
     <main class="container">
-        <div class="event-grid">
-            <!-- Event Card 1 -->
-            <div class="glass-panel event-card animate-fade-in">
-                <img src="https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?q=80&w=1412&auto=format&fit=crop"
-                    alt="Halfmoon Contest" class="event-img">
-                <div class="event-content">
-                    <span class="event-tag">REGISTRATION OPEN</span>
-                    <h2 class="event-title">Sumatera Betta Championship</h2>
-                    <div class="event-info">
-                        <span><i class="ri-calendar-line"></i> 15-18 Feb 2026</span>
-                        <span><i class="ri-map-pin-line"></i> Medan Mall</span>
-                    </div>
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
-                        Kontest cupang skala nasional dengan juri internasional. Terbuka untuk kategori Halfmoon,
-                        Plakat, dan Crowntail.
-                    </p>
-                    <a href="contest-entry.html?event=sumatera2026" class="btn-register">DAFTAR KONTES</a>
-                </div>
-            </div>
-
-            <!-- Event Card 2 -->
-            <div class="glass-panel event-card animate-fade-in" style="animation-delay: 0.2s;">
-                <img src="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?q=80&w=1587&auto=format&fit=crop"
-                    alt="Plakat Contest" class="event-img">
-                <div class="event-content">
-                    <span class="event-tag">UPCOMING</span>
-                    <h2 class="event-title">Wild Betta Exhibition</h2>
-                    <div class="event-info">
-                        <span><i class="ri-calendar-line"></i> 02 Mar 2026</span>
-                        <span><i class="ri-map-pin-line"></i> Digital Park</span>
-                    </div>
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
-                        Pameran dan edukasi pelestarian cupang alam nusantara. Raih doorprize ikan hias langka!
-                    </p>
-                    <a href="#" class="btn-register"
-                        style="background: rgba(255,255,255,0.1); color: #fff; cursor: not-allowed;">REMIND ME</a>
-                </div>
-            </div>
+        <div id="eventGrid" class="event-grid">
+            <!-- Dynamic events will appear here -->
+            <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Memuat daftar event...</div>
         </div>
 
         <section id="myRegistrations" style="margin-top: 4rem; display: none;">
@@ -202,7 +167,46 @@
             } else {
                 userNav.innerHTML = `<a href="login.html" class="btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.9rem;">LOGIN</a>`;
             }
+
+            fetchEvents();
         });
+
+        async function fetchEvents() {
+            try {
+                const response = await fetch('/api/events');
+                const data = await response.json();
+                if (data.success) {
+                    const grid = document.getElementById('eventGrid');
+                    if (data.data.length === 0) {
+                        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Belum ada event tersedia.</div>';
+                        return;
+                    }
+
+                    grid.innerHTML = data.data.map((ev, idx) => `
+                        <div class="glass-panel event-card animate-fade-in" style="animation-delay: ${idx * 0.1}s">
+                            <img src="${ev.image_url}" class="event-img">
+                            <div class="event-content">
+                                <span class="event-tag" style="background: ${getStatusColor(ev.status, true)}">${ev.status.toUpperCase()}</span>
+                                <h2 class="event-title">${ev.title}</h2>
+                                <div class="event-info">
+                                    <span><i class="ri-calendar-line"></i> ${ev.event_date}</span>
+                                    <span><i class="ri-map-pin-line"></i> ${ev.location}</span>
+                                </div>
+                                <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem; height: 60px; overflow: hidden;">
+                                    ${ev.description}
+                                </p>
+                                ${ev.status === 'past' ?
+                            '<button class="btn-register" style="background: rgba(255,255,255,0.1); color: #888; cursor: default;">EVENT SELESAI</button>' :
+                            `<a href="contest-entry.html?event=${encodeURIComponent(ev.title)}" class="btn-register">DAFTAR KONTES</a>`
+                        }
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error fetching events:', err);
+            }
+        }
 
         function logout() {
             localStorage.removeItem('sna_user_token');
@@ -245,7 +249,14 @@
             }
         }
 
-        function getStatusColor(status) {
+        function getStatusColor(status, isEvent = false) {
+            if (isEvent) {
+                switch (status) {
+                    case 'active': return 'rgba(0, 255, 136, 0.2); color: #00ff88;';
+                    case 'past': return 'rgba(255, 255, 255, 0.1); color: #888;';
+                    default: return 'rgba(0, 212, 255, 0.1); color: var(--primary);';
+                }
+            }
             switch (status) {
                 case 'approved': return 'rgba(0, 255, 136, 0.2); color: #00ff88;';
                 case 'rejected': return 'rgba(255, 77, 77, 0.2); color: #ff4d4d;';
