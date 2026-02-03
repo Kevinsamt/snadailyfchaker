@@ -307,7 +307,7 @@
         async function fetchStats() {
             const token = sessionStorage.getItem('sna_admin_token');
             try {
-                const res = await fetch('/api/admin/stats', { headers: { 'Authorization': token } });
+                const res = await fetch('/api/admin/stats?t=' + Date.now(), { headers: { 'Authorization': token } });
                 const data = await res.json();
                 if (data.success) {
                     const s = data.data;
