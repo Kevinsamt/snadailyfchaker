@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script>
+        // Security Check
+        if (!sessionStorage.getItem('sna_admin_token')) {
+            window.location.href = 'login.html';
+        }
+        function logout() {
+            sessionStorage.removeItem('sna_admin_token');
+            window.location.href = 'login.html';
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnaDaily Admin | Home</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .admin-nav {
+            background: rgba(0, 18, 25, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-sections {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-item {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .stat-card {
+            padding: 2rem;
+            border-radius: 20px;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .pending-table tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pending-table td {
+            padding: 1.2rem 1rem;
+        }
+
+        .badge-pending {
+            background: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ocean-background">
+        <div class="bubble x1"></div>
+        <div class="bubble x2"></div>
+        <div class="bubble x3"></div>
+    </div>
+
+    <nav class="admin-nav">
+        <div style="font-size: 1.4rem; font-weight: 800; color: white;">
+            SnaDaily<span class="text-gradient">Admin</span>
+        </div>
+        <div class="nav-sections">
+            <a href="admin-dashboard.html" class="nav-item active"><i class="ri-dashboard-line"></i> Dashboard</a>
+            <a href="admin.html" class="nav-item"><i class="ri-database-line"></i> Fish Data</a>
+            <a href="admin.html?tab=users" class="nav-item"><i class="ri-group-line"></i> Users</a>
+            <a href="admin.html?tab=events" class="nav-item"><i class="ri-calendar-event-line"></i> Events</a>
+        </div>
+        <button onclick="logout()" class="action-btn" style="color: var(--error);">
+            <i class="ri-logout-box-r-line"></i>
+        </button>
+    </nav>
+
+    <div class="container" style="margin-top: 3rem;">
+        <div style="margin-bottom: 3rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Selamat Datang, Admin!</h1>
+            <p style="color: var(--text-muted);">Berikut adalah ringkasan aktivitas sistem hari ini.</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+            <div class="glass-panel stat-card">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div
+                        style="padding: 10px; background: rgba(0, 212, 255, 0.1); border-radius: 12px; color: var(--primary);">
+                        <i class="ri-group-line" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+                <div style="font-size: 2.5rem; font-weight: 800;" id="count-users">0</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">Total Akun Pengguna</div>
+            </div>
+
+            <div class="glass-panel stat-card">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div
+                        style="padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 12px; color: var(--secondary);">
+                        <i class="ri-calendar-event-line" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+                <div style="font-size: 2.5rem; font-weight: 800;" id="count-events">0</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">Event Kontes Aktif</div>
+            </div>
+
+            <div class="glass-panel stat-card">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div
+                        style="padding: 10px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; color: #ffd700;">
+                        <i class="ri-medal-line" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+                <div style="font-size: 2.5rem; font-weight: 800;" id="count-regs">0</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">Total Ikan Terdaftar</div>
+            </div>
+
+            <div class="glass-panel stat-card">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div
+                        style="padding: 10px; background: rgba(255, 77, 77, 0.1); border-radius: 12px; color: var(--error);">
+                        <i class="ri-alarm-warning-line" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+                <div style="font-size: 2.5rem; font-weight: 800; color: var(--error);" id="count-pending">0</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">Menunggu Persetujuan</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions / Pending List -->
+        <div class="glass-panel" style="padding: 2.5rem;">
+            <h2 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.8rem;">
+                <i class="ri-notification-3-line" style="color: var(--error);"></i>
+                Pendaftaran Pending Terbaru
+            </h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;" class="pending-table">
+                    <thead>
+                        <tr
+                            style="text-align: left; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">
+                            <th style="padding: 1rem;">User</th>
+                            <th style="padding: 1rem;">Ikan</th>
+                            <th style="padding: 1rem;">Event</th>
+                            <th style="padding: 1rem;">Waktu</th>
+                            <th style="padding: 1rem; text-align: right;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingList">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 4rem; color: var(--text-muted);">Memuat
+                                data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', fetchStats);
+
+        async function fetchStats() {
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch('/api/admin/stats', {
+                    headers: { 'Authorization': token }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const s = data.data;
+                    document.getElementById('count-users').innerText = s.totalUsers;
+                    document.getElementById('count-events').innerText = s.totalEvents;
+                    document.getElementById('count-regs').innerText = s.totalRegistrations;
+                    document.getElementById('count-pending').innerText = s.totalPending;
+
+                    if (s.recentPending.length > 0) {
+                        document.getElementById('pendingList').innerHTML = s.recentPending.map(r => `
+                            <tr>
+                                <td style="font-weight: 700;">${r.user_name}</td>
+                                <td>
+                                    <div style="font-weight: 600;">${r.fish_name}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">${r.fish_type}</div>
+                                </td>
+                                <td style="color: var(--primary);">${r.contest_name}</td>
+                                <td style="font-size: 0.8rem; color: var(--text-muted);">${new Date(r.created_at).toLocaleString()}</td>
+                                <td style="text-align: right;">
+                                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                        <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: #00ff88;"><i class="ri-check-line"></i></button>
+                                        <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: #ff4d4d;"><i class="ri-close-line"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        document.getElementById('pendingList').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 4rem; color: var(--text-muted);">Tidak ada pendaftaran pending saat ini.</td></tr>';
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function quickAction(id, status) {
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch('/api/admin/contest/status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ id, status })
+                });
+                if (res.ok) {
+                    fetchStats();
+                } else {
+                    alert('Gagal memproses aksi.');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+
+</html>
