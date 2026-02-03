@@ -3,14 +3,6 @@
     "cleanUrls": true,
     "rewrites": [
         {
-            "source": "/admin-dashboard",
-            "destination": "/dashboard-admin.html"
-        },
-        {
-            "source": "/dashboard-admin",
-            "destination": "/dashboard-admin.html"
-        },
-        {
             "source": "/api/(.*)",
             "destination": "/server.js"
         }
