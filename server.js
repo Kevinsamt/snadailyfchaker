@@ -470,6 +470,37 @@ app.post('/api/user/profile', userAuthMiddleware, async (req, res) => {
 
 // --- ADMIN SPECIFIC ROUTES ---
 
+// Get Dashboard Stats
+app.get('/api/admin/stats', adminAuthMiddleware, async (req, res) => {
+    try {
+        const usersCount = await pool.query('SELECT COUNT(*) FROM users');
+        const eventsCount = await pool.query('SELECT COUNT(*) FROM events');
+        const registrationsCount = await pool.query('SELECT COUNT(*) FROM contest_registrations');
+        const pendingCount = await pool.query("SELECT COUNT(*) FROM contest_registrations WHERE status = 'pending'");
+        const recentPending = await pool.query(`
+            SELECT r.*, u.full_name as user_name 
+            FROM contest_registrations r 
+            JOIN users u ON r.user_id = u.id 
+            WHERE r.status = 'pending' 
+            ORDER BY r.created_at DESC 
+            LIMIT 5
+        `);
+
+        res.json({
+            success: true,
+            data: {
+                totalUsers: parseInt(usersCount.rows[0].count),
+                totalEvents: parseInt(eventsCount.rows[0].count),
+                totalRegistrations: parseInt(registrationsCount.rows[0].count),
+                totalPending: parseInt(pendingCount.rows[0].count),
+                recentPending: recentPending.rows
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // List All Users
 app.get('/api/admin/users', adminAuthMiddleware, async (req, res) => {
     try {

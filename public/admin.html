@@ -27,7 +27,8 @@
         </div>
         <div style="display: flex; gap: 1rem; align-items: center;">
             <div id="adminTabs" style="display: flex; gap: 0.5rem; margin-right: 2rem;">
-                <button class="tab-btn active" onclick="switchTab('fish')">Fish Data</button>
+                <button class="tab-btn active" onclick="switchTab('overview')">Beranda</button>
+                <button class="tab-btn" onclick="switchTab('fish')">Fish Data</button>
                 <button class="tab-btn" onclick="switchTab('users')">Users</button>
                 <button class="tab-btn" onclick="switchTab('events')">Events</button>
             </div>
@@ -38,8 +39,67 @@
     </nav>
 
     <div class="container">
+        <!-- Section: Overview Dashboard -->
+        <div id="section-overview" class="admin-section active">
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+                <div class="glass-panel animate-fade-in"
+                    style="padding: 1.5rem; border-left: 4px solid var(--primary);">
+                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Total User</div>
+                    <div style="font-size: 2rem; font-weight: 800;" id="stat-users">0</div>
+                </div>
+                <div class="glass-panel animate-fade-in"
+                    style="padding: 1.5rem; border-left: 4px solid var(--secondary); animation-delay: 0.1s;">
+                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Banyak Event</div>
+                    <div style="font-size: 2rem; font-weight: 800;" id="stat-events">0</div>
+                </div>
+                <div class="glass-panel animate-fade-in"
+                    style="padding: 1.5rem; border-left: 4px solid #ffd700; animation-delay: 0.2s;">
+                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Ikan Terdaftar
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 800;" id="stat-regs">0</div>
+                </div>
+                <div class="glass-panel animate-fade-in"
+                    style="padding: 1.5rem; border-left: 4px solid var(--error); animation-delay: 0.3s;">
+                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Menunggu
+                        Persetujuan</div>
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--error);" id="stat-pending">0</div>
+                </div>
+            </div>
+
+            <div class="glass-panel animate-fade-in" style="padding: 2rem; animation-delay: 0.4s;">
+                <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+                    <i class="ri-notification-3-line" style="color: var(--error);"></i>
+                    Pendaftaran Terkini (Pending)
+                </h2>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                                <th style="padding: 1rem;">User</th>
+                                <th style="padding: 1rem;">Ikan</th>
+                                <th style="padding: 1rem;">Event</th>
+                                <th style="padding: 1rem;">Tanggal</th>
+                                <th style="padding: 1rem;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                    Tidak ada pendaftaran pending.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1.5rem; text-align: right;">
+                    <button class="tab-btn" style="background: var(--primary); color: #000;"
+                        onclick="switchTab('fish')">Kelola Ikan &raquo;</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Section: Fish Data -->
-        <div id="section-fish" class="admin-section active">
+        <div id="section-fish" class="admin-section">
             <div class="admin-grid">
                 <!-- Input Section -->
                 <div>
@@ -224,14 +284,76 @@
 
     <script src="js/app.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStats();
+        });
+
         function switchTab(tab) {
             document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`section-${tab}`).classList.add('active');
-            event.currentTarget.classList.add('active');
 
+            // Highlight the correct button
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(`'${tab}'`)) btn.classList.add('active');
+            });
+
+            if (tab === 'overview') fetchStats();
             if (tab === 'users') fetchUsers();
             if (tab === 'events') fetchEvents();
+        }
+
+        async function fetchStats() {
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch('/api/admin/stats', { headers: { 'Authorization': token } });
+                const data = await res.json();
+                if (data.success) {
+                    const s = data.data;
+                    document.getElementById('stat-users').innerText = s.totalUsers;
+                    document.getElementById('stat-events').innerText = s.totalEvents;
+                    document.getElementById('stat-regs').innerText = s.totalRegistrations;
+                    document.getElementById('stat-pending').innerText = s.totalPending;
+
+                    if (s.recentPending.length > 0) {
+                        document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
+                            <tr>
+                                <td style="font-weight: 600;">${r.user_name}</td>
+                                <td>${r.fish_name} (${r.fish_type})</td>
+                                <td style="color: var(--primary); font-size: 0.85rem;">${r.contest_name}</td>
+                                <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(r.created_at).toLocaleDateString()}</td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: #00ff88;" title="Approve"><i class="ri-check-line"></i></button>
+                                        <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: #ff4d4d;" title="Reject"><i class="ri-close-line"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        document.getElementById('pendingTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Tidak ada pendaftaran pending.</td></tr>';
+                    }
+                }
+            } catch (err) {
+                console.error('Fetch Stats Error:', err);
+            }
+        }
+
+        async function quickAction(id, status) {
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch(`/api/admin/contest/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ id, status })
+                });
+                if (res.ok) {
+                    fetchStats();
+                }
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         async function fetchUsers() {
