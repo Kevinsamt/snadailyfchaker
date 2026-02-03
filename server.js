@@ -445,8 +445,21 @@ app.get('/api/contest/my-registrations', userAuthMiddleware, async (req, res) =>
 // List All Users
 app.get('/api/admin/users', adminAuthMiddleware, async (req, res) => {
     try {
-        const result = await pool.query('SELECT id, username, full_name, phone, role, created_at FROM users ORDER BY created_at DESC');
+        const result = await pool.query('SELECT id, username, password, full_name, phone, role, created_at FROM users ORDER BY created_at DESC');
         res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete User
+app.delete('/api/admin/users/:id', adminAuthMiddleware, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        // Optional: Delete associate registrations first or let DB handle if cascading (though we didn't specify cascade)
+        await pool.query('DELETE FROM contest_registrations WHERE user_id = $1', [userId]);
+        await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+        res.json({ success: true, message: 'User and registrations deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -118,10 +118,12 @@
                         <thead>
                             <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
                                 <th style="padding: 1rem;">Username</th>
+                                <th style="padding: 1rem;">Sandi (Hash)</th>
                                 <th style="padding: 1rem;">Nama Lengkap</th>
                                 <th style="padding: 1rem;">WhatsApp</th>
                                 <th style="padding: 1rem;">Role</th>
                                 <th style="padding: 1rem;">Terdaftar</th>
+                                <th style="padding: 1rem;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="userTableBody">
@@ -240,12 +242,37 @@
                 document.getElementById('userTableBody').innerHTML = data.data.map(u => `
                     <tr>
                         <td>${u.username}</td>
+                        <td style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${u.password}">${u.password}</td>
                         <td style="color: var(--primary); font-weight: 600;">${u.full_name}</td>
                         <td>${u.phone}</td>
                         <td><span style="background: rgba(0,212,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${u.role}</span></td>
                         <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(u.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--error);" title="Hapus User">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </td>
                     </tr>
                 `).join('');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Hapus akun user ini selamanya? (Semua pendaftaran kontes milik user ini juga akan dihapus)')) return;
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch(`/api/admin/users/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': token }
+                });
+                if (res.ok) {
+                    alert('User berhasil dihapus!');
+                    fetchUsers();
+                } else {
+                    alert('Gagal menghapus user.');
+                }
+            } catch (err) {
+                console.error('Delete User Error:', err);
             }
         }
 
