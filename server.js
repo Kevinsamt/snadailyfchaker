@@ -475,7 +475,8 @@ app.get('/api/admin/stats', adminAuthMiddleware, async (req, res) => {
     try {
         const usersCount = await pool.query('SELECT COUNT(*) FROM users');
         const eventsCount = await pool.query('SELECT COUNT(*) FROM events');
-        const registrationsCount = await pool.query('SELECT COUNT(*) FROM contest_registrations');
+        // Only count pending or approved registrations
+        const registrationsCount = await pool.query("SELECT COUNT(*) FROM contest_registrations WHERE status != 'rejected'");
         const pendingCount = await pool.query("SELECT COUNT(*) FROM contest_registrations WHERE status = 'pending'");
         const recentPending = await pool.query(`
             SELECT r.*, u.full_name as user_name 
@@ -544,7 +545,7 @@ app.get('/api/events', async (req, res) => {
         const sql = `
             SELECT e.*, COUNT(r.id) as registration_count 
             FROM events e 
-            LEFT JOIN contest_registrations r ON e.id = r.event_id 
+            LEFT JOIN contest_registrations r ON e.id = r.event_id AND r.status != 'rejected'
             GROUP BY e.id 
             ORDER BY e.event_date ASC
         `;
