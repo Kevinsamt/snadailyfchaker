@@ -501,6 +501,20 @@ app.get('/api/admin/stats', adminAuthMiddleware, async (req, res) => {
     }
 });
 
+// Update Contest Registration Status (Quick Action)
+app.post('/api/admin/contest/status', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { id, status } = req.body; // status: 'approved' or 'rejected'
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status' });
+        }
+        await pool.query('UPDATE contest_registrations SET status = $1 WHERE id = $2', [status, id]);
+        res.json({ success: true, message: `Registration ${status}` });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // List All Users
 app.get('/api/admin/users', adminAuthMiddleware, async (req, res) => {
     try {
