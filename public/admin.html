@@ -399,27 +399,32 @@
         }
 
         async function fetchEvents() {
-            const res = await fetch('/api/events?t=' + Date.now());
-            const data = await res.json();
-            if (data.success) {
-                document.getElementById('eventList').innerHTML = data.data.map(ev => `
-                    <div class="glass-panel" style="margin-bottom: 1rem; padding: 1rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--secondary);">
-                        <img src="${ev.image_url}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; margin-bottom: 0.2rem;">
-                                <span>${ev.title}</span>
-                                <span style="background: rgba(0,255,136,0.1); color: var(--secondary); font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; margin-left: 8px;">
-                                    <i class="ri-medal-2-line"></i> ${ev.registration_count}
-                                </span>
+            try {
+                const res = await fetch('/api/events?t=' + Date.now());
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('eventList').innerHTML = data.data.map(ev => `
+                        <div class="glass-panel" style="margin-bottom: 1rem; padding: 1rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--secondary);">
+                            <img src="${ev.image_url}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 8px;">
+                                    <span style="background: var(--secondary); color: #000; font-size: 0.8rem; padding: 2px 10px; border-radius: 4px; font-weight: 800; min-width: 30px; text-align: center;">
+                                        ${ev.registration_count || 0}
+                                    </span>
+                                    <span>${ev.title}</span>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${ev.event_date} | ${ev.location}</div>
                             </div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">${ev.event_date} | ${ev.location}</div>
+                            <div style="display: flex; gap: 5px;">
+                                <button onclick="editEvent(${JSON.stringify(ev).replace(/"/g, '&quot;')})" class="action-btn"><i class="ri-edit-line"></i></button>
+                                <button onclick="deleteEvent(${ev.id})" class="action-btn" style="color: var(--error);"><i class="ri-delete-bin-line"></i></button>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 5px;">
-                            <button onclick="editEvent(${JSON.stringify(ev).replace(/"/g, '&quot;')})" class="action-btn"><i class="ri-edit-line"></i></button>
-                            <button onclick="deleteEvent(${ev.id})" class="action-btn" style="color: var(--error);"><i class="ri-delete-bin-line"></i></button>
-                        </div>
-                    </div>
-                `).join('');
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Fetch Events Error:', err);
+                document.getElementById('eventList').innerHTML = '<div style="color:red; padding:10px;">Gagal memuat event.</div>';
             }
         }
 
