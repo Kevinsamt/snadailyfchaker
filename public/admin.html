@@ -430,6 +430,10 @@
                 const res = await fetch('/api/events?t=' + Date.now());
                 const data = await res.json();
                 if (data.success) {
+                    if (data.data.length === 0) {
+                        document.getElementById('eventList').innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada event yang dibuat.</div>';
+                        return;
+                    }
                     document.getElementById('eventList').innerHTML = data.data.map(ev => `
                         <div class="glass-panel" style="margin-bottom: 1rem; padding: 1rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--secondary);">
                             <img src="${ev.image_url}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
@@ -499,41 +503,62 @@
         async function deleteEvent(id) {
             if (!confirm('Hapus event ini?')) return;
             const token = sessionStorage.getItem('sna_admin_token');
-            const res = await fetch(`/api/admin/events/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': token }
-            });
-            if (res.ok) fetchEvents();
+            try {
+                const res = await fetch(`/api/admin/events/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': token }
+                });
+                if (res.ok) {
+                    fetchEvents();
+                } else {
+                    const errData = await res.json();
+                    alert('Gagal menghapus: ' + (errData.error || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error('Delete Event Error:', err);
+                alert('Terjadi kesalahan saat menghapus event.');
+            }
         }
 
         async function fetchRegistrations() {
             const token = sessionStorage.getItem('sna_admin_token');
-            const res = await fetch('/api/admin/registrations?t=' + Date.now(), { headers: { 'Authorization': token } });
-            const data = await res.json();
-            if (data.success) {
-                document.getElementById('regTableBody').innerHTML = data.data.map(r => `
-                    <tr>
-                        <td style="font-weight: 600;">${r.user_name}</td>
-                        <td>
-                            <div>${r.fish_name}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">${r.fish_type}</div>
-                        </td>
-                        <td style="color: var(--primary);">${r.contest_name}</td>
-                        <td>
-                            <span style="background: ${r.status === 'approved' ? 'rgba(0,255,136,0.1)' : r.status === 'rejected' ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.05)'}; 
-                                         color: ${r.status === 'approved' ? 'var(--secondary)' : r.status === 'rejected' ? 'var(--error)' : 'white'}; 
-                                         padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase;">
-                                ${r.status}
-                            </span>
-                        </td>
-                        <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(r.created_at).toLocaleDateString()}</td>
-                        <td>
-                            <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--error);" title="Hapus Registrasi">
-                                <i class="ri-delete-bin-line"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
+            try {
+                const res = await fetch('/api/admin/registrations?t=' + Date.now(), { headers: { 'Authorization': token } });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.data.length === 0) {
+                        document.getElementById('regTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada data registrasi.</td></tr>';
+                        return;
+                    }
+                    document.getElementById('regTableBody').innerHTML = data.data.map(r => `
+                        <tr>
+                            <td style="font-weight: 600;">${r.user_name}</td>
+                            <td>
+                                <div>${r.fish_name}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">${r.fish_type}</div>
+                            </td>
+                            <td style="color: var(--primary);">${r.contest_name}</td>
+                            <td>
+                                <span style="background: ${r.status === 'approved' ? 'rgba(0,255,136,0.1)' : r.status === 'rejected' ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.05)'}; 
+                                             color: ${r.status === 'approved' ? 'var(--secondary)' : r.status === 'rejected' ? 'var(--error)' : 'white'}; 
+                                             padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase;">
+                                    ${r.status}
+                                </span>
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(r.created_at).toLocaleDateString()}</td>
+                            <td>
+                                <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--error);" title="Hapus Registrasi">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    document.getElementById('regTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--error);">Gagal memuat registrasi: ' + data.error + '</td></tr>';
+                }
+            } catch (err) {
+                console.error('Fetch Registrations Error:', err);
+                document.getElementById('regTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--error);">Error koneksi ke server.</td></tr>';
             }
         }
 
@@ -548,17 +573,16 @@
                 if (res.ok) {
                     alert('Registrasi berhasil dihapus!');
                     fetchRegistrations();
+                } else {
+                    const errData = await res.json();
+                    alert('Gagal menghapus: ' + (errData.error || 'Unknown error'));
                 }
             } catch (err) {
                 console.error('Delete Reg Error:', err);
+                alert('Terjadi kesalahan saat menghapus registrasi.');
             }
         }
     </script>
-</body>
-
-</html>
-
-<script src="js/app.js"></script>
 </body>
 
 </html>
