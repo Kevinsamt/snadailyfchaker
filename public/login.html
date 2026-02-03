@@ -267,7 +267,7 @@
                 if (response.ok && data.success) {
                     if (currentMode === 'admin') {
                         sessionStorage.setItem('sna_admin_token', data.token);
-                        window.location.href = 'dashboard-admin';
+                        window.location.href = 'admin.html';
                     } else {
                         localStorage.setItem('sna_user_token', data.token);
                         localStorage.setItem('sna_user_data', JSON.stringify(data.user));
