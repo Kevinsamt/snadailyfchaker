@@ -314,16 +314,20 @@ async function initDb() {
     }
 }
 
-// ADMIN LOGIN ROUTE
+// ADMIN LOGIN ROUTE (Separate Endpoint)
 app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { username, password } = req.body;
     const VALID_USER = 'bettatumedan';
     const VALID_PASS = 'snadailybetta';
 
     if (username === VALID_USER && password === VALID_PASS) {
-        res.json({ success: true, token: 'secure_server_token_' + Date.now() });
+        res.json({
+            success: true,
+            token: 'secure_server_token_' + Date.now(),
+            role: 'admin'
+        });
     } else {
-        res.status(401).json({ success: false, message: 'Invalid Credentials' });
+        res.status(401).json({ success: false, message: 'Invalid Admin Credentials' });
     }
 });
 
@@ -363,7 +367,7 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-// User Login
+// User Login (Standard User)
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -389,11 +393,23 @@ app.post('/api/auth/login', async (req, res) => {
         res.json({
             success: true,
             token,
+            role: user.role, // Added for clarity on frontend
             user: { id: user.id, username: user.username, fullName: user.full_name }
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// Alias for backwards compatibility (Optional but helpful during transition)
+app.post('/api/login', (req, res) => {
+    // Check if it's admin or user based on request body (old behavior)
+    // For now, redirect to /api/auth/login as default
+    res.status(307).redirect('/api/auth/login');
+});
+
+app.post('/api/register', (req, res) => {
+    res.status(307).redirect('/api/auth/register');
 });
 
 // User Authentication Middleware (JWT)

@@ -121,7 +121,7 @@
             };
 
             try {
-                const res = await fetch('/api/register', {
+                const res = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -137,6 +137,7 @@
                     btn.innerHTML = 'DAFTAR SEKARANG <i class="ri-user-add-line"></i>';
                 }
             } catch (err) {
+                console.error("Register attempt failed:", err);
                 alert('Terjadi kesalahan server');
                 btn.disabled = false;
                 btn.innerHTML = 'DAFTAR SEKARANG <i class="ri-user-add-line"></i>';

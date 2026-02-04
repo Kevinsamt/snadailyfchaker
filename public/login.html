@@ -115,33 +115,40 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
+            // Simple differentiator for Admin vs User (Optional UI hint)
+            let endpoint = '/api/auth/login';
+            if (username === 'bettatumedan') {
+                endpoint = '/api/admin/login';
+            }
+
             try {
-                const res = await fetch('/api/login', {
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
                 const data = await res.json();
 
-                if (data.success) {
+                if (data.success || data.token) { // Check for success or presence of token
                     if (data.role === 'admin') {
-                        sessionStorage.setItem('sna_admin_token', 'admin_logged_in');
+                        sessionStorage.setItem('sna_admin_token', data.token);
                         window.location.href = 'admin.html';
                     } else {
                         localStorage.setItem('sna_user_token', data.token);
                         localStorage.setItem('sna_user_data', JSON.stringify({
-                            username: data.username,
-                            fullName: data.fullName
+                            username: data.user.username,
+                            fullName: data.user.fullName
                         }));
                         window.location.href = 'dashboard.html';
                     }
                 } else {
-                    errorMsg.innerText = data.error || 'Username atau password salah!';
+                    errorMsg.innerText = data.error || data.message || 'Username atau password salah!';
                     errorMsg.style.display = 'block';
                     btn.disabled = false;
                     btn.innerHTML = 'MASUK PANEL <i class="ri-arrow-right-line"></i>';
                 }
             } catch (err) {
+                console.error("Login attempt failed:", err);
                 errorMsg.innerText = 'Gagal terhubung ke server.';
                 errorMsg.style.display = 'block';
                 btn.disabled = false;
