@@ -544,6 +544,27 @@ app.post('/api/admin/events/:id/assign-judge', adminAuthMiddleware, async (req, 
     }
 });
 
+// Delete Judge Account
+app.delete('/api/admin/judges/:id', adminAuthMiddleware, async (req, res) => {
+    try {
+        const judgeId = req.params.id;
+
+        // Remove assignments first (though ON DELETE CASCADE should handle it, explicit is better if schema is strict)
+        await pool.query("DELETE FROM event_judges WHERE judge_id = $1", [judgeId]);
+
+        // Delete the user
+        const result = await pool.query("DELETE FROM users WHERE id = $1 AND role = 'judge' RETURNING id", [judgeId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Juri tidak ditemukan atau bukan role juri' });
+        }
+
+        res.json({ success: true, message: 'Akun juri berhasil dihapus' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- JUDGE SPECIFIC ROUTES ---
 
 // Get Assigned Events for Judge
@@ -571,6 +592,13 @@ app.get('/api/judge/events/:id/entries', userAuthMiddleware, async (req, res) =>
         if (req.user.role !== 'judge') return res.status(403).json({ error: 'Judge access required' });
 
         const eventId = req.params.id;
+
+        // Security Check: Verify assignment
+        const assignment = await pool.query("SELECT id FROM event_judges WHERE event_id = $1 AND judge_id = $2", [eventId, req.user.id]);
+        if (assignment.rows.length === 0) {
+            return res.status(403).json({ error: 'Anda tidak ditugaskan untuk event ini.' });
+        }
+
         const result = await pool.query(`
             SELECT r.*, u.full_name as contestant_name
             FROM contest_registrations r
@@ -593,6 +621,19 @@ app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) =>
 
         const entryId = req.params.id;
         const { score, comment } = req.body;
+
+        // Security Check: Verify if this judge is assigned to the event of this entry
+        const assignmentCheck = await pool.query(`
+            SELECT ej.id 
+            FROM event_judges ej
+            JOIN events e ON ej.event_id = e.id
+            JOIN contest_registrations r ON e.title = r.contest_name
+            WHERE r.id = $1 AND ej.judge_id = $2
+        `, [entryId, req.user.id]);
+
+        if (assignmentCheck.rows.length === 0) {
+            return res.status(403).json({ error: 'Anda tidak ditugaskan untuk menilai kontes ini.' });
+        }
 
         await pool.query(
             "UPDATE contest_registrations SET score = $1, judge_comment = $2, judged_by = $3 WHERE id = $4",
