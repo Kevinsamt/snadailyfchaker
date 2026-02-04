@@ -379,6 +379,7 @@
 
             document.addEventListener('DOMContentLoaded', () => {
                 fetchStats();
+                fetchJudges(); // Load judges early
             });
 
             function switchTab(tab) {
@@ -604,6 +605,11 @@
             }
 
             async function openJudgeAssignment(eventId) {
+                // Ensure judges are loaded
+                if (allJudges.length === 0) {
+                    await fetchJudges();
+                }
+
                 if (allJudges.length === 0) {
                     alert('Buat akun juri terlebih dahulu di tab Juri!');
                     return;
