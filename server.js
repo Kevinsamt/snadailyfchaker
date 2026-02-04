@@ -251,7 +251,18 @@ async function initDb() {
             fish_type TEXT,
             fish_image_url TEXT,
             status TEXT DEFAULT 'pending',
+            score INTEGER,
+            judge_comment TEXT,
+            judged_by INTEGER REFERENCES users(id),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Event Judges Assignment Table
+        await pool.query(`CREATE TABLE IF NOT EXISTS event_judges (
+            id SERIAL PRIMARY KEY,
+            event_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
+            judge_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(event_id, judge_id)
         )`);
 
         // Events Table
@@ -486,31 +497,131 @@ app.post('/api/user/profile', userAuthMiddleware, async (req, res) => {
 
 // --- ADMIN SPECIFIC ROUTES ---
 
+// Create Judge Account
+app.post('/api/admin/judges', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { username, password, fullName, phone } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const result = await pool.query(
+            "INSERT INTO users (username, password, full_name, phone, role) VALUES ($1, $2, $3, $4, 'judge') RETURNING id, username, full_name, role",
+            [username, hashedPassword, fullName, phone]
+        );
+
+        res.json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        if (err.code === '23505') {
+            return res.status(400).json({ error: 'Username sudah digunakan' });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get All Judges
+app.get('/api/admin/judges', adminAuthMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query("SELECT id, username, full_name, phone FROM users WHERE role = 'judge' ORDER BY created_at DESC");
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Assign Judge to Event
+app.post('/api/admin/events/:id/assign-judge', adminAuthMiddleware, async (req, res) => {
+    try {
+        const eventId = req.params.id;
+        const { judgeId } = req.body;
+
+        await pool.query(
+            "INSERT INTO event_judges (event_id, judge_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            [eventId, judgeId]
+        );
+
+        res.json({ success: true, message: 'Juri berhasil ditugaskan' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- JUDGE SPECIFIC ROUTES ---
+
+// Get Assigned Events for Judge
+app.get('/api/judge/events', userAuthMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'judge') return res.status(403).json({ error: 'Judge access required' });
+
+        const result = await pool.query(`
+            SELECT e.* 
+            FROM events e
+            JOIN event_judges ej ON e.id = ej.event_id
+            WHERE ej.judge_id = $1
+            ORDER BY e.event_date ASC
+        `, [req.user.id]);
+
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get Contest Entries for Judging
+app.get('/api/judge/events/:id/entries', userAuthMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'judge') return res.status(403).json({ error: 'Judge access required' });
+
+        const eventId = req.params.id;
+        const result = await pool.query(`
+            SELECT r.*, u.full_name as contestant_name
+            FROM contest_registrations r
+            JOIN users u ON r.user_id = u.id
+            JOIN events e ON r.contest_name = e.title
+            WHERE e.id = $1 AND r.status = 'approved'
+            ORDER BY r.created_at ASC
+        `, [eventId]);
+
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Submit Score for Entry
+app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'judge') return res.status(403).json({ error: 'Judge access required' });
+
+        const entryId = req.params.id;
+        const { score, comment } = req.body;
+
+        await pool.query(
+            "UPDATE contest_registrations SET score = $1, judge_comment = $2, judged_by = $3 WHERE id = $4",
+            [score, comment, req.user.id, entryId]
+        );
+
+        res.json({ success: true, message: 'Penilaian berhasil disimpan' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Get Dashboard Stats
 app.get('/api/admin/stats', adminAuthMiddleware, async (req, res) => {
     try {
-        const usersCount = await pool.query('SELECT COUNT(*) FROM users');
+        const usersCount = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'user'");
+        const judgesCount = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'judge'");
         const eventsCount = await pool.query('SELECT COUNT(*) FROM events');
-        // Only count pending or approved registrations
         const registrationsCount = await pool.query("SELECT COUNT(*) FROM contest_registrations WHERE status != 'rejected'");
         const pendingCount = await pool.query("SELECT COUNT(*) FROM contest_registrations WHERE status = 'pending'");
-        const recentPending = await pool.query(`
-            SELECT r.*, u.full_name as user_name 
-            FROM contest_registrations r 
-            JOIN users u ON r.user_id = u.id 
-            WHERE r.status = 'pending' 
-            ORDER BY r.created_at DESC 
-            LIMIT 5
-        `);
 
         res.json({
             success: true,
             data: {
-                totalUsers: parseInt(usersCount.rows[0].count),
-                totalEvents: parseInt(eventsCount.rows[0].count),
-                totalRegistrations: parseInt(registrationsCount.rows[0].count),
-                totalPending: parseInt(pendingCount.rows[0].count),
-                recentPending: recentPending.rows
+                users: usersCount.rows[0].count,
+                judges: judgesCount.rows[0].count,
+                events: eventsCount.rows[0].count,
+                registrations: registrationsCount.rows[0].count,
+                pending: pendingCount.rows[0].count
             }
         });
     } catch (err) {

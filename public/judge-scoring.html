@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script>
+        const token = localStorage.getItem('sna_user_token');
+        const userData = JSON.parse(localStorage.getItem('sna_user_data'));
+        if (!token || !userData || userData.role !== 'judge') window.location.href = 'login.html';
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnaDaily | Scoring Panel</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="judge.html" class="text-gradient"
+                style="font-size: 1.3rem; font-weight: 800; text-decoration: none;"><i class="ri-arrow-left-s-line"></i>
+                Kembali ke Dashboard</a>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span id="eventNameHeader" style="font-weight: 700; color: white;">Event Title</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="margin-top: 2rem; display: grid; grid-template-columns: 1fr 400px; gap: 2rem;">
+        <!-- Left: Contestant List -->
+        <div class="glass-panel" style="padding: 2rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;"></div>
+                <h2 style="font-size: 1.5rem; font-weight: 800;">Daftar <span class="text-gradient">Ikan</span> Kontes
+                </h2>
+            </div>
+            <div id="entriesList" style="display: grid; gap: 1rem;">
+                <!-- Entries injected here -->
+            </div>
+        </div>
+
+        <!-- Right: Scoring Panel (Sticky) -->
+        <aside>
+            <div id="scoringSection" class="glass-panel"
+                style="padding: 2rem; position: sticky; top: 2rem; display: none;">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                    <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;"></div>
+                    <h2 style="font-size: 1.5rem; font-weight: 800;">Beri <span class="text-gradient">Nilai</span></h2>
+                </div>
+
+                <div id="selectedFishInfo" style="margin-bottom: 2rem; text-align: center;">
+                    <img id="fishPreview" src=""
+                        style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; border: 1px solid var(--glass-border);">
+                    <h3 id="fishTitle" style="font-weight: 800; font-size: 1.2rem;">Nama Ikan</h3>
+                    <p id="fishType" style="color: var(--text-muted); font-size: 0.9rem;">Jenis Ikan</p>
+                </div>
+
+                <form id="scoringForm">
+                    <input type="hidden" id="selectedEntryId">
+                    <div class="input-group">
+                        <label class="input-label" style="display: flex; justify-content: space-between;">
+                            Skor (1 - 100) <span id="scoreVal"
+                                style="color: var(--primary); font-weight: 800;">50</span>
+                        </label>
+                        <input type="range" id="scoreInput" min="1" max="100" value="50" class="glass-input"
+                            style="padding: 0; cursor: pointer;"
+                            oninput="document.getElementById('scoreVal').innerText = this.value">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Komentar Juri</label>
+                        <textarea id="judgeComment" class="glass-input" style="height: 100px; resize: none;"
+                            placeholder="Catatan untuk pemilik..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">SIMPAN
+                        NILAI</button>
+                </form>
+            </div>
+
+            <div id="noSelectMsg" class="glass-panel"
+                style="padding: 3rem; text-align: center; color: var(--text-muted);">
+                <i class="ri-cursor-line" style="font-size: 2.5rem; display: block; margin-bottom: 1rem;"></i>
+                Pilih ikan dari daftar di samping untuk memulai penilaian.
+            </div>
+        </aside>
+    </main>
+
+    <script src="js/navigation.js"></script>
+    <script>
+        let currentEventId = new URLSearchParams(window.location.search).get('eventId');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!currentEventId) window.location.href = 'judge.html';
+            fetchEntries();
+        });
+
+        async function fetchEntries() {
+            const token = localStorage.getItem('sna_user_token');
+            try {
+                const res = await fetch(`/api/judge/events/${currentEventId}/entries`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const list = data.data;
+                    if (list.length === 0) {
+                        document.getElementById('entriesList').innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 5rem;">Belum ada kontestan yang disetujui di event ini.</p>`;
+                        return;
+                    }
+                    document.getElementById('entriesList').innerHTML = list.map(entry => `
+                        <div class="glass-panel entry-item animate-fade-in" onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})" style="padding: 1rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 1rem; ${entry.score ? 'border-left: 4px solid var(--success); opacity: 0.8;' : 'border-left: 4px solid var(--glass-border);'}">
+                            <img src="${entry.fish_image_url}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700;">${entry.fish_name}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${entry.contestant_name} • ${entry.fish_type}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                ${entry.score ? `<span style="font-size: 1.1rem; font-weight: 800; color: var(--primary);">${entry.score}</span>` : '<i class="ri-edit-circle-line" style="font-size: 1.25rem;"></i>'}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function selectEntry(entry) {
+            document.getElementById('noSelectMsg').style.display = 'none';
+            document.getElementById('scoringSection').style.display = 'block';
+
+            document.getElementById('selectedEntryId').value = entry.id;
+            document.getElementById('fishTitle').innerText = entry.fish_name;
+            document.getElementById('fishType').innerText = entry.fish_type;
+            document.getElementById('fishPreview').src = entry.fish_image_url;
+
+            document.getElementById('scoreInput').value = entry.score || 50;
+            document.getElementById('scoreVal').innerText = entry.score || 50;
+            document.getElementById('judgeComment').value = entry.judge_comment || '';
+
+            // Highlight selected
+            document.querySelectorAll('.entry-item').forEach(el => el.style.borderColor = 'var(--glass-border)');
+            // Find current and highlight? (Simplification: just UI feedback on click)
+        }
+
+        document.getElementById('scoringForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('selectedEntryId').value;
+            const payload = {
+                score: parseInt(document.getElementById('scoreInput').value),
+                comment: document.getElementById('judgeComment').value
+            };
+
+            const token = localStorage.getItem('sna_user_token');
+            try {
+                const res = await fetch(`/api/judge/entries/${id}/score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    alert('Penilaian disimpan!');
+                    fetchEntries();
+                    document.getElementById('scoringSection').style.display = 'none';
+                    document.getElementById('noSelectMsg').style.display = 'block';
+                }
+            } catch (err) {
+                alert('Gagal menyimpan nilai');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -38,6 +38,7 @@
                 <button onclick="switchTab('fish')" class="tab-btn">Ikan</button>
                 <button onclick="switchTab('events')" class="tab-btn">Events</button>
                 <button onclick="switchTab('registrations')" class="tab-btn">Registrasi</button>
+                <button onclick="switchTab('judges')" class="tab-btn">Juri</button>
                 <button onclick="switchTab('users')" class="tab-btn">Users</button>
                 <button onclick="logout()" class="tab-btn"
                     style="color: var(--error); border-color: rgba(239, 68, 68, 0.2);"><i
@@ -59,14 +60,14 @@
                 <div class="glass-panel" style="padding: 1.5rem; border-left: 4px solid var(--secondary);">
                     <div
                         style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
-                        Banyak Event</div>
-                    <div id="stat-events" style="font-size: 2.5rem; font-weight: 800;">0</div>
+                        Total Juri</div>
+                    <div id="stat-judges" style="font-size: 2.5rem; font-weight: 800; color: var(--secondary);">0</div>
                 </div>
                 <div class="glass-panel" style="padding: 1.5rem; border-left: 4px solid var(--warning);">
                     <div
                         style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
-                        Ikan Terdaftar</div>
-                    <div id="stat-regs" style="font-size: 2.5rem; font-weight: 800;">0</div>
+                        Banyak Event</div>
+                    <div id="stat-events" style="font-size: 2.5rem; font-weight: 800; color: var(--warning);">0</div>
                 </div>
                 <div class="glass-panel" style="padding: 1.5rem; border-left: 4px solid var(--error);">
                     <div
@@ -168,6 +169,56 @@
                                 style="width: min(200px, 40%); padding: 0.5rem 1rem;">
                         </div>
                         <div id="historyList" style="max-height: 500px; overflow-y: auto;">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Judges Management -->
+        <div id="section-judges" class="admin-section">
+            <div class="admin-grid">
+                <div>
+                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                            <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;">
+                            </div>
+                            <h2 style="font-size: 1.5rem; font-weight: 800;">Buat Akun <span
+                                    class="text-gradient">Juri</span></h2>
+                        </div>
+                        <form id="judgeForm">
+                            <div class="input-group">
+                                <label class="input-label">Nama Lengkap Juri</label>
+                                <input type="text" id="judgeFullName" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Username</label>
+                                <input type="text" id="judgeUsername" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Password</label>
+                                <input type="password" id="judgePassword" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Nomor WhatsApp</label>
+                                <input type="tel" id="judgePhone" class="glass-input" required>
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                                <i class="ri-user-add-line" style="margin-right: 8px;"></i> Simpan Akun Juri
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div>
+                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                            <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;">
+                            </div>
+                            <h2 style="font-size: 1.5rem; font-weight: 800;">Daftar <span
+                                    class="text-gradient">Juri</span></h2>
+                        </div>
+                        <div id="judgeList" style="max-height: 500px; overflow-y: auto;">
                             <!-- Injected by JS -->
                         </div>
                     </div>
@@ -324,6 +375,7 @@
         <script src="js/app.js"></script>
         <script>
             let allEvents = [];
+            let allJudges = [];
 
             document.addEventListener('DOMContentLoaded', () => {
                 fetchStats();
@@ -343,6 +395,7 @@
                 if (tab === 'users') fetchUsers();
                 if (tab === 'events') fetchEvents();
                 if (tab === 'registrations') fetchRegistrations();
+                if (tab === 'judges') fetchJudges();
             }
 
             async function fetchStats() {
@@ -352,12 +405,12 @@
                     const data = await res.json();
                     if (data.success) {
                         const s = data.data;
-                        document.getElementById('stat-users').innerText = s.totalUsers;
-                        document.getElementById('stat-events').innerText = s.totalEvents;
-                        document.getElementById('stat-regs').innerText = s.totalRegistrations;
-                        document.getElementById('stat-pending').innerText = s.totalPending;
+                        document.getElementById('stat-users').innerText = s.users;
+                        document.getElementById('stat-judges').innerText = s.judges || 0;
+                        document.getElementById('stat-events').innerText = s.events;
+                        document.getElementById('stat-pending').innerText = s.pending;
 
-                        if (s.recentPending.length > 0) {
+                        if (s.recentPending && s.recentPending.length > 0) {
                             document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
                             <tr>
                                 <td style="font-weight: 600;">${r.user_name}</td>
@@ -394,6 +447,60 @@
                     console.error(err);
                 }
             }
+
+            async function fetchJudges() {
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch('/api/admin/judges', { headers: { 'Authorization': token } });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (data.data.length === 0) {
+                            document.getElementById('judgeList').innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada juri terdaftar.</p>`;
+                            return;
+                        }
+                        document.getElementById('judgeList').innerHTML = data.data.map(j => `
+                            <div class="glass-panel" style="padding: 1rem; margin-bottom: 1rem; border-left: 3px solid var(--secondary); display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 700; color: white;">${j.full_name}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">@${j.username} • ${j.phone}</div>
+                                </div>
+                                <i class="ri-user-star-line" style="color: var(--secondary); font-size: 1.2rem;"></i>
+                            </div>
+                        `).join('');
+                    }
+                } catch (err) {
+                    console.error('Fetch Judges Error:', err);
+                }
+            }
+
+            document.getElementById('judgeForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const token = sessionStorage.getItem('sna_admin_token');
+                const payload = {
+                    fullName: document.getElementById('judgeFullName').value,
+                    username: document.getElementById('judgeUsername').value,
+                    password: document.getElementById('judgePassword').value,
+                    phone: document.getElementById('judgePhone').value
+                };
+
+                try {
+                    const res = await fetch('/api/admin/judges', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        alert('Akun Juri berhasil dibuat!');
+                        e.target.reset();
+                        fetchJudges();
+                    } else {
+                        const err = await res.json();
+                        alert('Gagal: ' + (err.error || 'Terjadi kesalahan'));
+                    }
+                } catch (err) {
+                    alert('Error koneksi');
+                }
+            });
 
             async function fetchUsers() {
                 const token = sessionStorage.getItem('sna_admin_token');
@@ -458,6 +565,7 @@
                                 <div style="font-size: 0.8rem; color: var(--text-muted);">${ev.event_date} | ${ev.location}</div>
                             </div>
                             <div style="display: flex; gap: 5px;">
+                                <button onclick="openJudgeAssignment(${ev.id})" class="action-btn" title="Tugaskan Juri" style="color: var(--warning);"><i class="ri-user-star-line"></i></button>
                                 <button onclick="editEventByIndex(${index})" class="action-btn" title="Edit"><i class="ri-edit-line"></i></button>
                                 <button onclick="deleteEvent(${ev.id})" class="action-btn" style="color: var(--error);" title="Hapus"><i class="ri-delete-bin-line"></i></button>
                             </div>
@@ -469,6 +577,32 @@
                 } catch (err) {
                     console.error('Fetch Events Error:', err);
                     document.getElementById('eventList').innerHTML = `<div style="color:var(--error); padding:10px;">Error koneksi: ${err.message}</div>`;
+                }
+            }
+
+            async function openJudgeAssignment(eventId) {
+                if (allJudges.length === 0) {
+                    alert('Buat akun juri terlebih dahulu di tab Juri!');
+                    return;
+                }
+                const judgeId = prompt(`Pilih ID Juri untuk event ini:\n\n${allJudges.map(j => `${j.id}: ${j.full_name}`).join('\n')}`);
+                if (!judgeId) return;
+
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch(`/api/admin/events/${eventId}/assign-judge`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                        body: JSON.stringify({ judgeId })
+                    });
+                    if (res.ok) {
+                        alert('Juri berhasil ditugaskan!');
+                    } else {
+                        const err = await res.json();
+                        alert('Gagal: ' + err.error);
+                    }
+                } catch (err) {
+                    alert('Error koneksi');
                 }
             }
 
