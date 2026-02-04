@@ -82,61 +82,115 @@
         <div class="bubble x3"></div>
     </div>
 
-    <div class="glass-panel entry-card animate-fade-in">
-        <div style="text-align: center; margin-bottom: 2.5rem;">
-            <h1 class="text-gradient">Registrasi Ikan</h1>
-            <p style="color: var(--text-muted);">Masukkan detail ikan cupang terbaikmu</p>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="events.html" class="text-gradient"
+                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
+                    style="color: white; font-weight: 400;">Cheker</span></a>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <a href="events.html"
+                    style="color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem;">Batal</a>
+            </div>
         </div>
+    </nav>
 
-        <form id="entryForm">
-            <div class="image-preview-container" id="dropZone" onclick="document.getElementById('imgUrl').focus()">
-                <div class="preview-placeholder" id="placeholder">
-                    <i class="ri-image-add-line"></i>
-                    <span>Masukkan URL Gambar Ikan</span>
+    <main class="container flex-center" style="min-height: calc(100vh - 80px);">
+        <div class="glass-panel entry-card animate-fade-in"
+            style="max-width: 800px; width: 100%; display: grid; grid-template-columns: 1fr 1.2fr; overflow: hidden; padding: 0;"
+            id="entryPanel">
+            <!-- Left Side: Decorative/Preview -->
+            <div class="m-hide"
+                style="background: linear-gradient(135deg, var(--bg-deep), var(--bg-dark)); padding: 3rem; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--glass-border);">
+                <div style="margin-bottom: 2rem;">
+                    <div
+                        style="width: 50px; height: 4px; background: var(--primary); margin-bottom: 1.5rem; border-radius: 10px;">
+                    </div>
+                    <h1 style="font-size: 2.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1rem;">Registrasi
+                        <span class="text-gradient">Ikan</span>
+                    </h1>
+                    <p style="color: var(--text-dim); font-size: 0.95rem;">Daftarkan ikan cupang terbaikmu untuk
+                        mengikuti kontes bergengsi.</p>
                 </div>
-                <img id="previewImage" class="preview-img">
-            </div>
 
-            <div class="input-group">
-                <label class="input-label">URL Foto Ikan</label>
-                <input type="url" id="imgUrl" class="glass-input" placeholder="https://..." required
-                    onchange="updatePreview(this.value)">
-                <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">Gunakan link gambar dari
-                    internet untuk sementara (e.g., Unsplash/Imgur)</small>
-            </div>
-
-            <div class="input-group">
-                <label class="input-label">Nama Event</label>
-                <select id="eventName" class="glass-input" style="background: rgba(0,0,0,0.5); font-weight: 600;"
-                    required>
-                    <option value="">Memuat event...</option>
-                </select>
-            </div>
-
-            <div class="form-grid">
-                <div class="input-group">
-                    <label class="input-label">Nama Ikan</label>
-                    <input type="text" id="fishName" class="glass-input" placeholder="e.g., Red Dragon" required>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Tipe / Kategori</label>
-                    <select id="fishType" class="glass-input" style="background: rgba(0,0,0,0.5);" required>
-                        <option value="Halfmoon">Halfmoon</option>
-                        <option value="Plakat">Plakat</option>
-                        <option value="Crowntail">Crowntail</option>
-                        <option value="Double Tail">Double Tail</option>
-                        <option value="Giant">Giant</option>
-                    </select>
+                <div class="image-preview-container" id="dropZone" style="height: 200px; margin-bottom: 0;">
+                    <div class="preview-placeholder" id="placeholder">
+                        <i class="ri-image-add-line" style="font-size: 2.5rem; color: var(--primary);"></i>
+                        <span style="display: block; font-size: 0.85rem; margin-top: 0.5rem;">Preview Foto Ikan</span>
+                    </div>
+                    <img id="previewImage" class="preview-img">
                 </div>
             </div>
 
-            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" id="submitBtn">
-                SUBMIT PENDAFTARAN
-            </button>
-            <a href="events.html"
-                style="display: block; text-align: center; margin-top: 1.5rem; color: var(--text-muted); text-decoration: none;">Batal</a>
-        </form>
-    </div>
+            <!-- Right Side: Form -->
+            <div style="padding: 3rem;">
+                <form id="entryForm">
+                    <div class="input-group">
+                        <label class="input-label">Pilih Event Kontes</label>
+                        <select id="eventName" class="glass-input" required style="cursor: pointer;">
+                            <option value="">Memuat event...</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-2 mb-3">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">Nama Ikan</label>
+                            <input type="text" id="fishName" class="glass-input" placeholder="e.g., Red Dragon"
+                                required>
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">Tipe / Kategori</label>
+                            <select id="fishType" class="glass-input" required>
+                                <option value="Halfmoon">Halfmoon</option>
+                                <option value="Plakat">Plakat</option>
+                                <option value="Crowntail">Crowntail</option>
+                                <option value="Double Tail">Double Tail</option>
+                                <option value="Giant">Giant</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">URL Foto Ikan</label>
+                        <input type="url" id="imgUrl" class="glass-input" placeholder="https://..." required
+                            onchange="updatePreview(this.value)">
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" id="submitBtn">
+                        <i class="ri-send-plane-fill"></i> SUBMIT PENDAFTARAN
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .entry-card {
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            #entryPanel {
+                grid-template-columns: 1fr;
+                margin: 1rem 0;
+            }
+
+            .entry-card>div:last-child {
+                padding: 2rem 1.5rem !important;
+            }
+
+            /* Mini branding for mobile */
+            #entryPanel::before {
+                content: 'Registrasi Kontes';
+                display: block;
+                padding: 1.5rem 1.5rem 0.5rem;
+                font-size: 1.25rem;
+                font-weight: 800;
+                color: var(--primary);
+                text-align: center;
+            }
+        }
+    </style>
+    </style>
 
     <script>
         // Check Auth

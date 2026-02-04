@@ -21,80 +21,83 @@
 
 <body>
 
-    <nav class="glass-panel"
-        style="border-radius: 0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
-        <div style="font-size: 1.5rem; font-weight: 700;">SnaDaily<span class="text-gradient">Cheker</span> Admin
-        </div>
-        <div style="display: flex; gap: 1rem; align-items: center;">
-            <div id="adminTabs" style="display: flex; gap: 0.5rem; margin-right: 2rem;">
-                <button class="tab-btn active" onclick="switchTab('overview')">Beranda</button>
-                <button class="tab-btn" onclick="switchTab('fish')">Fish Data</button>
-                <button class="tab-btn" onclick="switchTab('users')">Users</button>
-                <button class="tab-btn" onclick="switchTab('events')">Events</button>
-                <button class="tab-btn" onclick="switchTab('registrations')">Registrasi</button>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div
+                    style="width: 35px; height: 35px; background: var(--primary); border-radius: 8px; display: grid; place-items: center; color: #000;">
+                    <i class="ri-shield-user-fill" style="font-size: 1.2rem;"></i>
+                </div>
+                <a href="admin.html" class="text-gradient"
+                    style="font-size: 1.25rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">Admin<span
+                        style="color: white; font-weight: 400;">Panel</span></a>
             </div>
-            <button onclick="logout()" class="action-btn" title="Logout">
-                <i class="ri-logout-box-r-line"></i>
-            </button>
+            <div id="adminTabs" style="display: flex; gap: 0.5rem; overflow-x: auto; padding: 5px 0;"
+                class="hide-scrollbar">
+                <button onclick="switchTab('overview')" class="tab-btn active">Beranda</button>
+                <button onclick="switchTab('fish')" class="tab-btn">Ikan</button>
+                <button onclick="switchTab('events')" class="tab-btn">Events</button>
+                <button onclick="switchTab('registrations')" class="tab-btn">Registrasi</button>
+                <button onclick="switchTab('users')" class="tab-btn">Users</button>
+                <button onclick="logout()" class="tab-btn"
+                    style="color: var(--error); border-color: rgba(239, 68, 68, 0.2);"><i
+                        class="ri-logout-box-line"></i></button>
+            </div>
         </div>
     </nav>
 
-    <div class="container">
-        <!-- Section: Overview Dashboard -->
-        <div id="section-overview" class="admin-section active">
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-                <div class="glass-panel animate-fade-in"
-                    style="padding: 1.5rem; border-left: 4px solid var(--primary);">
-                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Total User</div>
-                    <div style="font-size: 2rem; font-weight: 800;" id="stat-users">0</div>
+    <main class="container">
+        <!-- Dashboard Overview -->
+        <div id="section-overview" class="admin-section active animate-fade-in">
+            <div class="grid grid-4 mb-4">
+                <div class="glass-panel" style="padding: 1.5rem; border-left: 4px solid var(--primary);">
+                    <div
+                        style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                        Total User</div>
+                    <div id="stat-users" style="font-size: 2.5rem; font-weight: 800;">0</div>
                 </div>
-                <div class="glass-panel animate-fade-in"
-                    style="padding: 1.5rem; border-left: 4px solid var(--secondary); animation-delay: 0.1s;">
-                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Banyak Event</div>
-                    <div style="font-size: 2rem; font-weight: 800;" id="stat-events">0</div>
+                <div class="glass-panel" style="padding: 1.5rem; border-left: 4px solid var(--secondary);">
+                    <div
+                        style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                        Banyak Event</div>
+                    <div id="stat-events" style="font-size: 2.5rem; font-weight: 800;">0</div>
                 </div>
-                <div class="glass-panel animate-fade-in"
-                    style="padding: 1.5rem; border-left: 4px solid #ffd700; animation-delay: 0.2s;">
-                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Ikan Terdaftar
-                    </div>
-                    <div style="font-size: 2rem; font-weight: 800;" id="stat-regs">0</div>
+                <div class="glass-panel" style="padding: 1.5rem; border-left: 4px solid var(--warning);">
+                    <div
+                        style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                        Ikan Terdaftar</div>
+                    <div id="stat-regs" style="font-size: 2.5rem; font-weight: 800;">0</div>
                 </div>
-                <div class="glass-panel animate-fade-in"
-                    style="padding: 1.5rem; border-left: 4px solid var(--error); animation-delay: 0.3s;">
-                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Menunggu
-                        Persetujuan</div>
-                    <div style="font-size: 2rem; font-weight: 800; color: var(--error);" id="stat-pending">0</div>
+                <div class="glass-panel" style="padding: 1.5rem; border-left: 4px solid var(--error);">
+                    <div
+                        style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                        Pending</div>
+                    <div id="stat-pending" style="font-size: 2.5rem; font-weight: 800; color: var(--error);">0</div>
                 </div>
             </div>
 
-            <div class="glass-panel animate-fade-in" style="padding: 2rem; animation-delay: 0.4s;">
-                <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
-                    <i class="ri-notification-3-line" style="color: var(--error);"></i>
-                    Pendaftaran Terkini (Pending)
-                </h2>
+            <div class="glass-panel" style="padding: 2rem;">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                    <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;"></div>
+                    <h2 style="font-size: 1.5rem; font-weight: 800;">Pendaftaran <span
+                            class="text-gradient">Terkini</span></h2>
+                </div>
                 <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse;">
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0 10px;">
                         <thead>
-                            <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
-                                <th style="padding: 1rem;">User</th>
-                                <th style="padding: 1rem;">Ikan</th>
-                                <th style="padding: 1rem;">Event</th>
-                                <th style="padding: 1rem;">Tanggal</th>
-                                <th style="padding: 1rem;">Aksi</th>
+                            <tr
+                                style="text-align: left; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">
+                                <th style="padding: 0 1rem;">User</th>
+                                <th style="padding: 0 1rem;">Ikan</th>
+                                <th style="padding: 0 1rem;">Event</th>
+                                <th style="padding: 0 1rem;">Waktu</th>
+                                <th style="padding: 0 1rem;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="pendingTableBody">
-                            <tr>
-                                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                                    Tidak ada pendaftaran pending.</td>
-                            </tr>
+                            <!-- Data populated by JS -->
                         </tbody>
                     </table>
-                </div>
-                <div style="margin-top: 1.5rem; text-align: right;">
-                    <button class="tab-btn" style="background: var(--primary); color: #000;"
-                        onclick="switchTab('fish')">Kelola Ikan &raquo;</button>
                 </div>
             </div>
         </div>
@@ -105,10 +108,12 @@
                 <!-- Input Section -->
                 <div>
                     <div class="glass-panel animate-fade-in" style="padding: 2rem;">
-                        <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="ri-file-add-line" style="color: var(--secondary);"></i>
-                            Input Data Ikan
-                        </h2>
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                            <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;">
+                            </div>
+                            <h2 style="font-size: 1.5rem; font-weight: 800;">Input Data <span
+                                    class="text-gradient">Ikan</span></h2>
+                        </div>
                         <form id="fishForm">
                             <input type="hidden" id="editId">
                             <div class="input-group">
@@ -152,14 +157,15 @@
                 <div>
                     <div class="glass-panel animate-fade-in" style="padding: 2rem; height: 100%;">
                         <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <div
-                                style="font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
-                                <i class="ri-history-line" style="color: var(--primary);"></i>
-                                Riwayat Ikan
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;">
+                                </div>
+                                <h2 style="font-size: 1.5rem; font-weight: 800;">Riwayat <span
+                                        class="text-gradient">Ikan</span></h2>
                             </div>
                             <input type="text" id="searchInput" class="glass-input" placeholder="Cari..."
-                                style="width: 50%; padding: 0.5rem;">
+                                style="width: min(200px, 40%); padding: 0.5rem 1rem;">
                         </div>
                         <div id="historyList" style="max-height: 500px; overflow-y: auto;">
                             <!-- Injected by JS -->
@@ -172,8 +178,11 @@
         <!-- Section: Users Management -->
         <div id="section-users" class="admin-section">
             <div class="glass-panel animate-fade-in" style="padding: 2rem;">
-                <h2 style="margin-bottom: 2rem;"><i class="ri-group-line" style="color: var(--primary);"></i> Kelola
-                    Akun User</h2>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                    <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;"></div>
+                    <h2 style="font-size: 1.5rem; font-weight: 800;">Kelola Akun <span class="text-gradient">User</span>
+                    </h2>
+                </div>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; color: white;">
                         <thead>
@@ -200,8 +209,12 @@
             <div class="admin-grid">
                 <div>
                     <div class="glass-panel animate-fade-in" style="padding: 2rem;">
-                        <h2 style="margin-bottom: 1.5rem;"><i class="ri-calendar-event-line"
-                                style="color: var(--secondary);"></i> Event Baru</h2>
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                            <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;">
+                            </div>
+                            <h2 style="font-size: 1.5rem; font-weight: 800;">Buat Event <span
+                                    class="text-gradient">Kontes</span></h2>
+                        </div>
                         <form id="eventForm">
                             <input type="hidden" id="eventId">
                             <div class="input-group">
@@ -274,78 +287,78 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 
-    <style>
-        .admin-section {
-            display: none;
-        }
+        <style>
+            .admin-section {
+                display: none;
+            }
 
-        .admin-section.active {
-            display: block;
-        }
+            .admin-section.active {
+                display: block;
+            }
 
-        .tab-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            color: var(--text-muted);
-            padding: 0.5rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
+            .tab-btn {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--glass-border);
+                color: var(--text-muted);
+                padding: 0.5rem 1.2rem;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.3s;
+            }
 
-        .tab-btn.active {
-            background: var(--primary);
-            color: #000;
-            border-color: var(--primary);
-        }
+            .tab-btn.active {
+                background: var(--primary);
+                color: #000;
+                border-color: var(--primary);
+            }
 
-        table td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-    </style>
+            table td {
+                padding: 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+        </style>
 
-    <script src="js/app.js"></script>
-    <script>
-        let allEvents = [];
+        <script src="js/app.js"></script>
+        <script>
+            let allEvents = [];
 
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchStats();
-        });
-
-        function switchTab(tab) {
-            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`section-${tab}`).classList.add('active');
-
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            tabButtons.forEach(btn => {
-                if (btn.getAttribute('onclick').includes(`'${tab}'`)) btn.classList.add('active');
+            document.addEventListener('DOMContentLoaded', () => {
+                fetchStats();
             });
 
-            if (tab === 'overview') fetchStats();
-            if (tab === 'users') fetchUsers();
-            if (tab === 'events') fetchEvents();
-            if (tab === 'registrations') fetchRegistrations();
-        }
+            function switchTab(tab) {
+                document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById(`section-${tab}`).classList.add('active');
 
-        async function fetchStats() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch('/api/admin/stats?t=' + Date.now(), { headers: { 'Authorization': token } });
-                const data = await res.json();
-                if (data.success) {
-                    const s = data.data;
-                    document.getElementById('stat-users').innerText = s.totalUsers;
-                    document.getElementById('stat-events').innerText = s.totalEvents;
-                    document.getElementById('stat-regs').innerText = s.totalRegistrations;
-                    document.getElementById('stat-pending').innerText = s.totalPending;
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                tabButtons.forEach(btn => {
+                    if (btn.getAttribute('onclick').includes(`'${tab}'`)) btn.classList.add('active');
+                });
 
-                    if (s.recentPending.length > 0) {
-                        document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
+                if (tab === 'overview') fetchStats();
+                if (tab === 'users') fetchUsers();
+                if (tab === 'events') fetchEvents();
+                if (tab === 'registrations') fetchRegistrations();
+            }
+
+            async function fetchStats() {
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch('/api/admin/stats?t=' + Date.now(), { headers: { 'Authorization': token } });
+                    const data = await res.json();
+                    if (data.success) {
+                        const s = data.data;
+                        document.getElementById('stat-users').innerText = s.totalUsers;
+                        document.getElementById('stat-events').innerText = s.totalEvents;
+                        document.getElementById('stat-regs').innerText = s.totalRegistrations;
+                        document.getElementById('stat-pending').innerText = s.totalPending;
+
+                        if (s.recentPending.length > 0) {
+                            document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
                             <tr>
                                 <td style="font-weight: 600;">${r.user_name}</td>
                                 <td>${r.fish_name} (${r.fish_type})</td>
@@ -359,36 +372,36 @@
                                 </td>
                             </tr>
                         `).join('');
-                    } else {
-                        document.getElementById('pendingTableBody').innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Tidak ada pendaftaran pending.</td></tr>`;
+                        } else {
+                            document.getElementById('pendingTableBody').innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Tidak ada pendaftaran pending.</td></tr>`;
+                        }
                     }
+                } catch (err) {
+                    console.error('Fetch Stats Error:', err);
                 }
-            } catch (err) {
-                console.error('Fetch Stats Error:', err);
             }
-        }
 
-        async function quickAction(id, status) {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/contest/status`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
-                    body: JSON.stringify({ id, status })
-                });
-                if (res.ok) fetchStats();
-            } catch (err) {
-                console.error(err);
+            async function quickAction(id, status) {
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch(`/api/admin/contest/status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                        body: JSON.stringify({ id, status })
+                    });
+                    if (res.ok) fetchStats();
+                } catch (err) {
+                    console.error(err);
+                }
             }
-        }
 
-        async function fetchUsers() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch('/api/admin/users', { headers: { 'Authorization': token } });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('userTableBody').innerHTML = data.data.map(u => `
+            async function fetchUsers() {
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch('/api/admin/users', { headers: { 'Authorization': token } });
+                    const data = await res.json();
+                    if (data.success) {
+                        document.getElementById('userTableBody').innerHTML = data.data.map(u => `
                         <tr>
                             <td>${u.username}</td>
                             <td style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${u.password}">${u.password}</td>
@@ -401,40 +414,40 @@
                             </td>
                         </tr>
                     `).join('');
-                }
-            } catch (err) {
-                console.error('Fetch Users Error:', err);
-            }
-        }
-
-        async function deleteUser(id) {
-            if (!confirm('Hapus akun user ini selamanya?')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/users/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': token }
-                });
-                if (res.ok) {
-                    alert('User berhasil dihapus!');
-                    fetchUsers();
-                }
-            } catch (err) {
-                console.error('Delete User Error:', err);
-            }
-        }
-
-        async function fetchEvents() {
-            try {
-                const res = await fetch('/api/events?t=' + Date.now());
-                const data = await res.json();
-                if (data.success) {
-                    allEvents = data.data;
-                    if (allEvents.length === 0) {
-                        document.getElementById('eventList').innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada event yang dibuat.</div>`;
-                        return;
                     }
-                    document.getElementById('eventList').innerHTML = allEvents.map((ev, index) => `
+                } catch (err) {
+                    console.error('Fetch Users Error:', err);
+                }
+            }
+
+            async function deleteUser(id) {
+                if (!confirm('Hapus akun user ini selamanya?')) return;
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch(`/api/admin/users/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': token }
+                    });
+                    if (res.ok) {
+                        alert('User berhasil dihapus!');
+                        fetchUsers();
+                    }
+                } catch (err) {
+                    console.error('Delete User Error:', err);
+                }
+            }
+
+            async function fetchEvents() {
+                try {
+                    const res = await fetch('/api/events?t=' + Date.now());
+                    const data = await res.json();
+                    if (data.success) {
+                        allEvents = data.data;
+                        if (allEvents.length === 0) {
+                            document.getElementById('eventList').innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada event yang dibuat.</div>`;
+                            return;
+                        }
+                        document.getElementById('eventList').innerHTML = allEvents.map((ev, index) => `
                         <div class="glass-panel" style="margin-bottom: 1rem; padding: 1rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--secondary);">
                             <img src="${ev.image_url || 'https://via.placeholder.com/60'}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
                             <div style="flex: 1;">
@@ -450,84 +463,84 @@
                             </div>
                         </div>
                     `).join('');
-                } else {
-                    document.getElementById('eventList').innerHTML = `<div style="color:var(--error); padding:10px;">Gagal memuat: ${data.error || 'Server error'}</div>`;
+                    } else {
+                        document.getElementById('eventList').innerHTML = `<div style="color:var(--error); padding:10px;">Gagal memuat: ${data.error || 'Server error'}</div>`;
+                    }
+                } catch (err) {
+                    console.error('Fetch Events Error:', err);
+                    document.getElementById('eventList').innerHTML = `<div style="color:var(--error); padding:10px;">Error koneksi: ${err.message}</div>`;
                 }
-            } catch (err) {
-                console.error('Fetch Events Error:', err);
-                document.getElementById('eventList').innerHTML = `<div style="color:var(--error); padding:10px;">Error koneksi: ${err.message}</div>`;
             }
-        }
 
-        function editEventByIndex(index) {
-            const ev = allEvents[index];
-            if (!ev) return;
-            document.getElementById('eventId').value = ev.id;
-            document.getElementById('eventTitle').value = ev.title;
-            document.getElementById('eventLocation').value = ev.location;
-            document.getElementById('eventDate').value = ev.event_date;
-            document.getElementById('eventImage').value = ev.image_url;
-            document.getElementById('eventDesc').value = ev.description;
-            document.getElementById('eventStatus').value = ev.status;
-            document.querySelector('#section-events h2').innerText = 'Edit Event';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+            function editEventByIndex(index) {
+                const ev = allEvents[index];
+                if (!ev) return;
+                document.getElementById('eventId').value = ev.id;
+                document.getElementById('eventTitle').value = ev.title;
+                document.getElementById('eventLocation').value = ev.location;
+                document.getElementById('eventDate').value = ev.event_date;
+                document.getElementById('eventImage').value = ev.image_url;
+                document.getElementById('eventDesc').value = ev.description;
+                document.getElementById('eventStatus').value = ev.status;
+                document.querySelector('#section-events h2').innerText = 'Edit Event';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
 
-        document.getElementById('eventForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('eventId').value;
-            const payload = {
-                title: document.getElementById('eventTitle').value,
-                location: document.getElementById('eventLocation').value,
-                eventDate: document.getElementById('eventDate').value,
-                imageUrl: document.getElementById('eventImage').value,
-                description: document.getElementById('eventDesc').value,
-                status: document.getElementById('eventStatus').value
-            };
+            document.getElementById('eventForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('eventId').value;
+                const payload = {
+                    title: document.getElementById('eventTitle').value,
+                    location: document.getElementById('eventLocation').value,
+                    eventDate: document.getElementById('eventDate').value,
+                    imageUrl: document.getElementById('eventImage').value,
+                    description: document.getElementById('eventDesc').value,
+                    status: document.getElementById('eventStatus').value
+                };
 
-            const token = sessionStorage.getItem('sna_admin_token');
-            const method = id ? 'PUT' : 'POST';
-            const url = id ? `/api/admin/events/${id}` : '/api/admin/events';
+                const token = sessionStorage.getItem('sna_admin_token');
+                const method = id ? 'PUT' : 'POST';
+                const url = id ? `/api/admin/events/${id}` : '/api/admin/events';
 
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json', 'Authorization': token },
-                body: JSON.stringify(payload)
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert('Event berhasil disimpan!');
+                    e.target.reset();
+                    document.getElementById('eventId').value = '';
+                    fetchEvents();
+                }
             });
 
-            if (res.ok) {
-                alert('Event berhasil disimpan!');
-                e.target.reset();
-                document.getElementById('eventId').value = '';
-                fetchEvents();
+            async function deleteEvent(id) {
+                if (!confirm('Hapus event ini?')) return;
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch(`/api/admin/events/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': token }
+                    });
+                    if (res.ok) fetchEvents();
+                } catch (err) {
+                    console.error('Delete Event Error:', err);
+                }
             }
-        });
 
-        async function deleteEvent(id) {
-            if (!confirm('Hapus event ini?')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/events/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': token }
-                });
-                if (res.ok) fetchEvents();
-            } catch (err) {
-                console.error('Delete Event Error:', err);
-            }
-        }
-
-        async function fetchRegistrations() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch('/api/admin/registrations?t=' + Date.now(), { headers: { 'Authorization': token } });
-                const data = await res.json();
-                if (data.success) {
-                    if (data.data.length === 0) {
-                        document.getElementById('regTableBody').innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada data registrasi.</td></tr>`;
-                        return;
-                    }
-                    document.getElementById('regTableBody').innerHTML = data.data.map(r => `
+            async function fetchRegistrations() {
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch('/api/admin/registrations?t=' + Date.now(), { headers: { 'Authorization': token } });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (data.data.length === 0) {
+                            document.getElementById('regTableBody').innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Belum ada data registrasi.</td></tr>`;
+                            return;
+                        }
+                        document.getElementById('regTableBody').innerHTML = data.data.map(r => `
                         <tr>
                             <td style="font-weight: 600;">${r.user_name}</td>
                             <td><div>${r.fish_name}</div><div style="font-size: 0.75rem; color: var(--text-muted);">${r.fish_type}</div></td>
@@ -545,32 +558,32 @@
                             </td>
                         </tr>
                     `).join('');
-                } else {
-                    document.getElementById('regTableBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--error);">Gagal memuat: ${data.error}</td></tr>`;
+                    } else {
+                        document.getElementById('regTableBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--error);">Gagal memuat: ${data.error}</td></tr>`;
+                    }
+                } catch (err) {
+                    console.error('Fetch Registrations Error:', err);
+                    document.getElementById('regTableBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--error);">Error koneksi.</td></tr>`;
                 }
-            } catch (err) {
-                console.error('Fetch Registrations Error:', err);
-                document.getElementById('regTableBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--error);">Error koneksi.</td></tr>`;
             }
-        }
 
-        async function deleteRegistration(id) {
-            if (!confirm('Hapus pendaftaran ini secara permanen?')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/registrations/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': token }
-                });
-                if (res.ok) {
-                    alert('Registrasi dihapus!');
-                    fetchRegistrations();
+            async function deleteRegistration(id) {
+                if (!confirm('Hapus pendaftaran ini secara permanen?')) return;
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch(`/api/admin/registrations/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': token }
+                    });
+                    if (res.ok) {
+                        alert('Registrasi dihapus!');
+                        fetchRegistrations();
+                    }
+                } catch (err) {
+                    console.error('Delete Reg Error:', err);
                 }
-            } catch (err) {
-                console.error('Delete Reg Error:', err);
             }
-        }
-    </script>
+        </script>
 </body>
 
 </html>

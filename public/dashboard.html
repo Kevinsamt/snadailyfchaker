@@ -131,73 +131,84 @@
 </head>
 
 <body>
-    <div class="ocean-background">
-        <div class="bubble x1"></div>
-        <div class="bubble x2"></div>
-        <div class="bubble x3"></div>
-    </div>
-
-    <nav style="padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;">
-        <a href="events.html"
-            style="color: white; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-            <i class="ri-arrow-left-line"></i> Kembali ke Event
-        </a>
-        <div id="userNav" style="display: flex; gap: 1rem; align-items: center;">
-            <button onclick="logout()" class="action-btn"
-                style="color: var(--error); border: none; background: none; font-weight: 700;">
-                <i class="ri-logout-box-r-line"></i> LOGOUT
-            </button>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="events.html" class="text-gradient"
+                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
+                    style="color: white; font-weight: 400;">Cheker</span></a>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <a href="events.html" class="tab-btn">Cari Event</a>
+                <button onclick="logout()" class="tab-btn"
+                    style="color: var(--error); border-color: rgba(239, 68, 68, 0.2);"><i
+                        class="ri-logout-box-line"></i></button>
+            </div>
         </div>
     </nav>
 
-    <div class="dashboard-container">
-        <!-- Sidebar Profile -->
-        <aside>
-            <div class="glass-panel profile-card animate-fade-in">
-                <div class="user-avatar" id="userInitial">U</div>
-                <div class="profile-info">
-                    <h2 id="fullNameDisplay">Memuat...</h2>
-                    <p id="usernameDisplay">@username</p>
+    <main class="container animate-fade-in" style="margin-top: 2rem;">
+        <div class="dashboard-container">
+            <!-- Sidebar Profile -->
+            <aside>
+                <div class="glass-panel profile-card animate-fade-in" style="height: fit-content; padding: 2.5rem;">
+                    <div id="userInitial"
+                        style="width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: grid; place-items: center; font-size: 3rem; color: #000; font-weight: 800; margin: 0 auto 1.5rem; box-shadow: 0 0 20px var(--primary-glow);">
+                        U</div>
+                    <div class="profile-info">
+                        <h2 id="fullNameDisplay" style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.2rem;">
+                            Memuat...</h2>
+                        <p id="usernameDisplay"
+                            style="color: var(--text-muted); margin-bottom: 2rem; font-family: monospace; font-size: 0.9rem;">
+                            @username</p>
 
-                    <div class="stat-grid">
-                        <div class="stat-item">
-                            <div class="stat-value" id="totalReg">0</div>
-                            <div class="stat-label">Terdaftar</div>
+                        <div class="stat-grid"
+                            style="grid-template-columns: 1fr 1fr; border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border); padding: 1.5rem 0; margin-bottom: 2rem;">
+                            <div class="stat-item" style="background: none; border: none; padding: 0;">
+                                <div class="stat-value" id="totalReg" style="font-size: 1.75rem;">0</div>
+                                <div class="stat-label">Terdaftar</div>
+                            </div>
+                            <div style="width: 1px; background: var(--glass-border);"></div>
+                            <div class="stat-item" style="background: none; border: none; padding: 0;">
+                                <div class="stat-value" id="approvedReg"
+                                    style="font-size: 1.75rem; color: var(--success);">0</div>
+                                <div class="stat-label">Disetujui</div>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="approvedReg">0</div>
-                            <div class="stat-label">Disetujui</div>
-                        </div>
-                    </div>
 
-                    <button class="btn-primary" style="width: 100%; padding: 0.8rem;" onclick="openModal()">
-                        <i class="ri-edit-line"></i> EDIT PROFIL
-                    </button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main>
-            <div class="glass-panel animate-fade-in" style="padding: 2rem; margin-bottom: 1rem;">
-                <h1 style="margin-bottom: 2rem;"><i class="ri-medal-2-line" style="color: var(--primary);"></i>
-                    Pendaftaran Kontes Saya</h1>
-                <div id="registrationList">
-                    <!-- Dynamic Content -->
-                    <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
-                        <i class="ri-history-line"
-                            style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
-                        Belum ada pendaftaran kontes.
+                        <button class="btn-primary"
+                            style="width: 100%; padding: 0.8rem; font-size: 0.9rem; border-radius: var(--radius-md);"
+                            onclick="openModal()">
+                            <i class="ri-edit-line"></i> EDIT PROFIL
+                        </button>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                    <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;"></div>
+                    <h2 style="font-size: 1.75rem; font-weight: 800;">Riwayat <span class="text-gradient">Kontes</span>
+                    </h2>
+                </div>
+
+                <div id="registrationList" class="grid" style="grid-template-columns: 1fr;">
+                    <div style="text-align: center; padding: 5rem; color: var(--text-muted);">
+                        <i class="ri-loader-3-line ri-spin"
+                            style="font-size: 2.5rem; color: var(--primary); display: block; margin-bottom: 1rem;"></i>
+                        Memuat riwayat pendaftaran...
+                    </div>
+                </div>
+            </main>
+        </div>
+    </main>
 
     <!-- Edit Profile Modal -->
     <div id="editModal" class="modal">
-        <div class="glass-panel modal-content animate-fade-in">
-            <h2 style="margin-bottom: 1.5rem;">Edit Profil</h2>
+        <div class="glass-panel modal-content animate-fade-in" style="border: 1px solid var(--glass-border-bright);">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;"></div>
+                <h2 style="font-size: 1.5rem; font-weight: 800;">Edit <span class="text-gradient">Profil</span></h2>
+            </div>
             <form id="profileForm">
                 <div class="input-group">
                     <label class="input-label">Nama Lengkap</label>
@@ -208,9 +219,10 @@
                     <input type="tel" id="editPhone" class="glass-input" required placeholder="08xxxxxxx">
                 </div>
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="button" class="btn-primary" style="background: rgba(255,255,255,0.05); color: white;"
+                    <button type="button" class="btn-primary"
+                        style="background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); box-shadow: none;"
                         onclick="closeModal()">BATAL</button>
-                    <button type="submit" class="btn-primary" style="flex: 1;">SIMPAN PERUBAHAN</button>
+                    <button type="submit" class="btn-primary" style="flex: 1;">SIMPAN PROFIL</button>
                 </div>
             </form>
         </div>
@@ -268,21 +280,22 @@
                     document.getElementById('approvedReg').innerText = list.filter(r => r.status === 'approved').length;
 
                     if (list.length > 0) {
-                        document.getElementById('registrationList').innerHTML = list.map(reg => `
-                            <div class="glass-panel reg-card">
-                                <img src="${reg.fish_image_url || 'https://via.placeholder.com/100'}" class="fish-thumb">
+                        document.getElementById('registrationList').innerHTML = list.map((reg, idx) => `
+                            <div class="glass-panel animate-fade-in" style="animation-delay: ${idx * 0.1}s; display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem; border-left: 4px solid ${reg.status === 'approved' ? 'var(--success)' : reg.status === 'rejected' ? 'var(--error)' : 'var(--warning)'};">
+                                <img src="${reg.fish_image_url || 'https://via.placeholder.com/100'}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 1px solid var(--glass-border);">
                                 <div style="flex: 1;">
-                                    <div style="font-size: 0.8rem; color: var(--primary); font-weight: 700; margin-bottom: 0.2rem;">${reg.contest_name}</div>
-                                    <h3 style="margin-bottom: 0.3rem;">${reg.fish_name}</h3>
-                                    <div style="color: var(--text-muted); font-size: 0.85rem;">Tipe: ${reg.fish_type}</div>
+                                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 0.25rem;">
+                                        <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">${reg.contest_name}</span>
+                                        <div style="width: 4px; height: 4px; background: var(--text-dim); border-radius: 50%;"></div>
+                                        <span style="font-size: 0.7rem; color: var(--text-dim);">${new Date(reg.created_at).toLocaleDateString('id-ID')}</span>
+                                    </div>
+                                    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.25rem;">${reg.fish_name}</h3>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Kategori: ${reg.fish_type}</div>
                                 </div>
                                 <div style="text-align: right;">
-                                    <span class="status-badge" style="background: ${getStatusColor(reg.status)}">
+                                    <span style="display: inline-block; padding: 5px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; background: ${reg.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : reg.status === 'rejected' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'}; color: ${reg.status === 'approved' ? 'var(--success)' : reg.status === 'rejected' ? 'var(--error)' : 'var(--warning)'}; border: 1px solid ${reg.status === 'approved' ? 'rgba(16, 185, 129, 0.2)' : reg.status === 'rejected' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'};">
                                         ${reg.status.toUpperCase()}
                                     </span>
-                                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem;">
-                                        ${new Date(reg.created_at).toLocaleDateString()}
-                                    </div>
                                 </div>
                             </div>
                         `).join('');

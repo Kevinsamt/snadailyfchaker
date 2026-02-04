@@ -1066,8 +1066,11 @@ const updateAuthNav = () => {
 window.logout = () => {
     localStorage.removeItem('sna_user_token');
     localStorage.removeItem('sna_user_data');
+    sessionStorage.removeItem('sna_admin_token');
     window.location.href = 'login.html';
 };
+
+window.logoutAdmin = window.logout;
 
 // Initialize based on page
 document.addEventListener('DOMContentLoaded', () => {
