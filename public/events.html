@@ -125,12 +125,41 @@
         <div class="container nav-container">
             <a href="index.html" class="text-gradient"
                 style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
-                    style="color: white; font-weight: 400;">Cheker</span></a>
-            <div id="userNav">
-                <!-- Data populated by JS -->
-            </div>
+                    style="color: white; font-weight: 300;">Checker</span></a>
+
+            <button class="hamburger-btn" onclick="toggleMenu()">
+                <i class="ri-menu-4-line"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- Nav Overlay -->
+    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
+    <div class="nav-overlay" id="navOverlay">
+        <div class="nav-menu-header">
+            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
+            <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="nav-menu-links">
+            <a href="index.html" class="nav-menu-link">
+                <i class="ri-home-4-line"></i> Beranda
+            </a>
+            <a href="events.html" class="nav-menu-link active">
+                <i class="ri-calendar-event-line"></i> Event Kontes
+            </a>
+            <a href="track.html" class="nav-menu-link">
+                <i class="ri-truck-line"></i> Lacak Pesanan
+            </a>
+            <div id="userMenuSection">
+                <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
+                <div id="userMenuLinks">
+                    <!-- Data populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <header class="event-hero">
         <div class="container">
@@ -167,23 +196,36 @@
     </main>
 
     <script>
+        function toggleMenu() {
+            const overlay = document.getElementById('navOverlay');
+            const backdrop = document.getElementById('navBackdrop');
+            overlay.classList.toggle('active');
+            backdrop.classList.toggle('active');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
-            const userNav = document.getElementById('userNav');
+            const userMenuLinks = document.getElementById('userMenuLinks');
 
             if (userData) {
-                userNav.innerHTML = `
-                    <a href="dashboard.html" class="user-profile" style="text-decoration: none; color: white;">
-                        <i class="ri-user-smile-line" style="color: var(--primary)"></i>
-                        <span style="font-weight: 600;">${userData.fullName}</span>
+                userMenuLinks.innerHTML = `
+                    <a href="dashboard.html" class="nav-menu-link">
+                        <i class="ri-dashboard-line"></i> Dashboard
                     </a>
-                    <button onclick="logout()" style="background: none; border: none; color: var(--error); cursor: pointer; font-weight: 600;">
-                        <i class="ri-logout-box-r-line"></i>
-                    </button>
+                    <a href="#" onclick="logout()" class="nav-menu-link" style="color: var(--error);">
+                        <i class="ri-logout-box-r-line"></i> Logout
+                    </a>
                 `;
                 fetchUserRegistrations();
             } else {
-                userNav.innerHTML = `<a href="login.html" class="btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.9rem;">LOGIN</a>`;
+                userMenuLinks.innerHTML = `
+                    <a href="login.html" class="nav-menu-link">
+                        <i class="ri-user-line"></i> Login
+                    </a>
+                    <a href="register.html" class="nav-menu-link" style="color: var(--secondary);">
+                        <i class="ri-user-add-line"></i> Daftar Akun
+                    </a>
+                `;
             }
 
             fetchEvents();

@@ -174,19 +174,47 @@
         <div class="bubble x6"></div>
     </div>
 
-    <!-- Desktop Nav -->
-    <nav class="navbar desktop-only">
+    <!-- Navigation -->
+    <nav class="navbar">
         <div class="container nav-container">
             <a href="index.html" class="text-gradient"
-                style="font-size: 1.75rem; font-weight: 800; text-decoration: none;">SnaDaily<span
+                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
                     style="color: white; font-weight: 300;">Checker</span></a>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <a href="events.html" class="tab-btn">Events</a>
-                <a href="login.html" class="tab-btn">Login</a>
-                <a href="register.html" class="tab-btn active">Join</a>
-            </div>
+
+            <button class="hamburger-btn" onclick="toggleMenu()">
+                <i class="ri-menu-4-line"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- Nav Overlay -->
+    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
+    <div class="nav-overlay" id="navOverlay">
+        <div class="nav-menu-header">
+            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
+            <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="nav-menu-links">
+            <a href="index.html" class="nav-menu-link active">
+                <i class="ri-home-4-line"></i> Beranda
+            </a>
+            <a href="events.html" class="nav-menu-link">
+                <i class="ri-calendar-event-line"></i> Event Kontes
+            </a>
+            <a href="track.html" class="nav-menu-link">
+                <i class="ri-truck-line"></i> Lacak Pesanan
+            </a>
+            <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
+            <a href="login.html" class="nav-menu-link">
+                <i class="ri-user-line"></i> Login
+            </a>
+            <a href="register.html" class="nav-menu-link" style="color: var(--secondary);">
+                <i class="ri-user-add-line"></i> Daftar Akun
+            </a>
+        </div>
+    </div>
 
     <!-- Hero / Checker Section -->
     <main class="hero-section">

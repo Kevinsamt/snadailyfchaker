@@ -133,17 +133,44 @@
 <body>
     <nav class="navbar">
         <div class="container nav-container">
-            <a href="events.html" class="text-gradient"
+            <a href="index.html" class="text-gradient"
                 style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
-                    style="color: white; font-weight: 400;">Cheker</span></a>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <a href="events.html" class="tab-btn">Cari Event</a>
-                <button onclick="logout()" class="tab-btn"
-                    style="color: var(--error); border-color: rgba(239, 68, 68, 0.2);"><i
-                        class="ri-logout-box-line"></i></button>
-            </div>
+                    style="color: white; font-weight: 300;">Checker</span></a>
+
+            <button class="hamburger-btn" onclick="toggleMenu()">
+                <i class="ri-menu-4-line"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- Nav Overlay -->
+    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
+    <div class="nav-overlay" id="navOverlay">
+        <div class="nav-menu-header">
+            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
+            <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="nav-menu-links">
+            <a href="index.html" class="nav-menu-link">
+                <i class="ri-home-4-line"></i> Beranda
+            </a>
+            <a href="events.html" class="nav-menu-link">
+                <i class="ri-calendar-event-line"></i> Event Kontes
+            </a>
+            <a href="track.html" class="nav-menu-link">
+                <i class="ri-truck-line"></i> Lacak Pesanan
+            </a>
+            <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
+            <a href="dashboard.html" class="nav-menu-link active">
+                <i class="ri-dashboard-line"></i> Dashboard Saya
+            </a>
+            <a href="#" onclick="logout()" class="nav-menu-link" style="color: var(--error);">
+                <i class="ri-logout-box-r-line"></i> Logout
+            </a>
+        </div>
+    </div>
 
     <main class="container animate-fade-in" style="margin-top: 2rem;">
         <div class="dashboard-container">
@@ -229,6 +256,13 @@
     </div>
 
     <script>
+        function toggleMenu() {
+            const overlay = document.getElementById('navOverlay');
+            const backdrop = document.getElementById('navBackdrop');
+            overlay.classList.toggle('active');
+            backdrop.classList.toggle('active');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('sna_user_token');
             if (!token) {

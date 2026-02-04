@@ -117,6 +117,13 @@
     </div>
 
     <script>
+        function toggleMenu() {
+            const overlay = document.getElementById('navOverlay');
+            const backdrop = document.getElementById('navBackdrop');
+            overlay.classList.toggle('active');
+            backdrop.classList.toggle('active');
+        }
+
         async function trackOrder() {
             const waybill = document.getElementById('waybillInput').value.trim();
             if (!waybill) return alert("Masukkan nomor resi!");

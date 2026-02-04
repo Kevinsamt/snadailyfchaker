@@ -337,6 +337,108 @@ body {
     .nav-container {
         padding: 0 1rem;
     }
+
+    .nav-links {
+        display: none;
+    }
+}
+
+/* Hamburger Menu Base */
+.hamburger-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: var(--transition);
+}
+
+.hamburger-btn:hover {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+/* Nav Overlay */
+.nav-overlay {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    height: 100vh;
+    background: rgba(7, 11, 20, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid var(--glass-border);
+    z-index: 2000;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.nav-overlay.active {
+    right: 0;
+}
+
+.nav-overlay-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1999;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.nav-overlay-backdrop.active {
+    display: block;
+    opacity: 1;
+}
+
+.nav-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.nav-menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.nav-menu-link {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition);
+}
+
+.nav-menu-link:hover {
+    color: var(--primary);
+    transform: translateX(10px);
+}
+
+.nav-menu-link i {
+    font-size: 1.5rem;
+}
+
+.nav-menu-link.active {
+    color: white;
 }
 
 .history-list {
