@@ -255,14 +255,8 @@
         </div>
     </div>
 
+    <script src="js/navigation.js"></script>
     <script>
-        function toggleMenu() {
-            const overlay = document.getElementById('navOverlay');
-            const backdrop = document.getElementById('navBackdrop');
-            overlay.classList.toggle('active');
-            backdrop.classList.toggle('active');
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('sna_user_token');
             if (!token) {

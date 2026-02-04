@@ -195,14 +195,8 @@
         </section>
     </main>
 
+    <script src="js/navigation.js"></script>
     <script>
-        function toggleMenu() {
-            const overlay = document.getElementById('navOverlay');
-            const backdrop = document.getElementById('navBackdrop');
-            overlay.classList.toggle('active');
-            backdrop.classList.toggle('active');
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
             const userMenuLinks = document.getElementById('userMenuLinks');

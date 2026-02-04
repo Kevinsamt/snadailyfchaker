@@ -314,7 +314,60 @@
     </div>
 
     <!-- Scripting -->
+    <script src="js/navigation.js"></script>
     <script src="js/app.js"></script>
+    <script>
+        // Search Logic
+        async function checkAuthenticity() {
+            const batchId = document.getElementById('batchIdInput').value.trim();
+            const btn = document.getElementById('searchBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const resultContainer = document.getElementById('resultContainer');
+
+            if (!batchId) {
+                alert('Masukkan Batch ID terlebih dahulu!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+            errorMsg.style.display = 'none';
+            resultContainer.style.display = 'none';
+
+            try {
+                const response = await fetch(`/api/fish/${batchId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const fish = data.data;
+                    document.getElementById('res-id').innerText = `ID: ${fish.id}`;
+                    document.getElementById('res-species').innerText = fish.name;
+                    document.getElementById('res-origin').innerText = fish.origin;
+                    document.getElementById('res-weight').innerText = `${fish.weight || 0} kg`;
+                    document.getElementById('res-date').innerText = new Date(fish.import_date).toLocaleDateString('id-ID');
+                    document.getElementById('res-method').innerText = fish.method || 'Farmed';
+
+                    resultContainer.style.display = 'block';
+                    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    errorMsg.innerText = 'Data tidak ditemukan. Pastikan Batch ID benar.';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Search failed:', err);
+                errorMsg.innerText = 'Gagal terhubung ke server.';
+                errorMsg.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-search-2-line"></i>';
+            }
+        }
+
+        document.getElementById('searchBtn').addEventListener('click', checkAuthenticity);
+        document.getElementById('batchIdInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkAuthenticity();
+        });
+    </script>
 </body>
 
 </html>

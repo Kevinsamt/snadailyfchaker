@@ -222,23 +222,19 @@
             }
         }
     </style>
-    </style>
-    window.location.href = 'login.html';
-    }
+    <script src="js/navigation.js"></script>
+    <script>
+        // Check Auth
+        if (!localStorage.getItem('sna_user_token')) {
+            window.location.href = 'login.html';
+        }
 
-    function toggleMenu() {
-    const overlay = document.getElementById('navOverlay');
-    const backdrop = document.getElementById('navBackdrop');
-    overlay.classList.toggle('active');
-    backdrop.classList.toggle('active');
-    }
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userData = JSON.parse(localStorage.getItem('sna_user_data'));
+            const userMenuLinks = document.getElementById('userMenuLinks');
 
-    document.addEventListener('DOMContentLoaded', async () => { // Added async here
-    const userData = JSON.parse(localStorage.getItem('sna_user_data'));
-    const userMenuLinks = document.getElementById('userMenuLinks');
-
-    if (userData) {
-    userMenuLinks.innerHTML = `
+            if (userData) {
+                userMenuLinks.innerHTML = `
     <a href="dashboard.html" class="nav-menu-link">
         <i class="ri-dashboard-line"></i> Dashboard
     </a>
@@ -246,8 +242,8 @@
         <i class="ri-logout-box-r-line"></i> Logout
     </a>
     `;
-    } else {
-    userMenuLinks.innerHTML = `
+            } else {
+                userMenuLinks.innerHTML = `
     <a href="login.html" class="nav-menu-link">
         <i class="ri-user-line"></i> Login
     </a>
@@ -255,87 +251,85 @@
         <i class="ri-user-add-line"></i> Daftar Akun
     </a>
     `;
-    }
+            }
 
-    // Moved event fetching logic into DOMContentLoaded
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedEvent = urlParams.get('event');
+            // Moved event fetching logic into DOMContentLoaded
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedEvent = urlParams.get('event');
 
-    try {
-    const res = await fetch('/api/events');
-    const data = await res.json();
-    if (data.success) {
-    const select = document.getElementById('eventName');
-    select.innerHTML = '<option value="">Pilih Event...</option>' +
-    data.data.filter(ev => ev.status !== 'past').map(ev =>
-    `<option value="${ev.title}" ${selectedEvent===decodeURIComponent(ev.title) ? 'selected' : '' }>${ev.title}</option>
+            try {
+                const res = await fetch('/api/events');
+                const data = await res.json();
+                if (data.success) {
+                    const select = document.getElementById('eventName');
+                    select.innerHTML = '<option value="">Pilih Event...</option>' +
+                        data.data.filter(ev => ev.status !== 'past').map(ev =>
+                            `<option value="${ev.title}" ${selectedEvent === decodeURIComponent(ev.title) ? 'selected' : ''}>${ev.title}</option>
     `
-    ).join('');
-    }
-    } catch (err) {
-    console.error('Error fetching events:', err);
-    document.getElementById('eventName').innerHTML = '<option value="">Gagal memuat event</option>';
-    }
-    }
+                        ).join('');
+                }
+            } catch (err) {
+                console.error('Error fetching events:', err);
+                document.getElementById('eventName').innerHTML = '<option value="">Gagal memuat event</option>';
+            }
+        });
 
-    fetchEvents();
+        function updatePreview(url) {
+            const preview = document.getElementById('previewImage');
+            const placeholder = document.getElementById('placeholder');
+            if (url) {
+                preview.src = url;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                placeholder.style.display = 'block';
+            }
+        }
 
-    function updatePreview(url) {
-    const preview = document.getElementById('previewImage');
-    const placeholder = document.getElementById('placeholder');
-    if (url) {
-    preview.src = url;
-    preview.style.display = 'block';
-    placeholder.style.display = 'none';
-    } else {
-    preview.style.display = 'none';
-    placeholder.style.display = 'block';
-    }
-    }
+        document.getElementById('entryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const token = localStorage.getItem('sna_user_token');
 
-    document.getElementById('entryForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    const token = localStorage.getItem('sna_user_token');
+            const payload = {
+                contestName: document.getElementById('eventName').value,
+                fishName: document.getElementById('fishName').value,
+                fishType: document.getElementById('fishType').value,
+                fishImageUrl: document.getElementById('imgUrl').value
+            };
 
-    const payload = {
-    contestName: document.getElementById('eventName').value,
-    fishName: document.getElementById('fishName').value,
-    fishType: document.getElementById('fishType').value,
-    fishImageUrl: document.getElementById('imgUrl').value
-    };
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Mengirim...';
 
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Mengirim...';
+            try {
+                const response = await fetch('/api/contest/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-    try {
-    const response = await fetch('/api/contest/register', {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
-    });
+                if (response.ok) {
+                    btn.style.background = 'var(--success)';
+                    btn.innerHTML = '<i class="ri-check-line"></i> Terkirim!';
+                    setTimeout(() => {
+                        window.location.href = 'events.html';
+                    }, 1500);
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Gagal mendaftar');
+                }
+            } catch (err) {
+                alert(err.message);
+                btn.disabled = false;
+                btn.innerHTML = 'SUBMIT PENDAFTARAN';
+            }
+        });
 
-    if (response.ok) {
-    btn.style.background = 'var(--success)';
-    btn.innerHTML = '<i class="ri-check-line"></i> Terkirim!';
-    setTimeout(() => {
-    window.location.href = 'events.html';
-    }, 1500);
-    } else {
-    const data = await response.json();
-    throw new Error(data.error || 'Gagal mendaftar');
-    }
-    } catch (err) {
-    alert(err.message);
-    btn.disabled = false;
-    btn.innerHTML = 'SUBMIT PENDAFTARAN';
-    }
-    });
-
-    // Autofill logic removed as it's handled in fetchEvents dropdown rendering
+        // Autofill logic removed as it's handled in fetchEvents dropdown rendering
     </script>
 </body>
 
