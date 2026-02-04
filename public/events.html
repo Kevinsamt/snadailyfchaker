@@ -152,12 +152,7 @@
             <a href="track.html" class="nav-menu-link">
                 <i class="ri-truck-line"></i> Lacak Pesanan
             </a>
-            <div id="userMenuSection">
-                <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
-                <div id="userMenuLinks">
-                    <!-- Data populated by JS -->
-                </div>
-            </div>
+            <div id="userMenuLinks"></div>
         </div>
     </div>
 
@@ -199,27 +194,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
-            const userMenuLinks = document.getElementById('userMenuLinks');
 
             if (userData) {
-                userMenuLinks.innerHTML = `
-                    <a href="dashboard.html" class="nav-menu-link">
-                        <i class="ri-dashboard-line"></i> Dashboard
-                    </a>
-                    <a href="#" onclick="logout()" class="nav-menu-link" style="color: var(--error);">
-                        <i class="ri-logout-box-r-line"></i> Logout
-                    </a>
-                `;
                 fetchUserRegistrations();
-            } else {
-                userMenuLinks.innerHTML = `
-                    <a href="login.html" class="nav-menu-link">
-                        <i class="ri-user-line"></i> Login
-                    </a>
-                    <a href="register.html" class="nav-menu-link" style="color: var(--secondary);">
-                        <i class="ri-user-add-line"></i> Daftar Akun
-                    </a>
-                `;
             }
 
             fetchEvents();

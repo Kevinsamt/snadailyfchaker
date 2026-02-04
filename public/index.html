@@ -369,30 +369,6 @@
         document.getElementById('batchIdInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') checkAuthenticity();
         });
-
-        // Dynamic Menu Logic
-        document.addEventListener('DOMContentLoaded', () => {
-            const userData = JSON.parse(localStorage.getItem('sna_user_data'));
-            const userMenuLinks = document.getElementById('userMenuLinks');
-
-            if (userData) {
-                userMenuLinks.innerHTML = `
-                    <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
-                    <a href="dashboard.html" class="nav-menu-link">
-                        <i class="ri-dashboard-line"></i> Dashboard
-                    </a>
-                    <a href="#" onclick="logout(); return false;" class="nav-menu-link" style="color: var(--error);">
-                        <i class="ri-logout-box-r-line"></i> Logout
-                    </a>
-                `;
-            }
-        });
-
-        function logout() {
-            localStorage.removeItem('sna_user_token');
-            localStorage.removeItem('sna_user_data');
-            window.location.href = 'login.html';
-        }
     </script>
 </body>
 
