@@ -16,10 +16,8 @@
         <div class="bubble x3"></div>
     </div>
 
-    <main class="container flex-center" style="min-height: 100vh; padding-top: 2rem; padding-bottom: 2rem;">
-        <div class="glass-panel animate-fade-in"
-            style="max-width: 900px; width: 100%; display: grid; grid-template-columns: 1.2fr 1fr; overflow: hidden; padding: 0;"
-            id="authPanel">
+    <main class="container flex-center" style="min-height: 100vh; padding: 1rem 0;">
+        <div class="glass-panel animate-fade-in auth-card" id="authPanel">
             <!-- Left Side: Branding -->
             <div class="m-hide"
                 style="background: linear-gradient(135deg, var(--bg-deep), var(--bg-dark)); padding: 4rem; display: flex; flex-direction: column; justify-content: center; position: relative;">
@@ -78,10 +76,19 @@
     </main>
 
     <style>
+        .auth-card {
+            max-width: 900px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            overflow: hidden;
+            padding: 0;
+        }
+
         @media (max-width: 768px) {
-            #authPanel {
-                grid-template-columns: 1fr;
-                margin: 1rem;
+            .auth-card {
+                grid-template-columns: 1fr !important;
+                margin: 0.5rem;
                 padding-top: 1rem;
             }
 

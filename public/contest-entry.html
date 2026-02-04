@@ -95,9 +95,7 @@
     </nav>
 
     <main class="container flex-center" style="min-height: calc(100vh - 80px);">
-        <div class="glass-panel entry-card animate-fade-in"
-            style="max-width: 800px; width: 100%; display: grid; grid-template-columns: 1fr 1.2fr; overflow: hidden; padding: 0;"
-            id="entryPanel">
+        <div class="glass-panel entry-card animate-fade-in" id="entryPanel">
             <!-- Left Side: Decorative/Preview -->
             <div class="m-hide"
                 style="background: linear-gradient(135deg, var(--bg-deep), var(--bg-dark)); padding: 3rem; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--glass-border);">
@@ -166,11 +164,17 @@
     <style>
         .entry-card {
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            overflow: hidden;
+            padding: 0;
         }
 
         @media (max-width: 768px) {
-            #entryPanel {
-                grid-template-columns: 1fr;
+            .entry-card {
+                grid-template-columns: 1fr !important;
                 margin: 1rem 0;
             }
 

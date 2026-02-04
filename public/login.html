@@ -17,9 +17,7 @@
     </div>
 
     <main class="container flex-center" style="min-height: 100vh;">
-        <div class="glass-panel animate-fade-in"
-            style="max-width: 900px; width: 100%; display: grid; grid-template-columns: 1.2fr 1fr; overflow: hidden; padding: 0;"
-            id="authPanel">
+        <div class="glass-panel animate-fade-in auth-card" id="authPanel">
             <!-- Left Side: Branding -->
             <div class="m-hide"
                 style="background: linear-gradient(135deg, var(--bg-deep), var(--bg-dark)); padding: 4rem; display: flex; flex-direction: column; justify-content: center; position: relative;">
@@ -78,25 +76,37 @@
     </main>
 
     <style>
+        .auth-card {
+            max-width: 900px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            overflow: hidden;
+            padding: 0 !important;
+            /* Ensure no global padding interferes */
+            margin: 0 auto;
+        }
+
         @media (max-width: 768px) {
-            #authPanel {
-                grid-template-columns: 1fr;
-                margin: 1rem;
+            .auth-card {
+                grid-template-columns: 1fr !important;
+                margin: 0.5rem;
             }
 
             .glass-panel>div:last-child {
-                padding: 2.5rem 1.5rem;
+                padding: 2rem 1.25rem !important;
             }
 
             /* Show a mini branding on mobile instead of hiding completely */
             #authPanel::before {
                 content: 'SnaDaily';
                 display: block;
-                padding: 1.5rem 1.5rem 0.5rem;
-                font-size: 1.5rem;
+                padding: 2rem 1rem 0.5rem;
+                font-size: 2rem;
                 font-weight: 800;
                 color: var(--primary);
                 text-align: center;
+                grid-column: 1 / -1;
             }
         }
     </style>
