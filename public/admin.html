@@ -455,8 +455,10 @@
                     const res = await fetch('/api/admin/judges', { headers: { 'Authorization': token } });
                     const data = await res.json();
                     if (data.success) {
-                        if (data.data.length === 0) {
+                        allJudges = data.data;
+                        if (allJudges.length === 0) {
                             document.getElementById('judgeList').innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada juri terdaftar.</p>`;
+                            allJudges = []; // Reset just in case
                             return;
                         }
                         document.getElementById('judgeList').innerHTML = data.data.map(j => `
