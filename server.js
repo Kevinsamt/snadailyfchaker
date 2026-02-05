@@ -34,7 +34,17 @@ const snap = new midtransClient.Snap({
 const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
 let GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
 if (GOOGLE_PRIVATE_KEY) {
-    GOOGLE_PRIVATE_KEY = GOOGLE_PRIVATE_KEY.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
+    // 1. Remove wrapping quotes if any
+    GOOGLE_PRIVATE_KEY = GOOGLE_PRIVATE_KEY.replace(/^["']|["']$/g, '');
+    // 2. Unescape newlines (handle both \n and \\n)
+    GOOGLE_PRIVATE_KEY = GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
+    // 3. Trim whitespace
+    GOOGLE_PRIVATE_KEY = GOOGLE_PRIVATE_KEY.trim();
+
+    // 4. Final safety check: if it doesn't have the header/footer, it's definitely invalid
+    if (!GOOGLE_PRIVATE_KEY.includes('-----BEGIN PRIVATE KEY-----')) {
+        console.error("CRITICAL: GOOGLE_PRIVATE_KEY format is invalid (missing header)");
+    }
 }
 const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
 
@@ -155,7 +165,8 @@ app.get('/api/admin/debug-drive', adminAuthMiddleware, async (req, res) => {
                     privateKey: !!GOOGLE_PRIVATE_KEY,
                     email: !!GOOGLE_CLIENT_EMAIL,
                     keyLength: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.length : 0,
-                    keyValidHeader: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.includes('BEGIN PRIVATE KEY') : false
+                    keyValidHeader: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.includes('BEGIN PRIVATE KEY') : false,
+                    keyValidFooter: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.includes('END PRIVATE KEY') : false
                 }
             });
         }
