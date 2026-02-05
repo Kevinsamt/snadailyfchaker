@@ -96,6 +96,39 @@ const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
     }
 };
 
+// ADMIN AUTHENTICATION MIDDLEWARE
+const adminAuthMiddleware = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && (authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader);
+
+    if (!token) return res.status(401).json({ error: 'Unauthorized Admin Access (Token missing)' });
+
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        if (err || decoded.role !== 'admin') {
+            return res.status(403).json({ error: 'Forbidden: Invalid or expired admin token' });
+        }
+        req.user = decoded;
+        next();
+    });
+};
+
+// USER AUTHENTICATION MIDDLEWARE
+const userAuthMiddleware = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) return res.status(401).json({ error: 'Token missing' });
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: 'Invalid or expired token' });
+        req.user = user;
+        next();
+    });
+};
+
+// Aliases for compatibility
+const authMiddleware = adminAuthMiddleware;
+
 // Diagnostic: Check Drive Connection
 app.get('/api/admin/debug-drive', adminAuthMiddleware, async (req, res) => {
     try {
@@ -471,24 +504,6 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
     }
 });
 
-// Admin Authentication Middleware (Strict JWT)
-const adminAuthMiddleware = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && (authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader);
-
-    if (!token) return res.status(401).json({ error: 'Unauthorized Admin Access (Token missing)' });
-
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-        if (err || decoded.role !== 'admin') {
-            return res.status(403).json({ error: 'Forbidden: Invalid or expired admin token' });
-        }
-        req.user = decoded;
-        next();
-    });
-};
-
-// Alias for compatibility with existing routes
-const authMiddleware = adminAuthMiddleware;
 
 
 // USER AUTHENTICATION & CONTEST ROUTES
@@ -558,19 +573,6 @@ app.post('/api/register', (req, res) => {
     res.status(307).redirect('/api/auth/register');
 });
 
-// User Authentication Middleware (JWT)
-const userAuthMiddleware = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) return res.status(401).json({ error: 'Token missing' });
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ error: 'Invalid or expired token' });
-        req.user = user;
-        next();
-    });
-};
 
 // Contest Registration (Now with File Upload)
 app.post('/api/contest/register', userAuthMiddleware, upload.fields([
