@@ -31,14 +31,18 @@ const snap = new midtransClient.Snap({
 
 // Google Drive Config
 const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
-const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY ? process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n') : null;
+// Fix: Handle quotes and escaped newlines from Vercel env
+let GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
+if (GOOGLE_PRIVATE_KEY) {
+    GOOGLE_PRIVATE_KEY = GOOGLE_PRIVATE_KEY.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
+}
 const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
 
 const driveAuth = new google.auth.JWT(
     GOOGLE_CLIENT_EMAIL,
     null,
     GOOGLE_PRIVATE_KEY,
-    ['https://www.googleapis.com/auth/drive.file']
+    ['https://www.googleapis.com/auth/drive']
 );
 const drive = google.drive({ version: 'v3', auth: driveAuth });
 
@@ -71,7 +75,7 @@ const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
 
     try {
         const file = await drive.files.create({
-            resource: fileMetadata,
+            requestBody: fileMetadata,
             media: media,
             fields: 'id, webViewLink',
         });
@@ -85,10 +89,11 @@ const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
             },
         });
 
-        return file.data.id; // Or return file.data.webViewLink for direct link
+        console.log(`File uploaded to Drive: ${file.data.id}`);
+        return file.data.id;
     } catch (err) {
-        console.error('Drive Upload Error:', err);
-        throw err;
+        console.error('Drive API Error Details:', err.response ? err.response.data : err.message);
+        throw new Error('Gagal upload ke Google Drive: ' + (err.message || 'Unknown error'));
     }
 };
 
