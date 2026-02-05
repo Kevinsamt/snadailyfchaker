@@ -32,20 +32,25 @@ const snap = new midtransClient.Snap({
 
 // Google Drive Config
 const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
-// Fix: Handle quotes and escaped newlines from Vercel env
 let GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
 if (GOOGLE_PRIVATE_KEY) {
     GOOGLE_PRIVATE_KEY = GOOGLE_PRIVATE_KEY.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
 }
 const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
 
-const driveAuth = new google.auth.JWT(
-    GOOGLE_CLIENT_EMAIL,
-    null,
-    GOOGLE_PRIVATE_KEY,
-    ['https://www.googleapis.com/auth/drive']
-);
-const drive = google.drive({ version: 'v3', auth: driveAuth });
+// Helper to get drive client (ensures fresh auth)
+const getDriveClient = () => {
+    if (!GOOGLE_PRIVATE_KEY || !GOOGLE_CLIENT_EMAIL) return null;
+
+    const auth = new google.auth.GoogleAuth({
+        credentials: {
+            client_email: GOOGLE_CLIENT_EMAIL,
+            private_key: GOOGLE_PRIVATE_KEY,
+        },
+        scopes: ['https://www.googleapis.com/auth/drive'],
+    });
+    return google.drive({ version: 'v3', auth });
+};
 
 // Multer Config (Memory Storage for Serverless)
 const upload = multer({
@@ -74,6 +79,9 @@ const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
     };
 
     try {
+        const drive = getDriveClient();
+        if (!drive) throw new Error("Auth client failed to initialize (check Keys/Email).");
+
         const file = await drive.files.create({
             requestBody: fileMetadata,
             media: media,
@@ -81,7 +89,7 @@ const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
         });
 
         // Make file public (optional but recommended for judges)
-        await drive.permissions.create({
+        await drive.files.permissions.create({
             fileId: file.data.id,
             requestBody: {
                 role: 'reader',
@@ -93,7 +101,11 @@ const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
         return file.data.id;
     } catch (err) {
         console.error('Drive API Error Details:', err.response ? err.response.data : err.message);
-        throw new Error('Gagal upload ke Google Drive: ' + (err.message || err.toString()));
+        let msg = err.message || err.toString();
+        if (msg.includes('Method doesn\'t allow unregistered callers')) {
+            msg = "Google Drive API belum diaktifkan di Google Cloud Console!";
+        }
+        throw new Error('Gagal upload ke Google Drive: ' + msg);
     }
 };
 
@@ -133,21 +145,24 @@ const authMiddleware = adminAuthMiddleware;
 // Diagnostic: Check Drive Connection
 app.get('/api/admin/debug-drive', adminAuthMiddleware, async (req, res) => {
     try {
-        if (!DRIVE_FOLDER_ID || !GOOGLE_PRIVATE_KEY || !GOOGLE_CLIENT_EMAIL) {
+        const drive = getDriveClient();
+        if (!drive) {
             return res.status(500).json({
                 success: false,
                 error: "Konfigurasi Environment di Vercel Hilang!",
                 details: {
                     folderId: !!DRIVE_FOLDER_ID,
                     privateKey: !!GOOGLE_PRIVATE_KEY,
-                    email: !!GOOGLE_CLIENT_EMAIL
+                    email: !!GOOGLE_CLIENT_EMAIL,
+                    keyLength: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.length : 0,
+                    keyValidHeader: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.includes('BEGIN PRIVATE KEY') : false
                 }
             });
         }
 
         const response = await drive.files.get({
             fileId: DRIVE_FOLDER_ID,
-            fields: 'id, name, permissions'
+            fields: 'id, name'
         });
 
         res.json({
@@ -157,10 +172,20 @@ app.get('/api/admin/debug-drive', adminAuthMiddleware, async (req, res) => {
             folderId: response.data.id
         });
     } catch (err) {
+        console.error('Debug Drive Error:', err.response ? err.response.data : err.message);
+        let errorMsg = "Gagal koneksi ke Google Drive API";
+        let subMsg = err.message;
+
+        if (subMsg.includes('unregistered callers')) {
+            errorMsg = "Google Drive API Belum Aktif!";
+            subMsg = "Cak harus buka Google Cloud Console, terus 'Enable' Google Drive API untuk project ini.";
+        }
+
         res.status(500).json({
             success: false,
-            error: "Gagal koneksi ke Google Drive API",
-            details: err.response ? err.response.data : err.message
+            error: errorMsg,
+            details: subMsg,
+            raw: err.response ? err.response.data : err.message
         });
     }
 });
