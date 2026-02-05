@@ -30,34 +30,29 @@ const snap = new midtransClient.Snap({
     clientKey: process.env.MIDTRANS_CLIENT_KEY
 });
 
-// Google Drive Config
+// Google Drive Config (OAuth2 for Personal Quota)
 const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
-let GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
-if (GOOGLE_PRIVATE_KEY) {
-    // Aggressive Cleaning for Vercel formatting issues
-    GOOGLE_PRIVATE_KEY = GOOGLE_PRIVATE_KEY
-        .replace(/^["']|["']$/g, '')      // Remove surrounding quotes
-        .replace(/\\n/g, '\n')           // Convert escaped \n to real newline
-        .replace(/\\r/g, '')             // Remove escaped \r
-        .trim();
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
 
-    // If for some reason it's all in one line without proper newlines but has the header,
-    // we might need to re-format it, but usually, just replacing \n is enough.
-}
-const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-
-// Helper to get drive client (ensures fresh auth)
+// Helper to get drive client (ensures fresh auth using OAuth2)
 const getDriveClient = () => {
-    if (!GOOGLE_PRIVATE_KEY || !GOOGLE_CLIENT_EMAIL) return null;
+    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REFRESH_TOKEN) {
+        return null;
+    }
 
-    const auth = new google.auth.GoogleAuth({
-        credentials: {
-            client_email: GOOGLE_CLIENT_EMAIL,
-            private_key: GOOGLE_PRIVATE_KEY,
-        },
-        scopes: ['https://www.googleapis.com/auth/drive'],
+    const oauth2Client = new google.auth.OAuth2(
+        GOOGLE_CLIENT_ID,
+        GOOGLE_CLIENT_SECRET,
+        'https://developers.google.com/oauthplayground' // Redirect URI used during token generation
+    );
+
+    oauth2Client.setCredentials({
+        refresh_token: GOOGLE_REFRESH_TOKEN
     });
-    return google.drive({ version: 'v3', auth });
+
+    return google.drive({ version: 'v3', auth: oauth2Client });
 };
 
 // Multer Config (Memory Storage for Serverless)
@@ -68,8 +63,8 @@ const upload = multer({
 
 // Helper: Upload Buffer to Drive
 const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
-    if (!DRIVE_FOLDER_ID || !GOOGLE_PRIVATE_KEY || !GOOGLE_CLIENT_EMAIL) {
-        throw new Error("Konfigurasi Google Drive di Vercel belum lengkap! Pastikan FOLDER_ID, PRIVATE_KEY, dan EMAIL sudah diisi.");
+    if (!DRIVE_FOLDER_ID || !GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REFRESH_TOKEN) {
+        throw new Error("Konfigurasi Google Drive (OAuth2) belum lengkap! Pastikan FOLDER_ID, CLIENT_ID, CLIENT_SECRET, dan REFRESH_TOKEN sudah diisi di Vercel.");
     }
 
     const stream = new Readable();
@@ -157,14 +152,12 @@ app.get('/api/admin/debug-drive', adminAuthMiddleware, async (req, res) => {
         if (!drive) {
             return res.status(500).json({
                 success: false,
-                error: "Konfigurasi Environment di Vercel Hilang!",
+                error: "Konfigurasi OAuth2 di Vercel Hilang!",
                 details: {
-                    folderId: !!DRIVE_FOLDER_ID,
-                    privateKey: !!GOOGLE_PRIVATE_KEY,
-                    email: !!GOOGLE_CLIENT_EMAIL,
-                    keyLength: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.length : 0,
-                    keyValidHeader: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.includes('BEGIN PRIVATE KEY') : false,
-                    keyValidFooter: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.includes('END PRIVATE KEY') : false
+                    hasClientId: !!GOOGLE_CLIENT_ID,
+                    hasClientSecret: !!GOOGLE_CLIENT_SECRET,
+                    hasRefreshToken: !!GOOGLE_REFRESH_TOKEN,
+                    folderId: !!DRIVE_FOLDER_ID
                 }
             });
         }
@@ -195,10 +188,9 @@ app.get('/api/admin/debug-drive', adminAuthMiddleware, async (req, res) => {
             error: errorMsg,
             details: subMsg,
             diagnostics: {
-                keyLength: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.length : 0,
-                keyValidHeader: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.includes('BEGIN PRIVATE KEY') : false,
-                keyValidFooter: GOOGLE_PRIVATE_KEY ? GOOGLE_PRIVATE_KEY.includes('END PRIVATE KEY') : false,
-                email: !!GOOGLE_CLIENT_EMAIL,
+                hasClientId: !!GOOGLE_CLIENT_ID,
+                hasClientSecret: !!GOOGLE_CLIENT_SECRET,
+                hasRefreshToken: !!GOOGLE_REFRESH_TOKEN,
                 folderId: !!DRIVE_FOLDER_ID
             },
             raw: err.response ? err.response.data : err.message
