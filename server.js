@@ -13,6 +13,7 @@ const multer = require('multer');
 const { Readable } = require('stream');
 require('dotenv').config();
 
+// Trigger redeploy to pick up new env vars
 const JWT_SECRET = process.env.JWT_SECRET || 'snadaily_fallback_secret_2026';
 
 if (!process.env.JWT_SECRET) {
