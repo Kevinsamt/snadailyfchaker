@@ -29,13 +29,26 @@
     <main class="container" style="margin-top: 2rem; display: grid; grid-template-columns: 1fr 400px; gap: 2rem;">
         <!-- Left: Contestant List -->
         <div class="glass-panel" style="padding: 2rem;">
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;"></div>
-                <h2 style="font-size: 1.5rem; font-weight: 800;">Daftar <span class="text-gradient">Ikan</span> Kontes
-                </h2>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;"></div>
+                    <h2 style="font-size: 1.5rem; font-weight: 800;">Daftar <span class="text-gradient">Ikan</span>
+                        Kontes</h2>
+                </div>
+                <button class="tab-btn" id="compareToggle" onclick="toggleCompareMode()"
+                    style="font-size: 0.8rem; padding: 5px 15px;">
+                    <i class="ri-layout-grid-line"></i> Mode Bandingkan
+                </button>
             </div>
+
             <div id="entriesList" style="display: grid; gap: 1rem;">
                 <!-- Entries injected here -->
+            </div>
+
+            <!-- Comparison Grid (Hidden by default) -->
+            <div id="compareGrid"
+                style="display: none; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                <!-- Grid contents injected here -->
             </div>
         </div>
 
@@ -48,11 +61,38 @@
                     <h2 style="font-size: 1.5rem; font-weight: 800;">Beri <span class="text-gradient">Nilai</span></h2>
                 </div>
 
-                <div id="selectedFishInfo" style="margin-bottom: 2rem; text-align: center;">
-                    <img id="fishPreview" src=""
-                        style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; border: 1px solid var(--glass-border);">
-                    <h3 id="fishTitle" style="font-weight: 800; font-size: 1.2rem;">Nama Ikan</h3>
-                    <p id="fishType" style="color: var(--text-muted); font-size: 0.9rem;">Jenis Ikan</p>
+                <div id="selectedFishInfo" style="margin-bottom: 2rem;">
+                    <div style="position: relative; margin-bottom: 1rem;">
+                        <img id="fishPreview" src=""
+                            style="width: 100%; height: 250px; object-fit: cover; border-radius: 12px; border: 1px solid var(--glass-border);">
+                        <div id="videoContainer" style="display: none; margin-top: 1rem;">
+                            <label class="input-label" style="font-size: 0.75rem; color: var(--primary);"><i
+                                    class="ri-video-line"></i> Video Kontestan</label>
+                            <div id="videoPlaceholder" class="glass-panel"
+                                style="padding: 1rem; font-size: 0.8rem; background: rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;">
+                                <i class="ri-play-circle-line" style="font-size: 1.5rem;"></i>
+                                <a id="videoLink" href="#" target="_blank"
+                                    style="color: white; text-decoration: underline;">Buka Video (Tab Baru)</a>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 id="fishTitle" style="font-weight: 800; font-size: 1.5rem; margin-bottom: 0.2rem;">Nama Ikan
+                    </h3>
+                    <p id="fishType"
+                        style="color: var(--primary); font-weight: 700; font-size: 0.9rem; margin-bottom: 1rem;">Jenis
+                        Ikan</p>
+
+                    <div class="glass-panel"
+                        style="padding: 1rem; font-size: 0.85rem; text-align: left; background: rgba(255,255,255,0.03);">
+                        <div style="margin-bottom: 0.5rem; display: flex; gap: 8px;"><i class="ri-group-line"
+                                style="color: var(--secondary);"></i> <strong>Tim:</strong> <span id="teamVal">-</span>
+                        </div>
+                        <div style="margin-bottom: 0.5rem; display: flex; gap: 8px;"><i class="ri-whatsapp-line"
+                                style="color: #25D366;"></i> <strong>WA:</strong> <span id="waVal">-</span></div>
+                        <div style="display: flex; gap: 8px;"><i class="ri-map-pin-line"
+                                style="color: var(--error);"></i> <strong>Alamat:</strong> <span id="addressVal"
+                                style="font-size: 0.8rem;">-</span></div>
+                    </div>
                 </div>
 
                 <form id="scoringForm">
@@ -88,6 +128,8 @@
     <script>
         let currentEventId = new URLSearchParams(window.location.search).get('eventId');
 
+        let allEntries = [];
+
         document.addEventListener('DOMContentLoaded', () => {
             if (!currentEventId) window.location.href = 'judge.html';
             fetchEntries();
@@ -101,26 +143,57 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    const list = data.data;
+                    allEntries = data.data;
+                    const list = allEntries;
                     if (list.length === 0) {
                         document.getElementById('entriesList').innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 5rem;">Belum ada kontestan yang disetujui di event ini.</p>`;
                         return;
                     }
+
+                    // Render List
                     document.getElementById('entriesList').innerHTML = list.map(entry => `
                         <div class="glass-panel entry-item animate-fade-in" onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})" style="padding: 1rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 1rem; ${entry.score ? 'border-left: 4px solid var(--success); opacity: 0.8;' : 'border-left: 4px solid var(--glass-border);'}">
                             <img src="${entry.fish_image_url}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
                             <div style="flex: 1;">
                                 <div style="font-weight: 700;">${entry.fish_name}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted);">${entry.contestant_name} • ${entry.fish_type}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${entry.team_name || entry.contestant_name} • ${entry.fish_type}</div>
                             </div>
                             <div style="text-align: right;">
                                 ${entry.score ? `<span style="font-size: 1.1rem; font-weight: 800; color: var(--primary);">${entry.score}</span>` : '<i class="ri-edit-circle-line" style="font-size: 1.25rem;"></i>'}
                             </div>
                         </div>
                     `).join('');
+
+                    // Render Comparison Grid
+                    document.getElementById('compareGrid').innerHTML = list.map(entry => `
+                        <div class="glass-panel animate-fade-in" onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})" style="padding: 0.75rem; cursor: pointer; border: 1px solid ${entry.score ? 'var(--success)' : 'var(--glass-border)'}; text-align: center;">
+                            <img src="${entry.fish_image_url}" style="width: 100%; height: 120px; border-radius: 8px; object-fit: cover; margin-bottom: 0.5rem;">
+                            <div style="font-weight: 700; font-size: 0.85rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${entry.fish_name}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${entry.fish_type}</div>
+                            ${entry.score ? `<div style="font-weight: 800; color: var(--primary); margin-top: 5px;">${entry.score}</div>` : ''}
+                        </div>
+                    `).join('');
                 }
             } catch (err) {
                 console.error(err);
+            }
+        }
+
+        function toggleCompareMode() {
+            const list = document.getElementById('entriesList');
+            const grid = document.getElementById('compareGrid');
+            const btn = document.getElementById('compareToggle');
+
+            if (list.style.display === 'none') {
+                list.style.display = 'grid';
+                grid.style.display = 'none';
+                btn.innerHTML = '<i class="ri-layout-grid-line"></i> Mode Bandingkan';
+                btn.classList.remove('active');
+            } else {
+                list.style.display = 'none';
+                grid.style.display = 'grid';
+                btn.innerHTML = '<i class="ri-list-check"></i> Mode List';
+                btn.classList.add('active');
             }
         }
 
@@ -133,13 +206,28 @@
             document.getElementById('fishType').innerText = entry.fish_type;
             document.getElementById('fishPreview').src = entry.fish_image_url;
 
+            // New fields
+            document.getElementById('teamVal').innerText = entry.team_name || '-';
+            document.getElementById('waVal').innerText = entry.wa_number || '-';
+            document.getElementById('addressVal').innerText = entry.full_address || '-';
+
+            // Video handling
+            const videoContainer = document.getElementById('videoContainer');
+            const videoLink = document.getElementById('videoLink');
+            if (entry.video_url) {
+                videoContainer.style.display = 'block';
+                videoLink.href = entry.video_url;
+                videoLink.innerText = 'Buka Video (' + (entry.video_url.includes('youtube') ? 'YouTube' : 'Link Eksternal') + ')';
+            } else {
+                videoContainer.style.display = 'none';
+            }
+
             document.getElementById('scoreInput').value = entry.score || 50;
             document.getElementById('scoreVal').innerText = entry.score || 50;
             document.getElementById('judgeComment').value = entry.judge_comment || '';
 
             // Highlight selected
             document.querySelectorAll('.entry-item').forEach(el => el.style.borderColor = 'var(--glass-border)');
-            // Find current and highlight? (Simplification: just UI feedback on click)
         }
 
         document.getElementById('scoringForm').addEventListener('submit', async (e) => {

@@ -10,7 +10,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'betta_contest_secret_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+    console.error("FATAL ERROR: JWT_SECRET is not defined in .env file.");
+    process.exit(1);
+}
 
 
 const app = express();
@@ -43,24 +48,21 @@ const apiLimiter = rateLimit({
     message: { error: "Terlalu banyak permintaan. Silakan tunggu sebentar." }
 });
 
-const allowedOrigins = [
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
     'https://snadailyfchaker.vercel.app',
     'https://snadigitaltech.com',
-    'https://www.snadigital.shop',
     'https://snadigital.shop',
     'http://localhost:3000'
 ];
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl)
         if (!origin) return callback(null, true);
 
-        const isVercel = origin.endsWith('.vercel.app');
-        const isSna = origin.endsWith('snadigitaltech.com') || origin.endsWith('snadigital.shop');
         const isLocal = origin.includes('localhost');
+        const isAllowed = allowedOrigins.some(o => origin === o.trim() || origin.endsWith(o.trim().replace('https://', '')));
 
-        if (isVercel || isSna || isLocal || allowedOrigins.indexOf(origin) !== -1) {
+        if (isLocal || isAllowed) {
             callback(null, true);
         } else {
             console.error("Blocked by CORS:", origin);
@@ -79,7 +81,7 @@ const KOMERCE_API_DELIVERY = process.env.KOMERCE_API_KEY_DELIVERY;
 const KOMERCE_ORIGIN_ID = process.env.KOMERCE_ORIGIN_ID || '1553'; // Kutalimbaru, Deli Serdang
 
 console.log("--- Shipping System Init ---");
-console.log("KOMERCE_API_KEY_COST:", KOMERCE_API_COST ? "LOADED (Starts with " + KOMERCE_API_COST.substring(0, 4) + "...)" : "MISSING");
+console.log("KOMERCE_API_KEY_COST:", KOMERCE_API_COST ? "LOADED" : "MISSING");
 console.log("KOMERCE_API_KEY_DELIVERY:", KOMERCE_API_DELIVERY ? "LOADED" : "MISSING");
 console.log("KOMERCE_ORIGIN_ID:", KOMERCE_ORIGIN_ID);
 console.log("----------------------------");
@@ -242,7 +244,7 @@ async function initDb() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Contest Registrations Table
+        // Contest Registrations Table (Updated with Team, WA, Address, Video)
         await pool.query(`CREATE TABLE IF NOT EXISTS contest_registrations (
             id SERIAL PRIMARY KEY,
             user_id INTEGER REFERENCES users(id),
@@ -250,12 +252,26 @@ async function initDb() {
             fish_name TEXT,
             fish_type TEXT,
             fish_image_url TEXT,
+            team_name TEXT,
+            wa_number TEXT,
+            full_address TEXT,
+            video_url TEXT,
             status TEXT DEFAULT 'pending',
             score INTEGER,
             judge_comment TEXT,
             judged_by INTEGER REFERENCES users(id),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
+
+        // Migration: Add columns if table already exists (for existing devs)
+        try {
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS team_name TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS wa_number TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS full_address TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS video_url TEXT");
+        } catch (migErr) {
+            console.log("Migration columns check done.");
+        }
 
         // Event Judges Assignment Table
         await pool.query(`CREATE TABLE IF NOT EXISTS event_judges (
@@ -325,16 +341,24 @@ async function initDb() {
     }
 }
 
-// ADMIN LOGIN ROUTE (Separate Endpoint)
-app.post('/api/admin/login', loginLimiter, (req, res) => {
+// ADMIN LOGIN ROUTE (Secure JWT-based)
+app.post('/api/admin/login', loginLimiter, async (req, res) => {
     const { username, password } = req.body;
-    const VALID_USER = 'bettatumedan';
-    const VALID_PASS = 'snadailybetta';
 
-    if (username === VALID_USER && password === VALID_PASS) {
+    // Get from process.env with fallbacks for development only if absolutely necessary
+    const ADMIN_USER = process.env.ADMIN_USER || 'bettatumedan';
+    const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'snadailybetta';
+
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+        const token = jwt.sign(
+            { username: ADMIN_USER, role: 'admin' },
+            JWT_SECRET,
+            { expiresIn: '12h' }
+        );
+
         res.json({
             success: true,
-            token: 'secure_server_token_' + Date.now(),
+            token: token,
             role: 'admin'
         });
     } else {
@@ -342,14 +366,20 @@ app.post('/api/admin/login', loginLimiter, (req, res) => {
     }
 });
 
-// Admin Authentication Middleware (Keep existing)
+// Admin Authentication Middleware (Strict JWT)
 const adminAuthMiddleware = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    if (authHeader && authHeader.startsWith('secure_server_token_')) {
+    const token = authHeader && (authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader);
+
+    if (!token) return res.status(401).json({ error: 'Unauthorized Admin Access (Token missing)' });
+
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        if (err || decoded.role !== 'admin') {
+            return res.status(403).json({ error: 'Forbidden: Invalid or expired admin token' });
+        }
+        req.user = decoded;
         next();
-    } else {
-        res.status(403).json({ error: 'Access denied. Admin login required.' });
-    }
+    });
 };
 
 // Alias for compatibility with existing routes
@@ -440,12 +470,12 @@ const userAuthMiddleware = (req, res, next) => {
 // Contest Registration
 app.post('/api/contest/register', userAuthMiddleware, async (req, res) => {
     try {
-        const { contestName, fishName, fishType, fishImageUrl } = req.body;
+        const { contestName, fishName, fishType, fishImageUrl, teamName, waNumber, fullAddress, videoUrl } = req.body;
         const userId = req.user.id;
 
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [userId, contestName, fishName, fishType, fishImageUrl]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            [userId, contestName, fishName, fishType, fishImageUrl, teamName, waNumber, fullAddress, videoUrl]
         );
 
         res.json({ success: true, data: result.rows[0] });

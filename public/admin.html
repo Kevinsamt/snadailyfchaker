@@ -402,7 +402,7 @@
             async function fetchStats() {
                 const token = sessionStorage.getItem('sna_admin_token');
                 try {
-                    const res = await fetch('/api/admin/stats?t=' + Date.now(), { headers: { 'Authorization': token } });
+                    const res = await fetch('/api/admin/stats?t=' + Date.now(), { headers: { 'Authorization': `Bearer ${token}` } });
                     const data = await res.json();
                     if (data.success) {
                         const s = data.data;
@@ -415,9 +415,15 @@
                             document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
                             <tr>
                                 <td style="font-weight: 600;">${r.user_name}</td>
-                                <td>${r.fish_name} (${r.fish_type})</td>
+                                <td>
+                                    <div>${r.fish_name} (${r.fish_type})</div>
+                                    <div style="font-size: 0.75rem; color: var(--secondary);">${r.team_name || 'No Team'}</div>
+                                </td>
                                 <td style="color: var(--primary); font-size: 0.85rem;">${r.contest_name}</td>
-                                <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(r.created_at).toLocaleDateString()}</td>
+                                <td>
+                                    <div style="font-size: 0.8rem;">WA: ${r.wa_number || '-'}</div>
+                                    ${r.video_url ? `<a href="${r.video_url}" target="_blank" style="color: var(--primary); font-size: 0.75rem;"><i class="ri-video-line"></i> Play Video</a>` : ''}
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 5px;">
                                         <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: #00ff88;" title="Approve"><i class="ri-check-line"></i></button>
@@ -440,7 +446,7 @@
                 try {
                     const res = await fetch(`/api/admin/contest/status`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ id, status })
                     });
                     if (res.ok) fetchStats();
@@ -452,7 +458,7 @@
             async function fetchJudges() {
                 const token = sessionStorage.getItem('sna_admin_token');
                 try {
-                    const res = await fetch('/api/admin/judges', { headers: { 'Authorization': token } });
+                    const res = await fetch('/api/admin/judges', { headers: { 'Authorization': `Bearer ${token}` } });
                     const data = await res.json();
                     if (data.success) {
                         allJudges = data.data;
@@ -485,7 +491,7 @@
                 try {
                     const res = await fetch(`/api/admin/judges/${id}`, {
                         method: 'DELETE',
-                        headers: { 'Authorization': token }
+                        headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (res.ok) {
                         alert('Akun juri berhasil dihapus');
@@ -512,7 +518,7 @@
                 try {
                     const res = await fetch('/api/admin/judges', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify(payload)
                     });
                     if (res.ok) {
@@ -531,7 +537,7 @@
             async function fetchUsers() {
                 const token = sessionStorage.getItem('sna_admin_token');
                 try {
-                    const res = await fetch('/api/admin/users', { headers: { 'Authorization': token } });
+                    const res = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
                     const data = await res.json();
                     if (data.success) {
                         document.getElementById('userTableBody').innerHTML = data.data.map(u => `
@@ -559,7 +565,7 @@
                 try {
                     const res = await fetch(`/api/admin/users/${id}`, {
                         method: 'DELETE',
-                        headers: { 'Authorization': token }
+                        headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (res.ok) {
                         alert('User berhasil dihapus!');
@@ -623,7 +629,7 @@
                 try {
                     const res = await fetch(`/api/admin/events/${eventId}/assign-judge`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ judgeId })
                     });
                     if (res.ok) {
@@ -669,7 +675,7 @@
 
                 const res = await fetch(url, {
                     method,
-                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(payload)
                 });
 
@@ -698,7 +704,7 @@
             async function fetchRegistrations() {
                 const token = sessionStorage.getItem('sna_admin_token');
                 try {
-                    const res = await fetch('/api/admin/registrations?t=' + Date.now(), { headers: { 'Authorization': token } });
+                    const res = await fetch('/api/admin/registrations?t=' + Date.now(), { headers: { 'Authorization': `Bearer ${token}` } });
                     const data = await res.json();
                     if (data.success) {
                         if (data.data.length === 0) {
@@ -708,8 +714,17 @@
                         document.getElementById('regTableBody').innerHTML = data.data.map(r => `
                         <tr>
                             <td style="font-weight: 600;">${r.user_name}</td>
-                            <td><div>${r.fish_name}</div><div style="font-size: 0.75rem; color: var(--text-muted);">${r.fish_type}</div></td>
+                            <td>
+                                <div>${r.fish_name}</div>
+                                <div style="font-size: 0.75rem; color: var(--secondary);">${r.team_name || 'No Team'}</div>
+                                <div style="font-size: 0.7rem; color: var(--text-muted);">${r.fish_type}</div>
+                            </td>
                             <td style="color: var(--primary);">${r.contest_name}</td>
+                            <td style="font-size: 0.8rem;">
+                                <div>WA: ${r.wa_number || '-'}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${r.full_address}">${r.full_address || '-'}</div>
+                                ${r.video_url ? `<a href="${r.video_url}" target="_blank" style="color: var(--primary); font-size: 0.75rem;"><i class="ri-video-line"></i> Video Link</a>` : ''}
+                            </td>
                             <td>
                                 <span style="background: ${r.status === 'approved' ? 'rgba(0,255,136,0.1)' : r.status === 'rejected' ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.05)'}; 
                                              color: ${r.status === 'approved' ? 'var(--secondary)' : r.status === 'rejected' ? 'var(--error)' : 'white'}; 
@@ -717,7 +732,6 @@
                                     ${r.status}
                                 </span>
                             </td>
-                            <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(r.created_at).toLocaleDateString()}</td>
                             <td>
                                 <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--error);" title="Hapus Registrasi"><i class="ri-delete-bin-line"></i></button>
                             </td>
@@ -738,7 +752,7 @@
                 try {
                     const res = await fetch(`/api/admin/registrations/${id}`, {
                         method: 'DELETE',
-                        headers: { 'Authorization': token }
+                        headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (res.ok) {
                         alert('Registrasi dihapus!');

@@ -170,10 +170,34 @@
                         </div>
                     </div>
 
+                    <div class="grid-2 mb-3">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">Nama Tim / Handle</label>
+                            <input type="text" id="teamName" class="glass-input" placeholder="Nama Tim (Opsional)">
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">Nomor WhatsApp (Aktif)</label>
+                            <input type="tel" id="waNumber" class="glass-input" placeholder="08xxxx" required>
+                        </div>
+                    </div>
+
                     <div class="input-group">
-                        <label class="input-label">URL Foto Ikan</label>
-                        <input type="url" id="imgUrl" class="glass-input" placeholder="https://..." required
-                            onchange="updatePreview(this.value)">
+                        <label class="input-label">Alamat Lengkap (Untuk Pengiriman Piala)</label>
+                        <textarea id="fullAddress" class="glass-input" style="height: 80px; resize: none;"
+                            placeholder="Jl. Merdeka No. 123..." required></textarea>
+                    </div>
+
+                    <div class="grid-2 mb-3">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">URL Foto Ikan</label>
+                            <input type="url" id="imgUrl" class="glass-input" placeholder="https://..." required
+                                onchange="updatePreview(this.value)">
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">URL Video Ikan (Durasi 2-7 Menit)</label>
+                            <input type="url" id="videoUrl" class="glass-input" placeholder="Link YouTube/Google Drive"
+                                required>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" id="submitBtn">
@@ -291,7 +315,11 @@
                 contestName: document.getElementById('eventName').value,
                 fishName: document.getElementById('fishName').value,
                 fishType: document.getElementById('fishType').value,
-                fishImageUrl: document.getElementById('imgUrl').value
+                fishImageUrl: document.getElementById('imgUrl').value,
+                teamName: document.getElementById('teamName').value,
+                waNumber: document.getElementById('waNumber').value,
+                fullAddress: document.getElementById('fullAddress').value,
+                videoUrl: document.getElementById('videoUrl').value
             };
 
             btn.disabled = true;
