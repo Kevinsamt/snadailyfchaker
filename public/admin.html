@@ -78,10 +78,16 @@
             </div>
 
             <div class="glass-panel" style="padding: 2rem;">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                    <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;"></div>
-                    <h2 style="font-size: 1.5rem; font-weight: 800;">Pendaftaran <span
-                            class="text-gradient">Terkini</span></h2>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;"></div>
+                        <h2 style="font-size: 1.5rem; font-weight: 800;">Pendaftaran <span
+                                class="text-gradient">Terkini</span></h2>
+                    </div>
+                    <button onclick="testDriveConnection()" class="tab-btn"
+                        style="font-size: 0.75rem; border-color: var(--primary); color: var(--primary);">
+                        <i class="ri-google-fill"></i> Test Google Drive
+                    </button>
                 </div>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: separate; border-spacing: 0 10px;">
@@ -443,6 +449,21 @@
                     }
                 } catch (err) {
                     console.error('Fetch Stats Error:', err);
+                }
+            }
+
+            async function testDriveConnection() {
+                const token = sessionStorage.getItem('sna_admin_token');
+                try {
+                    const res = await fetch('/api/admin/debug-drive', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert(`BERHASIL! ✅\nFolder: ${data.folderName}\nID: ${data.folderId}`);
+                    } else {
+                        alert(`GAGAL! ❌\nError: ${data.error}\nDetail: ${JSON.stringify(data.details)}`);
+                    }
+                } catch (err) {
+                    alert('Error Koneksi: ' + err.message);
                 }
             }
 

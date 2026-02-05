@@ -54,9 +54,8 @@ const upload = multer({
 
 // Helper: Upload Buffer to Drive
 const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
-    if (!DRIVE_FOLDER_ID || !GOOGLE_PRIVATE_KEY) {
-        console.error("Google Drive config is missing!");
-        return null;
+    if (!DRIVE_FOLDER_ID || !GOOGLE_PRIVATE_KEY || !GOOGLE_CLIENT_EMAIL) {
+        throw new Error("Konfigurasi Google Drive di Vercel belum lengkap! Pastikan FOLDER_ID, PRIVATE_KEY, dan EMAIL sudah diisi.");
     }
 
     const stream = new Readable();
@@ -93,9 +92,44 @@ const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
         return file.data.id;
     } catch (err) {
         console.error('Drive API Error Details:', err.response ? err.response.data : err.message);
-        throw new Error('Gagal upload ke Google Drive: ' + (err.message || 'Unknown error'));
+        throw new Error('Gagal upload ke Google Drive: ' + (err.message || err.toString()));
     }
 };
+
+// Diagnostic: Check Drive Connection
+app.get('/api/admin/debug-drive', adminAuthMiddleware, async (req, res) => {
+    try {
+        if (!DRIVE_FOLDER_ID || !GOOGLE_PRIVATE_KEY || !GOOGLE_CLIENT_EMAIL) {
+            return res.status(500).json({
+                success: false,
+                error: "Konfigurasi Environment di Vercel Hilang!",
+                details: {
+                    folderId: !!DRIVE_FOLDER_ID,
+                    privateKey: !!GOOGLE_PRIVATE_KEY,
+                    email: !!GOOGLE_CLIENT_EMAIL
+                }
+            });
+        }
+
+        const response = await drive.files.get({
+            fileId: DRIVE_FOLDER_ID,
+            fields: 'id, name, permissions'
+        });
+
+        res.json({
+            success: true,
+            message: "Koneksi Google Drive OKE!",
+            folderName: response.data.name,
+            folderId: response.data.id
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: "Gagal koneksi ke Google Drive API",
+            details: err.response ? err.response.data : err.message
+        });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 
