@@ -10,11 +10,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || 'snadaily_fallback_secret_2026';
 
-if (!JWT_SECRET) {
-    console.error("FATAL ERROR: JWT_SECRET is not defined in .env file.");
-    process.exit(1);
+if (!process.env.JWT_SECRET) {
+    console.warn("WARNING: JWT_SECRET is not defined in .env file. Using fallback.");
 }
 
 
