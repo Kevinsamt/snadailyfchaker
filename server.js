@@ -13,7 +13,7 @@ require('dotenv').config();
 const JWT_SECRET = process.env.JWT_SECRET || 'snadaily_fallback_secret_2026';
 
 if (!process.env.JWT_SECRET) {
-    console.warn("WARNING: JWT_SECRET is not defined in .env file. Using fallback.");
+    console.warn("WARNING: JWT_SECRET is not defined in .env. Using fallback secret for now.");
 }
 
 
