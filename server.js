@@ -774,6 +774,14 @@ app.get('/api/admin/stats', adminAuthMiddleware, async (req, res) => {
         const registrationsCount = await pool.query("SELECT COUNT(*) FROM contest_registrations WHERE status != 'rejected'");
         const pendingCount = await pool.query("SELECT COUNT(*) FROM contest_registrations WHERE status = 'pending'");
 
+        const pendingList = await pool.query(`
+            SELECT r.*, u.full_name as user_name 
+            FROM contest_registrations r
+            JOIN users u ON r.user_id = u.id
+            WHERE r.status = 'pending'
+            ORDER BY r.created_at DESC
+        `);
+
         res.json({
             success: true,
             data: {
@@ -781,7 +789,8 @@ app.get('/api/admin/stats', adminAuthMiddleware, async (req, res) => {
                 judges: judgesCount.rows[0].count,
                 events: eventsCount.rows[0].count,
                 registrations: registrationsCount.rows[0].count,
-                pending: pendingCount.rows[0].count
+                pending: pendingCount.rows[0].count,
+                recentPending: pendingList.rows
             }
         });
     } catch (err) {

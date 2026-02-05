@@ -416,8 +416,13 @@
                             <tr>
                                 <td style="font-weight: 600;">${r.user_name}</td>
                                 <td>
-                                    <div>${r.fish_name} (${r.fish_type})</div>
-                                    <div style="font-size: 0.75rem; color: var(--secondary);">${r.team_name || 'No Team'}</div>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <img src="${r.fish_image_url || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" onclick="window.open('${r.fish_image_url}', '_blank')">
+                                        <div>
+                                            <div style="font-weight: 600;">${r.fish_name} (${r.fish_type})</div>
+                                            <div style="font-size: 0.75rem; color: var(--secondary);">${r.team_name || 'No Team'}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td style="color: var(--primary); font-size: 0.85rem;">${r.contest_name}</td>
                                 <td>
@@ -449,7 +454,10 @@
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ id, status })
                     });
-                    if (res.ok) fetchStats();
+                    if (res.ok) {
+                        fetchStats();
+                        fetchRegistrations();
+                    }
                 } catch (err) {
                     console.error(err);
                 }
@@ -715,9 +723,14 @@
                         <tr>
                             <td style="font-weight: 600;">${r.user_name}</td>
                             <td>
-                                <div>${r.fish_name}</div>
-                                <div style="font-size: 0.75rem; color: var(--secondary);">${r.team_name || 'No Team'}</div>
-                                <div style="font-size: 0.7rem; color: var(--text-muted);">${r.fish_type}</div>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <img src="${r.fish_image_url || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" onclick="window.open('${r.fish_image_url}', '_blank')">
+                                    <div>
+                                        <div style="font-weight: 600;">${r.fish_name}</div>
+                                        <div style="font-size: 0.75rem; color: var(--secondary);">${r.team_name || 'No Team'}</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-muted);">${r.fish_type}</div>
+                                    </div>
+                                </div>
                             </td>
                             <td style="color: var(--primary);">${r.contest_name}</td>
                             <td style="font-size: 0.8rem;">
@@ -733,7 +746,15 @@
                                 </span>
                             </td>
                             <td>
-                                <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--error);" title="Hapus Registrasi"><i class="ri-delete-bin-line"></i></button>
+                                <div style="display: flex; gap: 5px;">
+                                    ${r.status === 'pending' ? `
+                                        <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: #00ff88;" title="Approve"><i class="ri-check-line"></i></button>
+                                        <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: #ff4d4d;" title="Reject"><i class="ri-close-line"></i></button>
+                                    ` : `
+                                        <button onclick="quickAction(${r.id}, 'pending')" class="action-btn" style="color: var(--text-muted);" title="Set to Pending"><i class="ri-history-line"></i></button>
+                                    `}
+                                    <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--error);" title="Hapus Registrasi"><i class="ri-delete-bin-line"></i></button>
+                                </div>
                             </td>
                         </tr>
                     `).join('');
