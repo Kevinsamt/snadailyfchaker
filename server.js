@@ -558,7 +558,7 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         }
 
         // Construct URLs (using simple thumbnail link or direct ID)
-        const photoUrl = fishPhotoId ? `https://lh3.googleusercontent.com/u/0/d/${fishPhotoId}` : null;
+        const photoUrl = fishPhotoId ? `https://drive.google.com/uc?export=view&id=${fishPhotoId}` : null;
         const videoUrl = fishVideoId ? `https://drive.google.com/file/d/${fishVideoId}/view` : null;
 
         const result = await pool.query(
