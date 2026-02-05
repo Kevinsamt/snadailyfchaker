@@ -8,6 +8,9 @@ const rateLimit = require('express-rate-limit');
 const midtransClient = require('midtrans-client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { google } = require('googleapis');
+const multer = require('multer');
+const { Readable } = require('stream');
 require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'snadaily_fallback_secret_2026';
@@ -25,6 +28,70 @@ const snap = new midtransClient.Snap({
     serverKey: process.env.MIDTRANS_SERVER_KEY,
     clientKey: process.env.MIDTRANS_CLIENT_KEY
 });
+
+// Google Drive Config
+const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
+const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY ? process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n') : null;
+const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+
+const driveAuth = new google.auth.JWT(
+    GOOGLE_CLIENT_EMAIL,
+    null,
+    GOOGLE_PRIVATE_KEY,
+    ['https://www.googleapis.com/auth/drive.file']
+);
+const drive = google.drive({ version: 'v3', auth: driveAuth });
+
+// Multer Config (Memory Storage for Serverless)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+});
+
+// Helper: Upload Buffer to Drive
+const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
+    if (!DRIVE_FOLDER_ID || !GOOGLE_PRIVATE_KEY) {
+        console.error("Google Drive config is missing!");
+        return null;
+    }
+
+    const stream = new Readable();
+    stream.push(fileBuffer);
+    stream.push(null);
+
+    const fileMetadata = {
+        name: `${Date.now()}_${fileName}`,
+        parents: [DRIVE_FOLDER_ID],
+    };
+
+    const media = {
+        mimeType: mimeType,
+        body: stream,
+    };
+
+    try {
+        const file = await drive.files.create({
+            resource: fileMetadata,
+            media: media,
+            fields: 'id, webViewLink',
+        });
+
+        // Make file public (optional but recommended for judges)
+        await drive.permissions.create({
+            fileId: file.data.id,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone',
+            },
+        });
+
+        return file.data.id; // Or return file.data.webViewLink for direct link
+    } catch (err) {
+        console.error('Drive Upload Error:', err);
+        throw err;
+    }
+};
+
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -466,19 +533,42 @@ const userAuthMiddleware = (req, res, next) => {
     });
 };
 
-// Contest Registration
-app.post('/api/contest/register', userAuthMiddleware, async (req, res) => {
+// Contest Registration (Now with File Upload)
+app.post('/api/contest/register', userAuthMiddleware, upload.fields([
+    { name: 'fishPhoto', maxCount: 1 },
+    { name: 'fishVideo', maxCount: 1 }
+]), async (req, res) => {
     try {
-        const { contestName, fishName, fishType, fishImageUrl, teamName, waNumber, fullAddress, videoUrl } = req.body;
+        const { contestName, fishName, fishType, teamName, waNumber, fullAddress } = req.body;
         const userId = req.user.id;
+
+        let fishPhotoId = null;
+        let fishVideoId = null;
+
+        // Upload Photo to Drive
+        if (req.files && req.files.fishPhoto) {
+            const photo = req.files.fishPhoto[0];
+            fishPhotoId = await uploadToDrive(photo.buffer, photo.originalname, photo.mimetype);
+        }
+
+        // Upload Video to Drive
+        if (req.files && req.files.fishVideo) {
+            const video = req.files.fishVideo[0];
+            fishVideoId = await uploadToDrive(video.buffer, video.originalname, video.mimetype);
+        }
+
+        // Construct URLs (using simple thumbnail link or direct ID)
+        const photoUrl = fishPhotoId ? `https://lh3.googleusercontent.com/u/0/d/${fishPhotoId}` : null;
+        const videoUrl = fishVideoId ? `https://drive.google.com/file/d/${fishVideoId}/view` : null;
 
         const result = await pool.query(
             'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-            [userId, contestName, fishName, fishType, fishImageUrl, teamName, waNumber, fullAddress, videoUrl]
+            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl]
         );
 
         res.json({ success: true, data: result.rows[0] });
     } catch (err) {
+        console.error('Registration Error:', err);
         res.status(400).json({ error: err.message });
     }
 });

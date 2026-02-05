@@ -189,14 +189,22 @@
 
                     <div class="grid-2 mb-3">
                         <div class="input-group" style="margin-bottom: 0;">
-                            <label class="input-label">URL Foto Ikan</label>
-                            <input type="url" id="imgUrl" class="glass-input" placeholder="https://..." required
-                                onchange="updatePreview(this.value)">
+                            <label class="input-label">Upload Foto Ikan (JPG/PNG)</label>
+                            <input type="file" id="fishPhotoFile" class="glass-input" accept="image/*" required
+                                onchange="handleFileSelect(this, 'photo')">
+                            <div id="photoProgressContainer" class="progress-wrap" style="display: none;">
+                                <div id="photoProgressBar" class="progress-bar"></div>
+                            </div>
+                            <input type="hidden" id="imgUrl">
                         </div>
                         <div class="input-group" style="margin-bottom: 0;">
-                            <label class="input-label">URL Video Ikan (Durasi 2-7 Menit)</label>
-                            <input type="url" id="videoUrl" class="glass-input" placeholder="Link YouTube/Google Drive"
-                                required>
+                            <label class="input-label">Upload Video Ikan (Durasi 2-7 Menit)</label>
+                            <input type="file" id="fishVideoFile" class="glass-input" accept="video/*" required
+                                onchange="handleFileSelect(this, 'video')">
+                            <div id="videoProgressContainer" class="progress-wrap" style="display: none;">
+                                <div id="videoProgressBar" class="progress-bar"></div>
+                            </div>
+                            <input type="hidden" id="videoUrl">
                         </div>
                     </div>
 
@@ -306,40 +314,55 @@
             }
         }
 
+        async function handleFileSelect(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Optional: Preview for photo
+            if (type === 'photo') {
+                const reader = new FileReader();
+                reader.onload = (e) => updatePreview(e.target.result);
+                reader.readAsDataURL(file);
+            }
+        }
+
         document.getElementById('entryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const token = localStorage.getItem('sna_user_token');
 
-            const payload = {
-                contestName: document.getElementById('eventName').value,
-                fishName: document.getElementById('fishName').value,
-                fishType: document.getElementById('fishType').value,
-                fishImageUrl: document.getElementById('imgUrl').value,
-                teamName: document.getElementById('teamName').value,
-                waNumber: document.getElementById('waNumber').value,
-                fullAddress: document.getElementById('fullAddress').value,
-                videoUrl: document.getElementById('videoUrl').value
-            };
+            const formData = new FormData();
+            formData.append('contestName', document.getElementById('eventName').value);
+            formData.append('fishName', document.getElementById('fishName').value);
+            formData.append('fishType', document.getElementById('fishType').value);
+            formData.append('teamName', document.getElementById('teamName').value);
+            formData.append('waNumber', document.getElementById('waNumber').value);
+            formData.append('fullAddress', document.getElementById('fullAddress').value);
+
+            // Append files
+            const photoFile = document.getElementById('fishPhotoFile').files[0];
+            const videoFile = document.getElementById('fishVideoFile').files[0];
+
+            if (photoFile) formData.append('fishPhoto', photoFile);
+            if (videoFile) formData.append('fishVideo', videoFile);
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Mengirim...';
+            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Sedang Mengunggah...';
 
             try {
                 const response = await fetch('/api/contest/register', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
 
                 if (response.ok) {
                     btn.style.background = 'var(--success)';
-                    btn.innerHTML = '<i class="ri-check-line"></i> Terkirim!';
+                    btn.innerHTML = '<i class="ri-check-line"></i> Terkirim & Terupload!';
                     setTimeout(() => {
-                        window.location.href = 'events.html';
+                        window.location.href = 'dashboard.html';
                     }, 1500);
                 } else {
                     const data = await response.json();
@@ -348,7 +371,7 @@
             } catch (err) {
                 alert(err.message);
                 btn.disabled = false;
-                btn.innerHTML = 'SUBMIT PENDAFTARAN';
+                btn.innerHTML = '<i class="ri-send-plane-fill"></i> SUBMIT PENDAFTARAN';
             }
         });
 
