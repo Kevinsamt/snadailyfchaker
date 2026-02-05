@@ -460,7 +460,11 @@
                     if (data.success) {
                         alert(`BERHASIL! ✅\nFolder: ${data.folderName}\nID: ${data.folderId}`);
                     } else {
-                        alert(`GAGAL! ❌\nError: ${data.error}\nDetail: ${JSON.stringify(data.details)}`);
+                        let msg = `GAGAL! ❌\nError: ${data.error}\nDetail: ${JSON.stringify(data.details)}`;
+                        if (data.diagnostics) {
+                            msg += `\n\nDIAGNOSA:\n- Panjang Kunci: ${data.diagnostics.keyLength}\n- Header OKE: ${data.diagnostics.keyValidHeader}\n- Footer OKE: ${data.diagnostics.keyValidFooter}`;
+                        }
+                        alert(msg);
                     }
                 } catch (err) {
                     alert('Error Koneksi: ' + err.message);
