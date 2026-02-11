@@ -14,10 +14,13 @@ const { Readable } = require('stream');
 require('dotenv').config();
 
 // Trigger redeploy to pick up new env vars
-const JWT_SECRET = process.env.JWT_SECRET || 'snadaily_fallback_secret_2026';
+// SECURITY: Strict configuration - System will fail if JWT_SECRET is missing
+const JWT_SECRET = process.env.JWT_SECRET;
 
-if (!process.env.JWT_SECRET) {
-    console.warn("WARNING: JWT_SECRET is not defined in .env. Using fallback secret for now.");
+if (!JWT_SECRET) {
+    console.error("FATAL ERROR: JWT_SECRET environment variable is not defined!");
+    console.error("Aplikasi dihentikan untuk alasan keamanan.");
+    process.exit(1);
 }
 
 
@@ -131,12 +134,12 @@ const adminAuthMiddleware = (req, res, next) => {
 // USER AUTHENTICATION MIDDLEWARE
 const userAuthMiddleware = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = authHeader && (authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader);
 
-    if (!token) return res.status(401).json({ error: 'Token missing' });
+    if (!token) return res.status(401).json({ error: 'Sesi habis atau tidak valid. Silakan login kembali.' });
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ error: 'Invalid or expired token' });
+        if (err) return res.status(403).json({ error: 'Sesi habis atau tidak valid.' });
         req.user = user;
         next();
     });
@@ -192,8 +195,8 @@ app.get('/api/admin/debug-drive', adminAuthMiddleware, async (req, res) => {
                 hasClientSecret: !!GOOGLE_CLIENT_SECRET,
                 hasRefreshToken: !!GOOGLE_REFRESH_TOKEN,
                 folderId: !!DRIVE_FOLDER_ID
-            },
-            raw: err.response ? err.response.data : err.message
+            }
+            // raw: err.response ? err.response.data : err.message // Removed for security
         });
     }
 });
@@ -213,12 +216,24 @@ const loginLimiter = rateLimit({
     message: { error: "Terlalu banyak mencoba login. Silakan tunggu 15 menit." }
 });
 
-// General API Rate Limiting
+// General API Rate Limiting (Stricter for Production)
 const apiLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: 60, // Limit each IP to 60 requests per minute
-    message: { error: "Terlalu banyak permintaan. Silakan tunggu sebentar." }
+    max: 30, // Reduced from 60 for better protection
+    message: { error: "Terlalu banyak permintaan. Silakan tunggu 1 menit." }
 });
+
+// Helper for Secure Error Responses (No info leakage)
+const sendSecureError = (res, status, userMsg, internalLog) => {
+    if (internalLog) console.error("[Security Log]:", internalLog);
+
+    // In production, we never leak internal errors to the client
+    res.status(status).json({
+        success: false,
+        error: userMsg || "Terjadi kesalahan internal pada sistem.",
+        timestamp: new Date().toISOString()
+    });
+};
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
     'https://snadailyfchaker.vercel.app',
@@ -237,12 +252,33 @@ app.use(cors({
         if (isLocal || isAllowed) {
             callback(null, true);
         } else {
-            console.error("Blocked by CORS:", origin);
-            callback(new Error('Not allowed by CORS Security Firewall'));
+            console.error("[CORS Block]:", origin);
+            callback(new Error('Akses ditolak oleh Firewall Keamanan (CORS)'));
         }
     }
 }));
 
+// Input Sanitization Middleware (Basic XSS protection)
+const sanitizeInput = (req, res, next) => {
+    const sanitize = (val) => {
+        if (typeof val !== 'string') return val;
+        return val.replace(/[<>]/g, ''); // Simple tag removal for basic protection
+    };
+
+    if (req.body) {
+        for (let key in req.body) {
+            req.body[key] = sanitize(req.body[key]);
+        }
+    }
+    if (req.query) {
+        for (let key in req.query) {
+            req.query[key] = sanitize(req.query[key]);
+        }
+    }
+    next();
+};
+
+app.use(sanitizeInput);
 app.use(bodyParser.json());
 app.use('/api/login', loginLimiter);
 app.use('/api/', apiLimiter);
@@ -556,9 +592,9 @@ app.post('/api/auth/register', async (req, res) => {
         res.json({ success: true, data: result.rows[0] });
     } catch (err) {
         if (err.code === '23505') {
-            return res.status(400).json({ error: 'Username sudah digunakan' });
+            return res.status(400).json({ error: 'Username sudah digunakan.' });
         }
-        res.status(400).json({ error: err.message });
+        sendSecureError(res, 500, "Gagal mendaftarkan akun.", err.message);
     }
 });
 
@@ -566,17 +602,20 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const result = await pool.query(
+            'SELECT id, username, password, full_name, role FROM users WHERE username = $1',
+            [username]
+        );
 
         if (result.rows.length === 0) {
-            return res.status(401).json({ error: 'Username atau password salah' });
+            return res.status(401).json({ error: 'Username atau password salah!' });
         }
 
         const user = result.rows[0];
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(401).json({ error: 'Username atau password salah' });
+            return res.status(401).json({ error: 'Username atau password salah!' });
         }
 
         const token = jwt.sign(
@@ -588,11 +627,14 @@ app.post('/api/auth/login', async (req, res) => {
         res.json({
             success: true,
             token,
-            role: user.role, // Added for clarity on frontend
-            user: { id: user.id, username: user.username, fullName: user.full_name }
+            role: user.role,
+            user: {
+                username: user.username,
+                fullName: user.full_name
+            }
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        sendSecureError(res, 500, "Gagal memproses login.", err.message);
     }
 });
 
@@ -643,8 +685,7 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
 
         res.json({ success: true, data: result.rows[0] });
     } catch (err) {
-        console.error('Registration Error:', err);
-        res.status(400).json({ error: err.message });
+        sendSecureError(res, 500, "Gagal mendaftarkan kontes.", err.message);
     }
 });
 
@@ -834,9 +875,9 @@ app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) =>
             [score, comment, req.user.id, entryId]
         );
 
-        res.json({ success: true, message: 'Penilaian berhasil disimpan' });
+        res.json({ success: true, message: 'Penilaian berhasil disimpan.' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        sendSecureError(res, 500, "Gagal menyimpan penilaian.", err.message);
     }
 });
 
@@ -1022,8 +1063,7 @@ app.get('/api/fish', authMiddleware, async (req, res) => {
             "data": result.rows
         });
     } catch (err) {
-        console.error("GET Error:", err);
-        res.status(400).json({ "error": err.message });
+        sendSecureError(res, 500, "Gagal mengambil data ikan.", err.message);
     }
 });
 
