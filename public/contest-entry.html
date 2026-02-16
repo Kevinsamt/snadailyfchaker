@@ -582,6 +582,9 @@
                         }, 1500);
                     }
                 } else {
+                    if (response.status === 413) {
+                        throw new Error("Ukuran file (foto/video) terlalu besar! Maksimal total 4.5 MB. Coba upload video yang lebih pendek.");
+                    }
                     const data = await response.json();
                     throw new Error(data.error || 'Gagal mendaftar');
                 }

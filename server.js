@@ -647,7 +647,14 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
 
         res.json({ success: true, data: result.rows[0] });
     } catch (err) {
-        sendSecureError(res, 500, "Gagal mendaftarkan kontes.", err.message);
+        console.error("Registration Error:", err.message);
+        // Provide more context for debugging while remaining somewhat safe
+        const errMsg = err.message.includes('413') ? "Ukuran file terlalu besar! (Maks 4.5MB di Vercel)" : err.message;
+        res.status(500).json({
+            success: false,
+            error: "Gagal mendaftarkan kontes: " + errMsg,
+            details: err.message
+        });
     }
 });
 
