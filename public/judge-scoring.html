@@ -120,25 +120,66 @@
         @media (max-width: 1024px) {
             .judge-scoring-main {
                 grid-template-columns: 1fr !important;
+                gap: 1.5rem !important;
+                margin-top: 0.5rem !important;
             }
 
-            aside {
-                position: relative !important;
+            .glass-panel {
+                padding: 1.5rem !important;
             }
 
-            .scoring-card {
-                position: relative !important;
-                top: 0 !important;
+            .contestant-header {
+                margin-bottom: 1.5rem !important;
             }
         }
 
         @media (max-width: 480px) {
             .total-score-display {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
             }
 
             .scoring-card {
-                padding: 1.25rem;
+                padding: 1.2rem;
+                border-radius: 20px;
+            }
+
+            .criteria-row {
+                padding: 0.8rem 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .entry-card-mini {
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+
+            .entry-card-mini img {
+                width: 50px;
+                height: 50px;
+            }
+
+            .no-select-msg {
+                padding: 3rem 1.5rem !important;
+            }
+        }
+
+        .mobile-back-btn {
+            display: none;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--primary-glow);
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-back-btn {
+                display: block;
             }
         }
     </style>
@@ -207,13 +248,16 @@
         </section>
 
         <!-- Right: Scoring Panel (Sticky) -->
-        <aside>
+        <aside id="scoringSidePanel">
+            <button class="mobile-back-btn" onclick="cancelScoring()">
+                <i class="ri-arrow-left-s-line"></i> Kembali ke Daftar Kontestan
+            </button>
             <div id="scoringSection" class="scoring-card animate-fade-in"
                 style="position: sticky; top: 6rem; display: none;">
                 <div id="selectedFishInfo" style="margin-bottom: 2.5rem;">
                     <div style="position: relative; margin-bottom: 1.5rem;">
                         <img id="fishPreview" src=""
-                            style="width: 100%; height: 280px; object-fit: cover; border-radius: 20px; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                            style="width: 100%; aspect-ratio: 16/9; height: auto; object-fit: cover; border-radius: 20px; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                         <div id="videoContainer" style="position: absolute; bottom: 1rem; right: 1rem;">
                             <a id="videoLink" href="#" target="_blank" class="btn-primary"
                                 style="font-size: 0.75rem; padding: 10px 15px; border-radius: 12px; display: flex; align-items: center; gap: 8px; text-decoration: none;">
@@ -222,19 +266,19 @@
                         </div>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                        <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                        <div style="flex: 1;">
                             <h3 id="fishTitle"
-                                style="font-weight: 900; font-size: 1.8rem; margin-bottom: 0.2rem; letter-spacing: -0.5px;">
+                                style="font-weight: 900; font-size: 1.6rem; margin-bottom: 0rem; letter-spacing: -0.5px; line-height: 1.2;">
                                 Nama Ikan</h3>
                             <p id="fishType"
-                                style="color: var(--primary); font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">
+                                style="color: var(--primary); font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
                                 Jenis Ikan</p>
                         </div>
-                        <div style="text-align: right;">
+                        <div style="text-align: right; min-width: 80px;">
                             <div
-                                style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
-                                Total Skor</div>
+                                style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; line-height: 1;">
+                                Score</div>
                             <div id="totalScoreVal" class="total-score-display">0</div>
                         </div>
                     </div>
@@ -304,7 +348,7 @@
                     </div>
 
                     <button type="submit" class="btn-primary"
-                        style="width: 100%; margin-top: 1rem; height: 55px; border-radius: 18px; font-weight: 900; font-size: 1rem; letter-spacing: 1px;">
+                        style="width: 100%; margin-top: 1rem; height: 50px; border-radius: 15px; font-weight: 900; font-size: 0.95rem; letter-spacing: 1px;">
                         SIMPAN SKOR <i class="ri-send-plane-fill" style="margin-left: 8px;"></i>
                     </button>
 
@@ -313,7 +357,7 @@
                 </form>
             </div>
 
-            <div id="noSelectMsg" class="scoring-card animate-fade-in"
+            <div id="noSelectMsg" class="scoring-card animate-fade-in no-select-msg"
                 style="padding: 5rem 2rem; text-align: center; border-style: dashed;">
                 <div
                     style="width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%; display: grid; place-items: center; margin: 0 auto 2rem;">
@@ -450,7 +494,12 @@
 
             updateScoreUI();
             renderEntries();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (window.innerWidth < 1024) {
+                document.getElementById('scoringSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         function updateScoreUI() {
