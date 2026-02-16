@@ -918,9 +918,49 @@ app.get('/api/admin/registrations', adminAuthMiddleware, async (req, res) => {
 // Delete Registration
 app.delete('/api/admin/registrations/:id', adminAuthMiddleware, async (req, res) => {
     try {
-        await pool.query('DELETE FROM contest_registrations WHERE id = $1', [req.params.id]);
-        res.json({ success: true, message: 'Registration deleted' });
+        const id = req.params.id;
+
+        // 1. Get URLs first before deleting record
+        const record = await pool.query('SELECT fish_image_url, video_url FROM contest_registrations WHERE id = $1', [id]);
+
+        if (record.rows.length > 0) {
+            const { fish_image_url, video_url } = record.rows[0];
+            const filesToDelete = [];
+
+            // Helper to extract path from Supabase Public URL
+            // Format: https://.../contest-files/entries/filename
+            const extractPath = (url) => {
+                if (!url) return null;
+                const parts = url.split('contest-files/');
+                return parts.length > 1 ? parts[1] : null;
+            };
+
+            const photoPath = extractPath(fish_image_url);
+            const videoPath = extractPath(video_url);
+
+            if (photoPath) filesToDelete.push(photoPath);
+            if (videoPath) filesToDelete.push(videoPath);
+
+            // 2. Delete from Supabase Storage if files exist
+            if (filesToDelete.length > 0) {
+                const { error: storageError } = await supabase.storage
+                    .from('contest-files')
+                    .remove(filesToDelete);
+
+                if (storageError) {
+                    console.error('Warning: Failed to delete some files from Supabase:', storageError.message);
+                    // We continue with DB deletion even if storage deletion fails
+                } else {
+                    console.log('Successfully deleted related files from Supabase Storage:', filesToDelete);
+                }
+            }
+        }
+
+        // 3. Delete record from database
+        await pool.query('DELETE FROM contest_registrations WHERE id = $1', [id]);
+        res.json({ success: true, message: 'Registration and associated files deleted' });
     } catch (err) {
+        console.error('Delete Registration Error:', err.message);
         res.status(500).json({ error: err.message });
     }
 });
