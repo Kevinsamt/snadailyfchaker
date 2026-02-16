@@ -18,41 +18,140 @@
     <link rel="stylesheet" href="css/seasonal-themes.css">
     <script src="js/seasonal-manager.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        body {
+            background: radial-gradient(circle at 50% 0%, #0a192f 0%, #020617 100%);
+            min-height: 100vh;
+        }
+
+        .event-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .event-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .event-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .event-card:hover .event-image {
+            transform: scale(1.1);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--primary);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            z-index: 10;
+        }
+
+        .nav-link-premium {
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link-premium:hover {
+            background: var(--primary);
+            color: #000;
+        }
+    </style>
 </head>
 
 <body>
-    <nav class="navbar">
+    <nav class="navbar glass">
         <div class="container nav-container">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div
-                    style="width: 35px; height: 35px; background: var(--secondary); border-radius: 8px; display: grid; place-items: center; color: #000;">
-                    <i class="ri-star-fill" style="font-size: 1.2rem;"></i>
-                </div>
-                <a href="judge.html" class="text-gradient"
-                    style="font-size: 1.3rem; font-weight: 800; text-decoration: none;">Judge<span
-                        style="color: white; font-weight: 400;">Panel</span></a>
-            </div>
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <span id="judgeName"
-                    style="font-weight: 600; color: var(--text-muted); font-size: 0.9rem;">Memuat...</span>
-                <button onclick="logout()" class="tab-btn" style="color: var(--error);"><i
-                        class="ri-logout-box-line"></i></button>
+                <div
+                    style="width: 40px; height: 40px; background: var(--secondary); border-radius: 12px; display: grid; place-items: center; color: #000; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);">
+                    <i class="ri-star-fill" style="font-size: 1.4rem;"></i>
+                </div>
+                <div>
+                    <a href="judge.html" class="text-gradient"
+                        style="font-size: 1.5rem; font-weight: 900; text-decoration: none; letter-spacing: -1px;">Judge<span
+                            style="color: white; font-weight: 400;">Panel</span></a>
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">
+                        SnaDaily Ecosystem</div>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div style="text-align: right; display: none; @media(min-width: 768px) { display: block; }">
+                    <div id="judgeName" style="font-weight: 800; color: white;">Memuat...</div>
+                    <div style="font-size: 0.75rem; color: var(--secondary); font-weight: 600;">OFFICIAL JUDGE</div>
+                </div>
+                <button onclick="logout()" class="tab-btn"
+                    style="color: var(--error); border-color: rgba(239, 68, 68, 0.2); width: 45px; height: 45px; border-radius: 12px; display: grid; place-items: center;">
+                    <i class="ri-logout-box-line" style="font-size: 1.2rem;"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <main class="container animate-fade-in" style="margin-top: 3rem;">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-            <div style="width: 4px; height: 28px; background: var(--primary); border-radius: 10px;"></div>
-            <h2 style="font-size: 1.8rem; font-weight: 800;">Tugas <span class="text-gradient">Penjurian</span></h2>
+    <main class="container animate-fade-in" style="margin-top: 4rem; padding-bottom: 5rem;">
+        <div
+            style="background: linear-gradient(135deg, rgba(0,212,255,0.1) 0%, rgba(0,255,136,0.05) 100%); padding: 3rem; border-radius: 30px; margin-bottom: 3rem; border: 1px solid var(--glass-border); position: relative; overflow: hidden;">
+            <div
+                style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: var(--primary); filter: blur(100px); opacity: 0.1;">
+            </div>
+
+            <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem; line-height: 1.1;">
+                Selamat Bekerja, <br><span class="text-gradient" id="welcomeJudge">Judge</span>
+            </h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px;">
+                Pantau pendaftaran kontes dan berikan penilaian terbaik Anda untuk mendukung komunitas ikan hias
+                Indonesia.
+            </p>
         </div>
 
-        <div id="assignedEventsList" class="grid grid-3" style="gap: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+            <div
+                style="width: 4px; height: 32px; background: var(--primary); border-radius: 10px; box-shadow: 0 0 15px var(--primary);">
+            </div>
+            <h2 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;">Tugas <span
+                    class="text-gradient">Penjurian</span> Aktif</h2>
+        </div>
+
+        <div id="assignedEventsList" class="grid grid-3" style="gap: 2rem;">
             <!-- Events injected here -->
-            <div style="grid-column: 1/-1; text-align: center; padding: 5rem; color: var(--text-muted);">
-                <i class="ri-loader-4-line ri-spin"
-                    style="font-size: 2.5rem; color: var(--primary); display: block; margin-bottom: 1rem;"></i>
-                Memuat daftar tugas...
+            <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
+                <div class="glass-panel" style="display: inline-block; padding: 2rem 4rem; border-radius: 20px;">
+                    <i class="ri-loader-4-line ri-spin"
+                        style="font-size: 3rem; color: var(--primary); display: block; margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-muted); font-weight: 600;">Menyelam mengambil data...</p>
+                </div>
             </div>
         </div>
     </main>
@@ -61,7 +160,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
-            document.getElementById('judgeName').innerText = userData.fullName;
+            if (userData) {
+                document.getElementById('judgeName').innerText = userData.fullName;
+                document.getElementById('welcomeJudge').innerText = userData.fullName.split(' ')[0];
+            }
             fetchAssignedEvents();
         });
 
@@ -75,20 +177,36 @@
                 if (data.success) {
                     const list = data.data;
                     if (list.length === 0) {
-                        document.getElementById('assignedEventsList').innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 5rem;">Belum ada tugas penjurian untuk Anda.</div>`;
+                        document.getElementById('assignedEventsList').innerHTML = `
+                            <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
+                                <div class="glass-panel" style="padding: 3rem; border-radius: 25px; max-width: 500px; margin: 0 auto;">
+                                    <i class="ri-calendar-todo-line" style="font-size: 4rem; color: var(--text-muted); display: block; margin-bottom: 1.5rem;"></i>
+                                    <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Kosong Melompong</h3>
+                                    <p style="color: var(--text-muted);">Belum ada tugas penjurian untuk Anda saat ini. Silakan hubungi admin jika ini kesalahan.</p>
+                                </div>
+                            </div>`;
                         return;
                     }
                     document.getElementById('assignedEventsList').innerHTML = list.map(ev => `
-                        <div class="glass-panel animate-fade-in" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-                            <img src="${ev.image_url}" style="width: 100%; height: 180px; object-fit: cover;">
-                            <div style="padding: 1.5rem;">
-                                <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem;">${ev.title}</h3>
-                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-                                    <i class="ri-map-pin-2-line"></i> ${ev.location} <br>
-                                    <i class="ri-calendar-line"></i> ${ev.event_date}
+                        <div class="event-card animate-fade-in">
+                            <span class="status-badge">${ev.status}</span>
+                            <div style="overflow: hidden;">
+                                <img src="${ev.image_url}" class="event-image">
+                            </div>
+                            <div style="padding: 2rem;">
+                                <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.8rem; line-height: 1.2;">${ev.title}</h3>
+                                <div style="display: flex; flex-direction: column; gap: 0.8rem; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i class="ri-map-pin-2-line" style="color: var(--error);"></i>
+                                        <span>${ev.location}</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i class="ri-calendar-event-line" style="color: var(--primary);"></i>
+                                        <span>${new Date(ev.event_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                    </div>
                                 </div>
-                                <a href="judge-scoring.html?eventId=${ev.id}" class="btn-primary" style="width: 100%; text-decoration: none; text-align: center; display: block; padding: 0.8rem; font-size: 0.9rem;">
-                                    MULAI PENILAIAN <i class="ri-arrow-right-line"></i>
+                                <a href="judge-scoring.html?eventId=${ev.id}" class="btn-primary" style="width: 100%; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 1rem; border-radius: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
+                                    MASUK PENILAIAN <i class="ri-arrow-right-up-line" style="font-size: 1.2rem;"></i>
                                 </a>
                             </div>
                         </div>
@@ -96,7 +214,10 @@
                 }
             } catch (err) {
                 console.error(err);
-                document.getElementById('assignedEventsList').innerHTML = `<p style="color: var(--error);">Gagal memuat data.</p>`;
+                document.getElementById('assignedEventsList').innerHTML = `
+                    <p style="color: var(--error); grid-column: 1/-1; text-align: center; padding: 2rem;">
+                        <i class="ri-error-warning-line"></i> Gagal memuat data. Silakan refresh halaman.
+                    </p>`;
             }
         }
 

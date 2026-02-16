@@ -465,6 +465,9 @@ async function initDb() {
             video_url TEXT,
             status TEXT DEFAULT 'pending',
             score INTEGER,
+            score_body INTEGER DEFAULT 0,
+            score_form INTEGER DEFAULT 0,
+            score_color INTEGER DEFAULT 0,
             judge_comment TEXT,
             judged_by INTEGER REFERENCES users(id),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -476,6 +479,9 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS wa_number TEXT");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS full_address TEXT");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS video_url TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_body INTEGER DEFAULT 0");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_form INTEGER DEFAULT 0");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_color INTEGER DEFAULT 0");
         } catch (migErr) {
             console.log("Migration columns check done.");
         }
@@ -854,7 +860,7 @@ app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) =>
         if (req.user.role !== 'judge') return res.status(403).json({ error: 'Judge access required' });
 
         const entryId = req.params.id;
-        const { score, comment } = req.body;
+        const { score_body, score_form, score_color, comment } = req.body;
 
         // Security Check: Verify if this judge is assigned to the event of this entry
         const assignmentCheck = await pool.query(`
@@ -869,12 +875,15 @@ app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) =>
             return res.status(403).json({ error: 'Anda tidak ditugaskan untuk menilai kontes ini.' });
         }
 
+        // Calculate average score
+        const totalScore = Math.round((parseInt(score_body) + parseInt(score_form) + parseInt(score_color)) / 3);
+
         await pool.query(
-            "UPDATE contest_registrations SET score = $1, judge_comment = $2, judged_by = $3 WHERE id = $4",
-            [score, comment, req.user.id, entryId]
+            "UPDATE contest_registrations SET score = $1, score_body = $2, score_form = $3, score_color = $4, judge_comment = $5, judged_by = $6 WHERE id = $7",
+            [totalScore, score_body, score_form, score_color, comment, req.user.id, entryId]
         );
 
-        res.json({ success: true, message: 'Penilaian berhasil disimpan.' });
+        res.json({ success: true, message: 'Penilaian berhasil disimpan.', totalScore });
     } catch (err) {
         sendSecureError(res, 500, "Gagal menyimpan penilaian.", err.message);
     }

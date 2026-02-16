@@ -334,8 +334,9 @@
                                 <th style="padding: 1rem;">User</th>
                                 <th style="padding: 1rem;">Ikan</th>
                                 <th style="padding: 1rem;">Event</th>
+                                <th style="padding: 1rem;">Skor & Data</th>
+                                <th style="padding: 1rem;">Komentar Juri</th>
                                 <th style="padding: 1rem;">Status</th>
-                                <th style="padding: 1rem;">Tanggal</th>
                                 <th style="padding: 1rem;">Aksi</th>
                             </tr>
                         </thead>
@@ -435,6 +436,7 @@
                                 <td style="color: var(--primary); font-size: 0.85rem;">${r.contest_name}</td>
                                 <td>
                                     <div style="font-size: 0.8rem;">WA: ${r.wa_number || '-'}</div>
+                                    <div style="font-size: 0.75rem; color: var(--primary);">B: ${r.score_body || 0} | F: ${r.score_form || 0} | C: ${r.score_color || 0}</div>
                                     ${r.video_url ? `<a href="${r.video_url}" target="_blank" style="color: var(--primary); font-size: 0.75rem;"><i class="ri-video-line"></i> Play Video</a>` : ''}
                                 </td>
                                 <td>
@@ -762,8 +764,14 @@
                             <td style="color: var(--primary);">${r.contest_name}</td>
                             <td style="font-size: 0.8rem;">
                                 <div>WA: ${r.wa_number || '-'}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${r.full_address}">${r.full_address || '-'}</div>
+                                <div style="font-weight: 700; color: var(--secondary);">SKOR: ${r.score || 0}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">B:${r.score_body || 0} F:${r.score_form || 0} C:${r.score_color || 0}</div>
                                 ${r.video_url ? `<a href="${r.video_url}" target="_blank" style="color: var(--primary); font-size: 0.75rem;"><i class="ri-video-line"></i> Video Link</a>` : ''}
+                            </td>
+                            <td>
+                                <div style="font-size: 0.8rem; max-width: 200px; color: var(--text-muted); font-style: italic;">
+                                    "${r.judge_comment || 'Belum ada komentar'}"
+                                </div>
                             </td>
                             <td>
                                 <span style="background: ${r.status === 'approved' ? 'rgba(0,255,136,0.1)' : r.status === 'rejected' ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.05)'}; 
