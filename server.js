@@ -415,6 +415,9 @@ const pool = new Pool({
     }
 });
 
+// Initialize and Migrate Database
+initDb();
+
 // Initialize Table
 async function initDb() {
     try {
@@ -669,8 +672,21 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
     { name: 'fishVideo', maxCount: 1 }
 ]), async (req, res) => {
     try {
-        const { contestName, fishName, fishType, teamName, waNumber, fullAddress, contestClass, registrationTier, paymentAmount, spinPrize } = req.body;
         const userId = req.user.id;
+        const {
+            contestName,
+            fishName,
+            fishType = 'N/A',
+            teamName = null,
+            waNumber = null,
+            fullAddress = null,
+            contestClass = null,
+            registrationTier = null,
+            spinPrize = null
+        } = req.body;
+
+        // Ensure numeric amount
+        const paymentAmount = req.body.paymentAmount ? parseInt(req.body.paymentAmount) : 0;
 
         let fishPhotoId = null;
         let fishVideoId = null;
