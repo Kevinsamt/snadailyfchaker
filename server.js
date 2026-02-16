@@ -8,7 +8,7 @@ const rateLimit = require('express-rate-limit');
 const midtransClient = require('midtrans-client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { google } = require('googleapis');
+const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
 const { Readable } = require('stream');
 require('dotenv').config();
@@ -32,30 +32,11 @@ const snap = new midtransClient.Snap({
     clientKey: process.env.MIDTRANS_CLIENT_KEY
 });
 
-// Google Drive Config (OAuth2 for Personal Quota)
-const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
+// Supabase Configuration
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
-// Helper to get drive client (ensures fresh auth using OAuth2)
-const getDriveClient = () => {
-    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REFRESH_TOKEN) {
-        return null;
-    }
-
-    const oauth2Client = new google.auth.OAuth2(
-        GOOGLE_CLIENT_ID,
-        GOOGLE_CLIENT_SECRET,
-        'https://developers.google.com/oauthplayground' // Redirect URI used during token generation
-    );
-
-    oauth2Client.setCredentials({
-        refresh_token: GOOGLE_REFRESH_TOKEN
-    });
-
-    return google.drive({ version: 'v3', auth: oauth2Client });
-};
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Multer Config (Memory Storage for Serverless)
 const upload = multer({
@@ -63,54 +44,34 @@ const upload = multer({
     limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
-// Helper: Upload Buffer to Drive
-const uploadToDrive = async (fileBuffer, fileName, mimeType) => {
-    if (!DRIVE_FOLDER_ID || !GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REFRESH_TOKEN) {
-        throw new Error("Konfigurasi Google Drive (OAuth2) belum lengkap! Pastikan FOLDER_ID, CLIENT_ID, CLIENT_SECRET, dan REFRESH_TOKEN sudah diisi di Vercel.");
+// Helper: Upload Buffer to Supabase
+const uploadToSupabase = async (fileBuffer, fileName, mimeType) => {
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+        throw new Error("Konfigurasi Supabase belum lengkap! Pastikan SUPABASE_URL dan SUPABASE_ANON_KEY sudah diisi di Vercel.");
     }
 
-    const stream = new Readable();
-    stream.push(fileBuffer);
-    stream.push(null);
-
-    const fileMetadata = {
-        name: `${Date.now()}_${fileName}`,
-        parents: [DRIVE_FOLDER_ID],
-    };
-
-    const media = {
-        mimeType: mimeType,
-        body: stream,
-    };
+    const filePath = `entries/${Date.now()}_${fileName}`;
 
     try {
-        const drive = getDriveClient();
-        if (!drive) throw new Error("Auth client failed to initialize (check Keys/Email).");
+        const { data, error } = await supabase.storage
+            .from('contest-files')
+            .upload(filePath, fileBuffer, {
+                contentType: mimeType,
+                upsert: true
+            });
 
-        const file = await drive.files.create({
-            requestBody: fileMetadata,
-            media: media,
-            fields: 'id, webViewLink',
-        });
+        if (error) throw error;
 
-        // Make file public (optional but recommended for judges)
-        await drive.files.permissions.create({
-            fileId: file.data.id,
-            requestBody: {
-                role: 'reader',
-                type: 'anyone',
-            },
-        });
+        // Get Public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('contest-files')
+            .getPublicUrl(filePath);
 
-        console.log(`File uploaded to Drive: ${file.data.id}`);
-        return file.data.id;
+        console.log(`File uploaded to Supabase: ${publicUrl}`);
+        return publicUrl;
     } catch (err) {
-        console.error('Drive API Error Details:', err.response ? err.response.data : err.message);
-        let msg = err.message || err.toString();
-        if (msg.includes('Method doesn\'t allow unregistered callers')) {
-            msg = "Google Drive API belum diaktifkan di Google Cloud Console!";
-        }
-        throw new Error('Gagal upload ke Google Drive: ' + msg);
+        console.error('Supabase Storage Error Details:', err.message);
+        throw new Error('Gagal upload ke Supabase Storage: ' + err.message);
     }
 };
 
@@ -147,55 +108,31 @@ const userAuthMiddleware = (req, res, next) => {
 // Aliases for compatibility
 const authMiddleware = adminAuthMiddleware;
 
-// Diagnostic: Check Drive Connection
-app.get('/api/admin/debug-drive', adminAuthMiddleware, async (req, res) => {
+// Diagnostic: Check Supabase Connection
+app.get('/api/admin/debug-supabase', adminAuthMiddleware, async (req, res) => {
     try {
-        const drive = getDriveClient();
-        if (!drive) {
-            return res.status(500).json({
-                success: false,
-                error: "Konfigurasi OAuth2 di Vercel Hilang!",
-                details: {
-                    hasClientId: !!GOOGLE_CLIENT_ID,
-                    hasClientSecret: !!GOOGLE_CLIENT_SECRET,
-                    hasRefreshToken: !!GOOGLE_REFRESH_TOKEN,
-                    folderId: !!DRIVE_FOLDER_ID
-                }
-            });
-        }
-
-        const response = await drive.files.get({
-            fileId: DRIVE_FOLDER_ID,
-            fields: 'id, name'
-        });
+        const { data, error } = await supabase.storage.listBuckets();
+        if (error) throw error;
 
         res.json({
             success: true,
-            message: "Koneksi Google Drive OKE!",
-            folderName: response.data.name,
-            folderId: response.data.id
+            message: "Koneksi Supabase OKE!",
+            buckets: data.map(b => b.name),
+            config: {
+                hasUrl: !!SUPABASE_URL,
+                hasKey: !!SUPABASE_KEY
+            }
         });
     } catch (err) {
-        console.error('Debug Drive Error:', err.response ? err.response.data : err.message);
-        let errorMsg = "Gagal koneksi ke Google Drive API";
-        let subMsg = err.message;
-
-        if (subMsg.includes('unregistered callers')) {
-            errorMsg = "Google Drive API Belum Aktif!";
-            subMsg = "Cak harus buka Google Cloud Console, terus 'Enable' Google Drive API untuk project ini.";
-        }
-
+        console.error('Debug Supabase Error:', err.message);
         res.status(500).json({
             success: false,
-            error: errorMsg,
-            details: subMsg,
+            error: "Gagal koneksi ke Supabase API",
+            details: err.message,
             diagnostics: {
-                hasClientId: !!GOOGLE_CLIENT_ID,
-                hasClientSecret: !!GOOGLE_CLIENT_SECRET,
-                hasRefreshToken: !!GOOGLE_REFRESH_TOKEN,
-                folderId: !!DRIVE_FOLDER_ID
+                hasUrl: !!SUPABASE_URL,
+                hasKey: !!SUPABASE_KEY
             }
-            // raw: err.response ? err.response.data : err.message // Removed for security
         });
     }
 });
@@ -688,24 +625,20 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         // Ensure numeric amount
         const paymentAmount = req.body.paymentAmount ? parseInt(req.body.paymentAmount) : 0;
 
-        let fishPhotoId = null;
-        let fishVideoId = null;
+        let photoUrl = null;
+        let videoUrl = null;
 
-        // Upload Photo to Drive
+        // Upload Photo to Supabase
         if (req.files && req.files.fishPhoto) {
             const photo = req.files.fishPhoto[0];
-            fishPhotoId = await uploadToDrive(photo.buffer, photo.originalname, photo.mimetype);
+            photoUrl = await uploadToSupabase(photo.buffer, photo.originalname, photo.mimetype);
         }
 
-        // Upload Video to Drive
+        // Upload Video to Supabase
         if (req.files && req.files.fishVideo) {
             const video = req.files.fishVideo[0];
-            fishVideoId = await uploadToDrive(video.buffer, video.originalname, video.mimetype);
+            videoUrl = await uploadToSupabase(video.buffer, video.originalname, video.mimetype);
         }
-
-        // Construct URLs (using simple thumbnail link or direct ID)
-        const photoUrl = fishPhotoId ? `https://drive.google.com/uc?export=view&id=${fishPhotoId}` : null;
-        const videoUrl = fishVideoId ? `https://drive.google.com/file/d/${fishVideoId}/view` : null;
 
         const result = await pool.query(
             'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
