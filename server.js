@@ -463,6 +463,10 @@ async function initDb() {
             wa_number TEXT,
             full_address TEXT,
             video_url TEXT,
+            contest_class TEXT,
+            registration_tier TEXT,
+            payment_amount INTEGER,
+            spin_prize TEXT,
             status TEXT DEFAULT 'pending',
             score INTEGER,
             score_body INTEGER DEFAULT 0,
@@ -479,6 +483,10 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS wa_number TEXT");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS full_address TEXT");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS video_url TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS contest_class TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS registration_tier TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS payment_amount INTEGER");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS spin_prize TEXT");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_body INTEGER DEFAULT 0");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_form INTEGER DEFAULT 0");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_color INTEGER DEFAULT 0");
@@ -661,7 +669,7 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
     { name: 'fishVideo', maxCount: 1 }
 ]), async (req, res) => {
     try {
-        const { contestName, fishName, fishType, teamName, waNumber, fullAddress } = req.body;
+        const { contestName, fishName, fishType, teamName, waNumber, fullAddress, contestClass, registrationTier, paymentAmount, spinPrize } = req.body;
         const userId = req.user.id;
 
         let fishPhotoId = null;
@@ -684,8 +692,8 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         const videoUrl = fishVideoId ? `https://drive.google.com/file/d/${fishVideoId}/view` : null;
 
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
+            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize]
         );
 
         res.json({ success: true, data: result.rows[0] });
