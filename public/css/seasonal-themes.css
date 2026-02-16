@@ -33,16 +33,23 @@
 /* Lampion Decoration */
 .theme-imlek .lampion-container {
     position: fixed;
-    top: -10px;
+    top: -40px;
+    /* Move higher to stay away from text */
     width: 100%;
-    height: 120px;
-    /* Reduced height on mobile to prevent overlap */
+    height: 100px;
     pointer-events: none;
-    z-index: 50;
-    /* Lower than navbar but high enough for background */
+    z-index: -1;
+    /* Place behind all content to ensure visibility of text */
     display: flex;
     justify-content: space-around;
     overflow: hidden;
+}
+
+/* Hide some lampions on mobile to reduce clutter */
+@media (max-width: 640px) {
+    .theme-imlek .lampion:nth-child(n+5) {
+        display: none !important;
+    }
 }
 
 @media (min-width: 768px) {
@@ -54,13 +61,13 @@
 }
 
 .theme-imlek .lampion {
-    width: 40px;
-    /* Smaller lampions on mobile */
-    height: 55px;
+    width: 35px;
+    /* Even smaller on mobile */
+    height: 45px;
     background: #FF0000;
     border-radius: 40% 40% 40% 40% / 15% 15% 15% 15%;
     position: relative;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5), inset 0 0 10px rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.4), inset 0 0 8px rgba(255, 215, 0, 0.2);
     animation: swing 4s ease-in-out infinite alternate;
     transform-origin: top center;
 }
@@ -95,11 +102,12 @@
 .theme-imlek .lampion-gold-band {
     position: absolute;
     width: 100%;
-    height: 10px;
+    height: 6px;
+    /* Thinner bands */
     background: #d4af37;
-    top: 10%;
+    top: 15%;
     left: 0;
-    box-shadow: 0 45px 0 #d4af37;
+    box-shadow: 0 35px 0 #d4af37;
 }
 
 @keyframes swing {
