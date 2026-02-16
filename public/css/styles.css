@@ -90,7 +90,7 @@ body {
 @media (max-width: 768px) {
     .glass-panel {
         border-radius: var(--radius-md);
-        padding: 1rem;
+        padding: 1.25rem;
     }
 }
 
@@ -210,15 +210,29 @@ body {
     .grid-3,
     .grid-2 {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
     .container {
-        padding: 1rem;
+        padding: 0.75rem;
     }
 
     body {
-        font-size: 14px;
+        font-size: 15px;
     }
+
+    .mobile-hide,
+    .m-hide {
+        display: none !important;
+    }
+
+    .mobile-only {
+        display: block !important;
+    }
+}
+
+.mobile-only {
+    display: none;
 }
 
 /* Animations */

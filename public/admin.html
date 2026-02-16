@@ -34,7 +34,8 @@
                     style="font-size: 1.25rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">Admin<span
                         style="color: white; font-weight: 400;">Panel</span></a>
             </div>
-            <div id="adminTabs" style="display: flex; gap: 0.5rem; overflow-x: auto; padding: 5px 0;"
+            <div id="adminTabs"
+                style="display: flex; gap: 0.5rem; overflow-x: auto; padding: 10px 0; -ms-overflow-style: none; scrollbar-width: none;"
                 class="hide-scrollbar">
                 <button onclick="switchTab('overview')" class="tab-btn active">Beranda</button>
                 <button onclick="switchTab('fish')" class="tab-btn">Ikan</button>
@@ -367,17 +368,54 @@
                 cursor: pointer;
                 font-weight: 600;
                 transition: all 0.3s;
+                white-space: nowrap;
+                /* Prevent text wrapping */
             }
 
             .tab-btn.active {
                 background: var(--primary);
                 color: #000;
                 border-color: var(--primary);
+                box-shadow: 0 0 15px var(--primary-glow);
             }
 
             table td {
                 padding: 1rem;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    padding: 0.75rem;
+                }
+
+                .glass-panel {
+                    padding: 1.25rem !important;
+                }
+
+                h2 {
+                    font-size: 1.25rem !important;
+                }
+
+                .grid-4 {
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0.75rem;
+                }
+
+                .admin-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .grid-4 {
+                    grid-template-columns: 1fr;
+                }
+
+                .tab-btn {
+                    padding: 0.4rem 0.8rem;
+                    font-size: 0.85rem;
+                }
             }
         </style>
 

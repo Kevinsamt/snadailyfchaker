@@ -119,12 +119,20 @@
         <div class="glass-panel" style="padding: 2.5rem;">
             <p style="color: var(--text-muted); margin-bottom: 1rem;">Sudah punya nomor resi? Silakan masukkan di bawah
                 ini.</p>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div id="trackSearchBox" style="display: flex; gap: 10px; flex-direction: column;">
                 <input type="text" id="waybillInput" class="glass-input" placeholder="Contoh: ABC12345"
-                    style="margin-bottom: 0; flex: 1; min-width: 200px;">
-                <button onclick="trackOrder()" class="btn-primary m-w-full" style="white-space: nowrap;">Cek
+                    style="margin-bottom: 0; width: 100%;">
+                <button onclick="trackOrder()" class="btn-primary" style="width: 100%; white-space: nowrap;">Cek
                     Status</button>
             </div>
+
+            <style>
+                @media (min-width: 480px) {
+                    #trackSearchBox {
+                        flex-direction: row !important;
+                    }
+                }
+            </style>
 
             <div id="trackResult" style="display: none;">
                 <div class="track-card">

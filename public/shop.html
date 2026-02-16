@@ -12,11 +12,25 @@
     <style>
         .shop-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 2rem;
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
+        }
+
+        @media (max-width: 600px) {
+            .shop-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .cart-float {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+            }
         }
 
         .product-card {
@@ -157,7 +171,7 @@
             <p style="color: var(--text-muted); margin-bottom: 2rem;">Silakan lengkapi data pengiriman anda.</p>
 
             <form id="checkoutForm" onsubmit="event.preventDefault(); proceedToPayment();">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="checkout-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="input-group">
                         <label class="input-label">Nama Lengkap</label>
                         <input type="text" id="custName" class="glass-input" placeholder="Masukkan nama" required>
@@ -167,6 +181,14 @@
                         <input type="tel" id="custPhone" class="glass-input" placeholder="0812xxxx" required>
                     </div>
                 </div>
+
+                <style>
+                    @media (max-width: 480px) {
+                        .checkout-grid {
+                            grid-template-columns: 1fr !important;
+                        }
+                    }
+                </style>
 
                 <div class="input-group">
                     <label class="input-label">Email (Gmail)</label>

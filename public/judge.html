@@ -120,21 +120,38 @@
         </div>
     </nav>
 
-    <main class="container animate-fade-in" style="margin-top: 4rem; padding-bottom: 5rem;">
-        <div
+    <main class="container animate-fade-in" style="margin-top: 2rem; padding-bottom: 5rem;">
+        <div class="judge-hero"
             style="background: linear-gradient(135deg, rgba(0,212,255,0.1) 0%, rgba(0,255,136,0.05) 100%); padding: 3rem; border-radius: 30px; margin-bottom: 3rem; border: 1px solid var(--glass-border); position: relative; overflow: hidden;">
             <div
                 style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: var(--primary); filter: blur(100px); opacity: 0.1;">
             </div>
 
-            <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem; line-height: 1.1;">
+            <h1 style="font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem; line-height: 1.1;">
                 Selamat Bekerja, <br><span class="text-gradient" id="welcomeJudge">Judge</span>
             </h1>
             <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px;">
-                Pantau pendaftaran kontes dan berikan penilaian terbaik Anda untuk mendukung komunitas ikan hias
-                Indonesia.
+                Pantau pendaftaran kontes dan berikan penilaian terbaik Anda.
             </p>
         </div>
+
+        <style>
+            @media (max-width: 768px) {
+                .judge-hero {
+                    padding: 2rem 1.5rem !important;
+                    border-radius: 20px !important;
+                }
+
+                h1 {
+                    font-size: 1.5rem !important;
+                }
+
+                #assignedEventsList {
+                    grid-template-columns: 1fr !important;
+                    gap: 1.5rem !important;
+                }
+            }
+        </style>
 
         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
             <div
