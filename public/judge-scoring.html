@@ -150,12 +150,12 @@
             <a href="judge.html" class="nav-link-premium" style="background: transparent; color: var(--text-muted);">
                 <i class="ri-arrow-left-line"></i> Dashboard
             </a>
-            <div style="flex: 1; text-align: center;">
+            <div style="flex: 1; text-align: center; padding: 0 10px;">
                 <span id="eventNameHeader"
-                    style="font-weight: 800; font-size: 1.1rem; color: white; letter-spacing: 1px; text-transform: uppercase;">Event
+                    style="font-weight: 800; font-size: clamp(0.9rem, 4vw, 1.1rem); color: white; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">Event
                     Title</span>
             </div>
-            <div style="width: 100px;"></div>
+            <div class="mobile-hide" style="width: 100px;"></div>
         </div>
     </nav>
 
@@ -164,19 +164,35 @@
         <!-- Left: Contestant List -->
         <section class="animate-fade-in">
             <div class="glass-panel" style="padding: 2.5rem; height: 100%;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem;">
+                <div class="contestant-header"
+                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; gap: 1rem;">
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         <div
                             style="width: 4px; height: 28px; background: var(--secondary); border-radius: 10px; box-shadow: 0 0 15px var(--secondary);">
                         </div>
-                        <h2 style="font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px;">Daftar <span
-                                class="text-gradient">Kontestan</span></h2>
+                        <h2
+                            style="font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 900; letter-spacing: -0.5px; margin: 0;">
+                            Daftar <span class="text-gradient">Kontestan</span></h2>
                     </div>
                     <button class="tab-btn" id="compareToggle" onclick="toggleCompareMode()"
-                        style="font-size: 0.85rem; padding: 8px 20px; border-radius: 12px;">
-                        <i class="ri-layout-grid-line"></i> Mode Bandingkan
+                        style="font-size: 0.85rem; padding: 8px 20px; border-radius: 12px; white-space: nowrap;">
+                        <i class="ri-layout-grid-line"></i> <span class="mobile-hide">Mode</span> Bandingkan
                     </button>
                 </div>
+
+                <style>
+                    @media (max-width: 540px) {
+                        .contestant-header {
+                            flex-direction: column !important;
+                            align-items: flex-start !important;
+                            gap: 1rem !important;
+                        }
+
+                        #compareToggle {
+                            width: 100%;
+                        }
+                    }
+                </style>
 
                 <div id="entriesList" style="display: grid; gap: 1rem;">
                     <!-- Entries injected here -->
