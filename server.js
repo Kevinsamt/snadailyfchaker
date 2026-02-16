@@ -430,6 +430,7 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_body INTEGER DEFAULT 0");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_form INTEGER DEFAULT 0");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_color INTEGER DEFAULT 0");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS has_spun BOOLEAN DEFAULT FALSE");
         } catch (migErr) {
             console.log("Migration columns check done.");
         }
@@ -655,6 +656,45 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
             error: "Gagal mendaftarkan kontes: " + errMsg,
             details: err.message
         });
+    }
+});
+
+// Claim Spin Prize
+app.post('/api/contest/registrations/:id/spin', userAuthMiddleware, async (req, res) => {
+    try {
+        const registrationId = req.params.id;
+        const { prize } = req.body;
+
+        // Verify registration ownership, status, and spin status
+        const check = await pool.query(
+            "SELECT status, registration_tier, has_spun FROM contest_registrations WHERE id = $1 AND user_id = $2",
+            [registrationId, req.user.id]
+        );
+
+        if (check.rows.length === 0) {
+            return res.status(404).json({ error: 'Registrasi tidak ditemukan.' });
+        }
+
+        const registration = check.rows[0];
+        if (registration.status !== 'approved') {
+            return res.status(403).json({ error: 'Hanya pendaftaran yang sudah disetujui (Approved) yang bisa klaim hadiah.' });
+        }
+        if (registration.registration_tier !== 'Diamond') {
+            return res.status(403).json({ error: 'Hanya pendaftaran Diamond yang bisa klaim hadiah spin.' });
+        }
+        if (registration.has_spun) {
+            return res.status(403).json({ error: 'Hadiah untuk pendaftaran ini sudah diklaim.' });
+        }
+
+        // Save prize and mark as spun
+        await pool.query(
+            "UPDATE contest_registrations SET spin_prize = $1, has_spun = TRUE WHERE id = $2",
+            [prize, registrationId]
+        );
+
+        res.json({ success: true, message: 'Hadiah berhasil diklaim!', prize });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 

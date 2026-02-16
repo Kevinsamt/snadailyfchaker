@@ -683,37 +683,29 @@
         </div>
     </main>
 
-    <!-- Diamond Luck Overlay -->
-    <div id="spinOverlay" class="spin-wheel-overlay">
-        <h2 style="color: #ffd700; font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -2px;">
-            DIAMOND LUCK</h2>
-        <p style="color: rgba(255,255,255,0.6); margin-bottom: 3rem; font-weight: 600;">Semoga beruntung, Bosku!</p>
-
-        <div class="wheel-outer">
-            <div class="bulb-container" id="bulbContainer"></div>
-            <div class="wheel-marker"></div>
-            <div id="wheel" class="wheel-container">
-                <!-- Segments by JS -->
+    <!-- Success Overlay (Diamond & Standard) -->
+    <div id="successOverlay" class="spin-wheel-overlay">
+        <div class="glass-panel animate-fade-in"
+            style="padding: 3rem; text-align: center; max-width: 500px; border-radius: 32px; border: 1px solid rgba(255,215,0,0.3);">
+            <div
+                style="width: 80px; height: 80px; background: rgba(0, 212, 255, 0.1); border-radius: 50%; display: grid; place-items: center; margin: 0 auto 2rem; border: 2px solid #00d4ff;">
+                <i class="ri-checkbox-circle-fill" style="font-size: 3rem; color: #00d4ff;"></i>
             </div>
-            <div class="wheel-center-cap">
-                <i class="ri-vip-diamond-fill"></i>
-            </div>
-        </div>
-
-        <div id="prizeResult" style="margin-top: 3rem; text-align: center; display: none; animation: fadeIn 0.5s;">
-            <p style="font-size: 1rem; color: rgba(255,255,255,0.7); margin-bottom: 0.5rem;">Selamat! Anda Memenangkan:
+            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">Pendaftaran <span
+                    class="text-gradient">Berhasil!</span></h2>
+            <p style="color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 2.5rem;">
+                Data kontes Cak sudah kami terima. Admin bakal ngecek pendaftarannya dulu ya.
+                <br><br>
+                <span id="diamondNote" style="display: none; color: #ffd700; font-weight: 700;">
+                    <i class="ri-vip-diamond-fill"></i> Karena Cak pilih Diamond, klaim Diamond Spin Cak di halaman
+                    profil setelah di-ACC Admin ya!
+                </span>
             </p>
-            <h3 id="prizeLabel"
-                style="font-size: 3rem; font-weight: 800; color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.5);">
-                PRIZE</h3>
-            <button onclick="finishRegistration()" class="btn-primary"
-                style="margin-top: 3rem; padding: 1rem 3rem; border-radius: 100px;">KLAIM & SELESAI</button>
+            <a href="dashboard.html" class="btn-primary"
+                style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; border-radius: 100px; text-decoration: none;">
+                <i class="ri-user-3-line"></i> KEMBALI KE PROFIL
+            </a>
         </div>
-
-        <button id="spinBtn" class="btn-primary"
-            style="margin-top: 3rem; padding: 1.2rem 4rem; border-radius: 100px; background: #ffd700; color: #000; font-weight: 800; border: none; box-shadow: 0 10px 30px rgba(255,215,0,0.3);">
-            PUTAR SEKARANG
-        </button>
     </div>
 
     <script src="js/navigation.js"></script>
@@ -802,74 +794,6 @@
             document.getElementById('paymentAmount').value = price;
         }
 
-        const PRIZES = ["Slot Registrasi", "Ikan Random", "Pink Aurora", "Free Entry", "Merchandise", "Zonk!"];
-        let currentSpinPrize = "";
-
-        function initWheel() {
-            const wheel = document.getElementById('wheel');
-            const bulbContainer = document.getElementById('bulbContainer');
-            wheel.innerHTML = '';
-            bulbContainer.innerHTML = '';
-
-            // Render Bulbs
-            for (let i = 0; i < 12; i++) {
-                const container = document.createElement('div');
-                container.style.position = 'absolute';
-                container.style.inset = '0';
-                container.style.transform = `rotate(${i * 30}deg)`;
-                container.innerHTML = '<div class="bulb"></div>';
-                bulbContainer.appendChild(container);
-            }
-
-            const colors = ['#ffd700', '#ffffff', '#ffd700', '#ffffff', '#ffd700', '#475569'];
-
-            PRIZES.forEach((prize, i) => {
-                const segment = document.createElement('div');
-                segment.className = 'wheel-segment';
-                segment.style.transform = `rotate(${i * 60}deg) skewY(-30deg)`;
-                segment.style.backgroundColor = colors[i];
-                segment.style.border = '2px solid rgba(0,0,0,0.1)';
-
-                const span = document.createElement('span');
-                span.style.transform = `skewY(30deg) rotate(30deg)`;
-                span.style.display = 'block';
-                span.style.textAlign = 'center';
-                span.style.width = '100px';
-                span.style.marginLeft = '40px';
-                span.innerText = prize;
-                segment.appendChild(span);
-
-                wheel.appendChild(segment);
-            });
-        }
-
-        function spinWheel() {
-            const wheel = document.getElementById('wheel');
-            const spinBtn = document.getElementById('spinBtn');
-            const bulbs = document.querySelectorAll('.bulb');
-            const randomDegree = 1800 + Math.floor(Math.random() * 360);
-
-            spinBtn.style.display = 'none';
-            bulbs.forEach(b => b.style.animationDuration = '0.3s'); // Speed up bulbs
-            wheel.style.transform = `rotate(${randomDegree}deg)`;
-
-            setTimeout(() => {
-                const actualDegree = (360 - (randomDegree % 360)) % 360;
-                const prizeIndex = Math.floor(actualDegree / 60);
-                currentSpinPrize = PRIZES[prizeIndex];
-
-                bulbs.forEach(b => b.style.animationDuration = '1.5s'); // Reset bulbs
-                document.getElementById('prizeLabel').innerText = currentSpinPrize;
-                document.getElementById('prizeResult').style.display = 'block';
-            }, 6100);
-        }
-
-        document.getElementById('spinBtn').onclick = spinWheel;
-
-        function finishRegistration() {
-            window.location.href = 'dashboard.html';
-        }
-
         document.getElementById('entryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -905,13 +829,9 @@
 
                 if (response.ok) {
                     if (tier === 'Diamond') {
-                        document.getElementById('spinOverlay').style.display = 'flex';
-                        initWheel();
-                    } else {
-                        btn.style.background = '#10b981';
-                        btn.innerHTML = '<i class="ri-checkbox-circle-line"></i> PENDAFTARAN BERHASIL!';
-                        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+                        document.getElementById('diamondNote').style.display = 'block';
                     }
+                    document.getElementById('successOverlay').style.display = 'flex';
                 } else {
                     if (response.status === 413) {
                         throw new Error("File terlalu besar! Maksimal total 4.5 MB.");

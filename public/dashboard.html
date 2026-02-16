@@ -143,6 +143,168 @@
             max-width: 500px;
             padding: 2.5rem;
         }
+
+        /* Luxury Spin Wheel styles */
+        .spin-wheel-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.98), #000);
+            backdrop-filter: blur(30px);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .wheel-outer {
+            position: relative;
+            width: min(450px, 90vw);
+            aspect-ratio: 1/1;
+            padding: 25px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 50%;
+            box-shadow: 0 0 0 10px #334155, 0 0 50px rgba(255, 215, 0, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.8);
+            border: 4px solid #ffd700;
+            cursor: pointer;
+        }
+
+        .wheel-outer::before {
+            content: '';
+            position: absolute;
+            inset: -15px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 215, 0, 0.3);
+            animation: rotate 20s linear infinite;
+        }
+
+        .bulb-container {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .bulb {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px #fff, 0 0 20px #ffd700;
+            animation: bulbPulse 1.5s infinite alternate;
+        }
+
+        @keyframes bulbPulse {
+            from {
+                opacity: 0.4;
+                transform: translateX(-50%) scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) scale(1.2);
+                box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
+            }
+        }
+
+        .wheel-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            transition: transform 6s cubic-bezier(0.15, 0, 0.05, 1);
+            border: 8px solid #1e293b;
+            background: #0f172a;
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            left: 50%;
+            top: 50%;
+            transform-origin: 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: #000;
+            text-transform: uppercase;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .wheel-center-cap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 50%;
+            z-index: 20;
+            display: grid;
+            place-items: center;
+        }
+
+        .wheel-center-cap i {
+            font-size: 2rem;
+            color: #ffd700;
+        }
+
+        .wheel-marker {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 50px;
+            background: #ffd700;
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            z-index: 30;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
+        }
+
+        .gift-box-btn {
+            background: linear-gradient(135deg, #ffd700, #ff9500);
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: giftBlink 1.5s infinite;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        @keyframes giftBlink {
+
+            0%,
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+                filter: brightness(1.2);
+                box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+            }
+        }
     </style>
 </head>
 
@@ -265,6 +427,37 @@
         </div>
     </div>
 
+    <!-- Spin Wheel Overlay -->
+    <div id="wheelOverlay" class="spin-wheel-overlay">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <div
+                style="display: inline-block; padding: 6px 15px; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 50px; color: #ffd700; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem;">
+                <i class="ri-vip-diamond-fill"></i> Diamond Prize
+            </div>
+            <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">DIAMOND <span
+                    class="text-gradient">SPIN</span></h2>
+            <p style="color: rgba(255,255,255,0.6); font-weight: 600;">Tap/Klik roda untuk memutar!</p>
+        </div>
+
+        <div class="wheel-outer" onclick="spinWheel()" id="wheelOuter">
+            <div class="bulb-container" id="bulbContainer"></div>
+            <div class="wheel-marker"></div>
+            <div id="wheel" class="wheel-container"></div>
+            <div class="wheel-center-cap">
+                <i class="ri-vip-diamond-fill"></i>
+            </div>
+        </div>
+
+        <div id="prizeResult" style="margin-top: 3rem; text-align: center; display: none; animation: fadeIn 0.5s;">
+            <div style="font-size: 0.8rem; color: #ffd700; text-transform: uppercase; font-weight: 800;">Selamat, Cak
+                Dapet:</div>
+            <div id="prizeLabel" style="font-size: 2.5rem; font-weight: 900; margin-top: 0.5rem; color: #fff;">Memuat...
+            </div>
+            <button onclick="closeWheel()" class="btn-primary"
+                style="margin-top: 2rem; padding: 1rem 3rem; border-radius: 100px;">KLAIM HADIAH</button>
+        </div>
+    </div>
+
     <script src="js/navigation.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -318,25 +511,36 @@
                     document.getElementById('approvedReg').innerText = list.filter(r => r.status === 'approved').length;
 
                     if (list.length > 0) {
-                        document.getElementById('registrationList').innerHTML = list.map((reg, idx) => `
-                            <div class="glass-panel animate-fade-in" style="animation-delay: ${idx * 0.1}s; display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem; border-left: 4px solid ${reg.status === 'approved' ? 'var(--success)' : reg.status === 'rejected' ? 'var(--error)' : 'var(--warning)'};">
-                                <img src="${reg.fish_image_url || 'https://via.placeholder.com/100'}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 1px solid var(--glass-border);">
-                                <div style="flex: 1;">
-                                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 0.25rem;">
-                                        <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">${reg.contest_name}</span>
-                                        <div style="width: 4px; height: 4px; background: var(--text-dim); border-radius: 50%;"></div>
-                                        <span style="font-size: 0.7rem; color: var(--text-dim);">${new Date(reg.created_at).toLocaleDateString('id-ID')}</span>
+                        document.getElementById('registrationList').innerHTML = list.map((reg, idx) => {
+                            const isDiamond = reg.registration_tier === 'Diamond';
+                            const canSpin = isDiamond && reg.status === 'approved' && !reg.has_spun;
+
+                            return `
+                                <div class="glass-panel animate-fade-in" style="animation-delay: ${idx * 0.1}s; display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem; border-left: 4px solid ${reg.status === 'approved' ? 'var(--success)' : reg.status === 'rejected' ? 'var(--error)' : 'var(--warning)'}; position: relative;">
+                                    <img src="${reg.fish_image_url || 'https://via.placeholder.com/100'}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 1px solid var(--glass-border);">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 0.25rem;">
+                                            <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">${reg.contest_name}</span>
+                                            ${isDiamond ? '<span style="background: rgba(255,215,0,0.1); color: #ffd700; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 800;"><i class="ri-vip-diamond-fill"></i> DIAMOND</span>' : ''}
+                                        </div>
+                                        <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.25rem;">${reg.fish_name}</h3>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Status: ${reg.status.toUpperCase()}</div>
+                                        ${reg.spin_prize ? `<div style="font-size: 0.75rem; color: #ffd700; margin-top: 5px; font-weight: 700;"><i class="ri-gift-line"></i> Hadiah: ${reg.spin_prize}</div>` : ''}
                                     </div>
-                                    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.25rem;">${reg.fish_name}</h3>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Kategori: ${reg.fish_type}</div>
+                                    <div style="text-align: right;">
+                                        ${canSpin ? `
+                                            <button onclick="openWheel(${reg.id})" class="gift-box-btn">
+                                                <i class="ri-gift-fill"></i> SPIN!
+                                            </button>
+                                        ` : `
+                                            <span style="display: inline-block; padding: 5px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; background: ${reg.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : reg.status === 'rejected' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'}; color: ${reg.status === 'approved' ? 'var(--success)' : reg.status === 'rejected' ? 'var(--error)' : 'var(--warning)'}; border: 1px solid ${reg.status === 'approved' ? 'rgba(16, 185, 129, 0.2)' : reg.status === 'rejected' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'};">
+                                                ${reg.status.toUpperCase()}
+                                            </span>
+                                        `}
+                                    </div>
                                 </div>
-                                <div style="text-align: right;">
-                                    <span style="display: inline-block; padding: 5px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; background: ${reg.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : reg.status === 'rejected' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'}; color: ${reg.status === 'approved' ? 'var(--success)' : reg.status === 'rejected' ? 'var(--error)' : 'var(--warning)'}; border: 1px solid ${reg.status === 'approved' ? 'rgba(16, 185, 129, 0.2)' : reg.status === 'rejected' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'};">
-                                        ${reg.status.toUpperCase()}
-                                    </span>
-                                </div>
-                            </div>
-                        `).join('');
+                            `;
+                        }).join('');
                     }
                 }
             } catch (err) {
@@ -344,12 +548,86 @@
             }
         }
 
-        function getStatusColor(status) {
-            switch (status) {
-                case 'approved': return 'rgba(0, 255, 136, 0.2); color: #00ff88;';
-                case 'rejected': return 'rgba(255, 77, 77, 0.2); color: #ff4d4d;';
-                default: return 'rgba(255, 215, 0, 0.2); color: #ffd700;';
+        // --- SPIN WHEEL LOGIC ---
+        const PRIZES = ["Slot Registrasi", "Ikan Random", "Pink Aurora", "Free Entry", "Merchandise", "Diamond Pack"];
+        let currentRegId = null;
+        let isSpinning = false;
+        let currentPrize = "";
+
+        function openWheel(regId) {
+            currentRegId = regId;
+            initWheel();
+            document.getElementById('wheelOverlay').style.display = 'flex';
+            document.getElementById('prizeResult').style.display = 'none';
+            document.getElementById('wheelOuter').style.opacity = '1';
+            document.getElementById('wheelOuter').style.pointerEvents = 'auto';
+        }
+
+        function initWheel() {
+            const wheel = document.getElementById('wheel');
+            const bulbContainer = document.getElementById('bulbContainer');
+            wheel.innerHTML = '';
+            bulbContainer.innerHTML = '';
+            wheel.style.transition = 'none';
+            wheel.style.transform = 'rotate(0deg)';
+
+            for (let i = 0; i < 12; i++) {
+                const container = document.createElement('div');
+                container.style.position = 'absolute'; container.style.inset = '0';
+                container.style.transform = `rotate(${i * 30}deg)`;
+                container.innerHTML = '<div class="bulb"></div>';
+                bulbContainer.appendChild(container);
             }
+
+            const colors = ['#ffd700', '#ffffff', '#ffd700', '#ffffff', '#ffd700', '#475569'];
+            PRIZES.forEach((prize, i) => {
+                const segment = document.createElement('div');
+                segment.className = 'wheel-segment';
+                segment.style.transform = `rotate(${i * 60}deg) skewY(-30deg)`;
+                segment.style.backgroundColor = colors[i];
+                segment.innerHTML = `<span style="transform: skewY(30deg) rotate(30deg); display: block; text-align: center; width: 80px; margin-left: 30px;">${prize}</span>`;
+                wheel.appendChild(segment);
+            });
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            const wheel = document.getElementById('wheel');
+            const bulbs = document.querySelectorAll('.bulb');
+            const randomDegree = 2880 + Math.floor(Math.random() * 360);
+
+            bulbs.forEach(b => b.style.animationDuration = '0.3s');
+            wheel.style.transition = 'transform 6s cubic-bezier(0.15, 0, 0.05, 1)';
+            wheel.style.transform = `rotate(${randomDegree}deg)`;
+
+            setTimeout(() => {
+                const actualDegree = (360 - (randomDegree % 360)) % 360;
+                const prizeIndex = Math.floor(actualDegree / 60);
+                currentPrize = PRIZES[prizeIndex];
+
+                bulbs.forEach(b => b.style.animationDuration = '1.5s');
+                document.getElementById('prizeLabel').innerText = currentPrize;
+                document.getElementById('prizeResult').style.display = 'block';
+                document.getElementById('wheelOuter').style.opacity = '0.3';
+                document.getElementById('wheelOuter').style.pointerEvents = 'none';
+                isSpinning = false;
+            }, 6100);
+        }
+
+        async function closeWheel() {
+            const token = localStorage.getItem('sna_user_token');
+            try {
+                const res = await fetch(`/api/contest/registrations/${currentRegId}/spin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ prize: currentPrize })
+                });
+                if (res.ok) {
+                    document.getElementById('wheelOverlay').style.display = 'none';
+                    fetchRegistrations();
+                }
+            } catch (err) { alert('Gagal menyimpan hadiah'); }
         }
 
         function openModal() { document.getElementById('editModal').style.display = 'flex'; }
@@ -364,10 +642,7 @@
             try {
                 const res = await fetch('/api/user/profile', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ fullName, phone })
                 });
                 if (res.ok) {
@@ -375,9 +650,7 @@
                     closeModal();
                     fetchProfile();
                 }
-            } catch (err) {
-                alert('Gagal memperbarui profil');
-            }
+            } catch (err) { alert('Gagal memperbarui profil'); }
         });
 
     </script>
