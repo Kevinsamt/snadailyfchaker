@@ -117,6 +117,14 @@
             transform: scale(1.02);
         }
 
+        .judge-scoring-main {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 2rem;
+            margin-top: 2rem;
+            padding-bottom: 5rem;
+        }
+
         @media (max-width: 1024px) {
             .judge-scoring-main {
                 grid-template-columns: 1fr !important;
@@ -191,17 +199,16 @@
             <a href="judge.html" class="nav-link-premium" style="background: transparent; color: var(--text-muted);">
                 <i class="ri-arrow-left-line"></i> Dashboard
             </a>
-            <div style="flex: 1; text-align: center; padding: 0 10px;">
+            <div style="flex: 1; text-align: right; padding-left: 10px;">
                 <span id="eventNameHeader"
-                    style="font-weight: 800; font-size: clamp(0.9rem, 4vw, 1.1rem); color: white; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">Event
+                    style="font-weight: 800; font-size: clamp(0.85rem, 4vw, 1.1rem); color: white; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">Event
                     Title</span>
             </div>
-            <div class="mobile-hide" style="width: 100px;"></div>
+            <!-- Removed fixed spacer -->
         </div>
     </nav>
 
-    <main class="container judge-scoring-main"
-        style="margin-top: 2rem; display: grid; grid-template-columns: 1fr 450px; gap: 2rem; padding-bottom: 5rem;">
+    <main class="container judge-scoring-main">
         <!-- Left: Contestant List -->
         <section class="animate-fade-in">
             <div class="glass-panel" style="padding: 2.5rem; height: 100%;">
