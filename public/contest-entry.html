@@ -786,6 +786,77 @@
                                 Pendaftaran ikan ini dibiayai oleh SnaDaily.</div>
                         </div>
                         <input type="hidden" id="registrationTier" value="Early">
+                        <input type="hidden" id="paymentAmount" value="40000">
+                    </div>
+
+                    <!-- Manual E-Wallet Payment Area -->
+                    <div id="directPaymentArea"
+                        style="margin-top: 2rem; padding: 2rem; background: rgba(255,255,255,0.03); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+                            <i class="ri-wallet-3-line" style="color: #00d4ff; font-size: 1.5rem;"></i>
+                            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700;">Pembayaran E-Wallet</h3>
+                        </div>
+
+                        <div id="displayAmountDirect" class="amount-badge">Rp 40.000</div>
+
+                        <div class="ewallet-grid"
+                            style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 1.5rem;">
+                            <div
+                                style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 15px;">
+                                <div
+                                    style="width: 45px; height: 45px; background: #fff; border-radius: 10px; display: grid; place-items: center; overflow: hidden;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/ShopeePay.svg/2560px-ShopeePay.svg.png"
+                                        style="width: 80%;" alt="ShopeePay">
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">SHOPEEPAY</div>
+                                    <div style="font-weight: 800; font-size: 1rem; letter-spacing: 1px;">0812-3456-7890
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #ff5722;">A.N TERRA ARRIES</div>
+                                </div>
+                            </div>
+                            <div
+                                style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 15px;">
+                                <div
+                                    style="width: 45px; height: 45px; background: #4d2a86; border-radius: 10px; display: grid; place-items: center;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Logo_ovo_purple.svg/1024px-Logo_ovo_purple.svg.png"
+                                        style="width: 70%;" alt="OVO">
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">OVO</div>
+                                    <div style="font-weight: 800; font-size: 1rem; letter-spacing: 1px;">0812-3456-7890
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #a55eea;">A.N TERRA ARRIES</div>
+                                </div>
+                            </div>
+                            <div
+                                style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 15px;">
+                                <div
+                                    style="width: 45px; height: 45px; background: #118eea; border-radius: 10px; display: grid; place-items: center;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Logo_danain.png/1200px-Logo_danain.png"
+                                        style="width: 80%;" alt="DANA">
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">DANA</div>
+                                    <div style="font-weight: 800; font-size: 1rem; letter-spacing: 1px;">0812-3456-7890
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #00d4ff;">A.N TERRA ARRIES</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-box" style="margin-top: 2rem; margin-bottom: 0;">
+                            <label>Lampirkan Bukti Transfer</label>
+                            <div class="proof-upload" onclick="document.getElementById('paymentProofFile').click()">
+                                <i class="ri-upload-cloud-2-line" style="font-size: 1.5rem; color: var(--primary);"></i>
+                                <div id="proofFileName"
+                                    style="font-size: 0.8rem; margin-top: 5px; color: rgba(255,255,255,0.6);">
+                                    Upload Struk / Screenshot
+                                </div>
+                            </div>
+                            <input type="file" id="paymentProofFile" hidden accept="image/*"
+                                onchange="handleProofSelect(this)">
+                        </div>
                     </div>
 
 
@@ -1002,9 +1073,33 @@
         }
 
         function selectTier(tier, price, element) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isFreeEntry = urlParams.get('claim') === 'free_entry';
+
             document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
             document.getElementById('registrationTier').value = tier;
+            document.getElementById('paymentAmount').value = isFreeEntry ? 0 : price;
+
+            // Manual E-Wallet Helper
+            const finalAmount = isFreeEntry ? 0 : price;
+            const paymentArea = document.getElementById('directPaymentArea');
+            const displayBadge = document.getElementById('displayAmountDirect');
+
+            if (finalAmount > 0) {
+                if (paymentArea) paymentArea.style.display = 'block';
+                if (displayBadge) displayBadge.innerText = 'Rp ' + finalAmount.toLocaleString('id-ID');
+            } else {
+                if (paymentArea) paymentArea.style.display = 'none';
+            }
+        }
+
+        async function handleProofSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const fileName = file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name;
+            document.getElementById('proofFileName').innerText = fileName;
+            document.getElementById('proofFileName').style.color = 'var(--secondary)';
         }
 
 
@@ -1017,6 +1112,7 @@
             formData.append('fishType', 'N/A');
             formData.append('contestClass', document.getElementById('contestClass').value);
             formData.append('registrationTier', tier);
+            formData.append('paymentAmount', document.getElementById('paymentAmount').value);
             formData.append('teamName', document.getElementById('teamName').value);
             formData.append('waNumber', document.getElementById('waNumber').value);
             formData.append('fullAddress', document.getElementById('fullAddress').value);
@@ -1070,10 +1166,23 @@
             e.preventDefault();
 
             const btn = document.getElementById('submitBtn');
+            const amount = parseInt(document.getElementById('paymentAmount') ? document.getElementById('paymentAmount').value : 0);
+            const proofFile = document.getElementById('paymentProofFile') ? document.getElementById('paymentProofFile').files[0] : null;
+
+            if (amount > 0 && !proofFile) {
+                alert('Tolong upload bukti transfer dulu ya Cak!');
+                return;
+            }
+
             btn.disabled = true;
             btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> SEDANG MENGIRIM...';
 
-            await sendRegistration(buildFormData());
+            const formData = buildFormData();
+            if (proofFile) {
+                formData.append('paymentProof', proofFile);
+            }
+
+            await sendRegistration(formData);
         });
     </script>
 </body>

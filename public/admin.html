@@ -455,6 +455,7 @@
                                 <th>User</th>
                                 <th>Ikan & Team</th>
                                 <th>Event</th>
+                                <th>Payment</th>
                                 <th>Skor Juri</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
@@ -888,7 +889,17 @@
                                     </div>
                                 </div>
                             </td>
-                            <td><div style="font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</div></td>
+                             <td><div style="font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</div></td>
+                             <td>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    ${r.payment_proof_url ? `
+                                        <a href="${r.payment_proof_url}" target="_blank" class="action-btn" style="width: auto; height: auto; padding: 4px 10px; font-size: 0.7rem; color: #fff; background: rgba(0,212,255,0.2); border-radius: 6px; text-decoration: none;">
+                                            <i class="ri-file-search-line"></i> BUKTI BAYAR
+                                        </a>
+                                    ` : '<span style="color: var(--text-dim); font-size: 0.7rem;">PROSES/GRATIS</span>'}
+                                    <div style="font-size: 0.8rem; font-weight: 800; color: white;">Rp ${r.payment_amount?.toLocaleString() || 0}</div>
+                                </div>
+                            </td>
                             <td>
                                 <div style="font-size: 1rem; font-weight: 800; color: var(--admin-secondary);">${score}</div>
                                 <div style="font-size: 0.65rem; color: var(--text-dim);">B:${r.score_body} F:${r.score_form} C:${r.score_color}</div>

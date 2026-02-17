@@ -634,7 +634,8 @@ app.post('/api/register', (req, res) => {
 // Contest Registration (Now with File Upload)
 app.post('/api/contest/register', userAuthMiddleware, upload.fields([
     { name: 'fishPhoto', maxCount: 1 },
-    { name: 'fishVideo', maxCount: 1 }
+    { name: 'fishVideo', maxCount: 1 },
+    { name: 'paymentProof', maxCount: 1 }
 ]), async (req, res) => {
     try {
         const userId = req.user.id;
@@ -646,6 +647,7 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
             waNumber = null,
             fullAddress = null,
             contestClass = null,
+            registrationTier = null,
             spinPrize = null
         } = req.body;
 
@@ -668,11 +670,13 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         if (tierStarts[registrationTier] && now < tierStarts[registrationTier]) {
             return res.status(403).json({ error: `Pendaftaran tier ${registrationTier} belum dibuka.` });
         }
-        // ---------------------------------------------
+        // Ensure numeric amount
+        const paymentAmount = req.body.paymentAmount ? parseInt(req.body.paymentAmount) : 0;
 
 
         let photoUrl = null;
         let videoUrl = null;
+        let proofUrl = null;
 
         // Upload Photo to Supabase with MIME check
         if (req.files && req.files.fishPhoto) {
@@ -694,10 +698,16 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
             videoUrl = await uploadToSupabase(video.buffer, video.originalname, video.mimetype);
         }
 
+        // Upload Payment Proof
+        if (req.files && req.files.paymentProof) {
+            const proof = req.files.paymentProof[0];
+            proofUrl = await uploadToSupabase(proof.buffer, proof.originalname, proof.mimetype);
+        }
+
 
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, spin_prize) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
-            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, spinPrize]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
+            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl]
         );
 
         res.json({ success: true, data: result.rows[0] });
