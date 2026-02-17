@@ -648,10 +648,15 @@
                                             ${reg.spin_prize ? `<span style="color: #ffd700;"><i class="ri-gift-line"></i> ${escapeHTML(reg.spin_prize)}</span>` : ''}
                                         </div>
                                     </div>
-                                    <div style="flex-shrink: 0;">
+                                    <div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
                                         ${canSpin ? `
                                             <button onclick="openWheel(${reg.id})" class="gift-box-btn hover-lift">
                                                 <i class="ri-gift-fill"></i> SPIN!
+                                            </button>
+                                        ` : ''}
+                                        ${reg.status === 'approved' ? `
+                                            <button onclick="window.open('print-entry.html?id=${reg.id}', '_blank')" class="btn-primary" style="padding: 8px 12px; font-size: 0.7rem; border-radius: 8px; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border);">
+                                                <i class="ri-printer-line"></i> CETAK NOMOR
                                             </button>
                                         ` : ''}
                                     </div>

@@ -588,6 +588,9 @@
                                     <div style="display: flex; gap: 8px;">
                                         <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary); background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.2);" title="Approve"><i class="ri-check-double-line"></i></button>
                                         <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error); background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2);" title="Reject"><i class="ri-close-circle-line"></i></button>
+                                        ${r.status === 'approved' ? `
+                                            <button onclick="window.open('print-entry.html?id=${r.id}', '_blank')" class="action-btn" style="color: white; background: rgba(255,255,255,0.05); border-color: var(--glass-border);" title="Print Label"><i class="ri-printer-line"></i></button>
+                                        ` : ''}
                                     </div>
                                 </td>
                             </tr>
@@ -861,6 +864,9 @@
                                         <button onclick="quickAction(${r.id}, 'pending')" class="action-btn" style="color: var(--text-dim);" title="Reset"><i class="ri-refresh-line"></i></button>
                                     `}
                                     <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--admin-error);" title="Delete"><i class="ri-delete-bin-4-line"></i></button>
+                                    ${r.status === 'approved' ? `
+                                        <button onclick="window.open('print-entry.html?id=${r.id}', '_blank')" class="action-btn" style="color: #ffd700;" title="Print Label"><i class="ri-printer-line"></i></button>
+                                    ` : ''}
                                 </div>
                             </td>
                         </tr>
