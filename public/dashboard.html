@@ -787,6 +787,10 @@
         }
 
         function claimViaWA() {
+            if (currentPrize === "+1 Entry Gratis") {
+                window.location.href = 'contest-entry.html';
+                return;
+            }
             const msg = `Halo Admin SnaDaily! Saya mau klaim hadiah *${currentPrize}* dari Diamond Spin pendaftaran ikan saya. Mohon dibantu proses ya Cak!`;
             // Nomor Admin default
             const adminWA = "6281362002517";
@@ -812,6 +816,10 @@
         }
 
         function claimSpecificPrize(prize, fish) {
+            if (prize === "+1 Entry Gratis") {
+                window.location.href = 'contest-entry.html';
+                return;
+            }
             const msg = `Halo Admin SnaDaily! Saya mau klaim hadiah *${prize}* dari pendaftaran ikan *${fish}*. Mohon dibantu proses ya Cak!`;
             const adminWA = "6281362002517";
             window.open(`https://wa.me/${adminWA}?text=${encodeURIComponent(msg)}`, '_blank');
