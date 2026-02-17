@@ -183,13 +183,9 @@
                 <div class="contest-name" id="contestName">KONTES IKAN</div>
 
                 <div class="entry-details-grid">
-                    <div class="detail-item">
+                    <div class="detail-item" style="grid-column: 1 / -1;">
                         <div class="detail-label">Kelas</div>
                         <div class="detail-value" id="contestClass">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Spesifikasi</div>
-                        <div class="detail-value" id="registrationTier">-</div>
                     </div>
                     <div class="detail-item" style="grid-column: 1 / -1;">
                         <div class="detail-label">Nama Team</div>
@@ -240,7 +236,6 @@
                 document.getElementById('entryNumber').textContent = reg.entry_number || 'N/A';
                 document.getElementById('contestName').textContent = reg.contest_name || 'KONTES IKAN';
                 document.getElementById('contestClass').textContent = reg.contest_class || '-';
-                document.getElementById('registrationTier').textContent = reg.registration_tier || '-';
                 document.getElementById('teamName').textContent = reg.team_name || '-';
 
                 if (reg.fish_image_url) {

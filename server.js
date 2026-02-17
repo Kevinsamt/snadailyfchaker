@@ -710,13 +710,13 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
 
 
 
-        // Generate Entry Number: CLASS-TIER-XXX (e.g., A-A1-001)
+        // Generate Entry Number: TIER-XXX (e.g., A1-001)
         const countResult = await pool.query(
-            'SELECT COUNT(*) FROM contest_registrations WHERE contest_class = $1 AND registration_tier = $2',
-            [contestClass, registrationTier]
+            'SELECT COUNT(*) FROM contest_registrations WHERE registration_tier = $1',
+            [registrationTier]
         );
         const sequenceNum = parseInt(countResult.rows[0].count) + 1;
-        const entryNumber = `${contestClass || 'X'}-${registrationTier || 'N'}-${String(sequenceNum).padStart(3, '0')}`;
+        const entryNumber = `${registrationTier || 'N'}-${String(sequenceNum).padStart(3, '0')}`;
 
         const result = await pool.query(
             'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url, entry_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
