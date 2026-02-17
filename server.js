@@ -50,7 +50,9 @@ const uploadToSupabase = async (fileBuffer, fileName, mimeType) => {
         throw new Error("Konfigurasi Supabase belum lengkap! Pastikan SUPABASE_URL dan SUPABASE_ANON_KEY sudah diisi di Vercel.");
     }
 
-    const filePath = `entries/${Date.now()}_${fileName}`;
+    // Sanitize filename: remove special characters that might break S3/Supabase keys
+    const sanitizedName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const filePath = `entries/${Date.now()}_${sanitizedName}`;
 
     try {
         const { data, error } = await supabase.storage
