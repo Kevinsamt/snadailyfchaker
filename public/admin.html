@@ -149,12 +149,24 @@
             transition: all 0.2s;
         }
 
+        .glass-panel {
+            padding: 2rem;
+        }
+
         .action-btn:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: scale(1.1);
         }
 
         @media (max-width: 768px) {
+            .admin-grid {
+                gap: 1.25rem;
+            }
+
+            .glass-panel {
+                padding: 1.25rem !important;
+            }
+
             .admin-section {
                 padding: 1rem 0 4rem;
             }
@@ -174,8 +186,8 @@
         }
 
         @media (max-width: 480px) {
-            .admin-grid {
-                gap: 1.5rem !important;
+            .grid-4 {
+                grid-template-columns: 1fr;
             }
 
             .tab-btn {
@@ -260,8 +272,7 @@
                 </div>
             </div>
 
-            <div class="glass-panel animate-fade-in"
-                style="padding: 2rem; border-bottom: 1px solid var(--glass-border);">
+            <div class="glass-panel animate-fade-in" style="border-bottom: 1px solid var(--glass-border);">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         <div
@@ -295,7 +306,7 @@
         <div id="section-fish" class="admin-section">
             <div class="admin-grid">
                 <div>
-                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                    <div class="glass-panel animate-fade-in">
                         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
                             <div
                                 style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px; box-shadow: 0 0 10px var(--admin-primary);">
@@ -347,7 +358,7 @@
                 </div>
 
                 <div>
-                    <div class="glass-panel animate-fade-in" style="padding: 2rem; height: 100%;">
+                    <div class="glass-panel animate-fade-in" style="height: 100%;">
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                             <div style="display: flex; align-items: center; gap: 1rem;">
@@ -372,7 +383,7 @@
         <div id="section-events" class="admin-section">
             <div class="admin-grid">
                 <div>
-                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                    <div class="glass-panel animate-fade-in">
                         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
                             <div
                                 style="width: 4px; height: 24px; background: var(--admin-warning); border-radius: 10px;">
@@ -419,7 +430,7 @@
                     </div>
                 </div>
                 <div>
-                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                    <div class="glass-panel animate-fade-in">
                         <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Daftar Event</h2>
                         <div id="eventList" style="max-height: 600px; overflow-y: auto;">
                             <!-- Injected by JS -->
@@ -431,7 +442,7 @@
 
         <!-- Section: Registration Management -->
         <div id="section-registrations" class="admin-section">
-            <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+            <div class="glass-panel animate-fade-in">
                 <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
                     <div style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px;"></div>
                     <h2 style="font-size: 1.5rem; font-weight: 800;">Seluruh <span
@@ -462,7 +473,7 @@
         <div id="section-judges" class="admin-section">
             <div class="admin-grid">
                 <div>
-                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                    <div class="glass-panel animate-fade-in">
                         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
                             <div
                                 style="width: 4px; height: 24px; background: var(--admin-secondary); border-radius: 10px;">
@@ -493,7 +504,7 @@
                     </div>
                 </div>
                 <div>
-                    <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                    <div class="glass-panel animate-fade-in">
                         <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Active Judges</h2>
                         <div id="judgeList" style="max-height: 500px; overflow-y: auto;">
                             <!-- Injected by JS -->
@@ -505,7 +516,7 @@
 
         <!-- Section: Users Management -->
         <div id="section-users" class="admin-section">
-            <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+            <div class="glass-panel animate-fade-in">
                 <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
                     <div style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px;"></div>
                     <h2 style="font-size: 1.5rem; font-weight: 800;">Kelola <span class="text-gradient">Users</span>

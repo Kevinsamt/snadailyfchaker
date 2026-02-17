@@ -86,6 +86,10 @@
             background: var(--primary);
             color: #000;
         }
+
+        .glass-panel {
+            padding: 2.5rem;
+        }
     </style>
 </head>
 
@@ -150,6 +154,10 @@
                     grid-template-columns: 1fr !important;
                     gap: 1.5rem !important;
                 }
+
+                .glass-panel {
+                    padding: 1.5rem !important;
+                }
             }
         </style>
 
@@ -164,7 +172,7 @@
         <div id="assignedEventsList" class="grid grid-3" style="gap: 2rem;">
             <!-- Events injected here -->
             <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
-                <div class="glass-panel" style="display: inline-block; padding: 2rem 4rem; border-radius: 20px;">
+                <div class="glass-panel" style="display: inline-block; padding: 2rem 3rem; border-radius: 20px;">
                     <i class="ri-loader-4-line ri-spin"
                         style="font-size: 3rem; color: var(--primary); display: block; margin-bottom: 1rem;"></i>
                     <p style="color: var(--text-muted); font-weight: 600;">Menyelam mengambil data...</p>
@@ -196,7 +204,7 @@
                     if (list.length === 0) {
                         document.getElementById('assignedEventsList').innerHTML = `
                             <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
-                                <div class="glass-panel" style="padding: 3rem; border-radius: 25px; max-width: 500px; margin: 0 auto;">
+                                <div class="glass-panel" style="border-radius: 25px; max-width: 500px; margin: 0 auto;">
                                     <i class="ri-calendar-todo-line" style="font-size: 4rem; color: var(--text-muted); display: block; margin-bottom: 1.5rem;"></i>
                                     <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Kosong Melompong</h3>
                                     <p style="color: var(--text-muted);">Belum ada tugas penjurian untuk Anda saat ini. Silakan hubungi admin jika ini kesalahan.</p>
