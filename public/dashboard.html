@@ -654,7 +654,12 @@
                                             ${reg.spin_prize ? `<span style="color: #ffd700;"><i class="ri-gift-line"></i> ${escapeHTML(reg.spin_prize)}</span>` : ''}
                                         </div>
                                     </div>
-                                    <div style="flex-shrink: 0;">
+                                    <div style="flex-shrink: 0; display: flex; gap: 0.5rem; flex-direction: column;">
+                                        ${reg.status === 'approved' && reg.entry_number ? `
+                                            <button onclick="window.open('/print-entry.html?id=${reg.id}', '_blank')" class="action-btn" style="width: auto; padding: 0.5rem 1rem; height: auto; border-radius: 8px; background: linear-gradient(135deg, #00d4ff, #00a3cc); color: #000; font-size: 0.7rem; font-weight: 700; border: none; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;" title="Print Entry Card">
+                                                <i class="ri-printer-line"></i> PRINT
+                                            </button>
+                                        ` : ''}
                                         ${canSpin ? `
                                             <button onclick="openWheel(${reg.id})" class="gift-box-btn hover-lift">
                                                 <i class="ri-gift-fill"></i> SPIN!
