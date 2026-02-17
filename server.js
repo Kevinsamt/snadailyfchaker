@@ -200,7 +200,8 @@ app.use(cors({
 const sanitizeInput = (req, res, next) => {
     const sanitize = (val) => {
         if (typeof val !== 'string') return val;
-        return val.replace(/[<>]/g, ''); // Simple tag removal for basic protection
+        // More robust basic XSS prevention: escape < and > and remove script-like strings
+        return val.replace(/[<>]/g, '').replace(/javascript:/gi, '').replace(/on\w+=/gi, '');
     };
 
     if (req.body) {
@@ -683,42 +684,69 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
     }
 });
 
-// Claim Spin Prize
-app.post('/api/contest/registrations/:id/spin', userAuthMiddleware, async (req, res) => {
+// --- SECURE SPIN WHEEL LOGIC (SERVER-SIDE) ---
+const SPIN_PRIZES = ["PINK AURORA", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis"];
+
+app.post('/api/contest/start-spin/:id', userAuthMiddleware, async (req, res) => {
     try {
         const registrationId = req.params.id;
-        const { prize } = req.body;
+        const userId = req.user.id;
 
-        // Verify registration ownership, status, and spin status
+        // 1. Verify eligibility
         const check = await pool.query(
-            "SELECT status, registration_tier, has_spun FROM contest_registrations WHERE id = $1 AND user_id = $2",
-            [registrationId, req.user.id]
+            "SELECT status, registration_tier, has_spun, spin_prize FROM contest_registrations WHERE id = $1 AND user_id = $2",
+            [registrationId, userId]
         );
 
         if (check.rows.length === 0) {
-            return res.status(404).json({ error: 'Registrasi tidak ditemukan.' });
+            return res.status(404).json({ error: 'Pendaftaran tidak ditemukan.' });
         }
 
-        const registration = check.rows[0];
-        if (registration.status !== 'approved') {
-            return res.status(403).json({ error: 'Hanya pendaftaran yang sudah disetujui (Approved) yang bisa klaim hadiah.' });
+        const reg = check.rows[0];
+        if (reg.status !== 'approved') {
+            return res.status(403).json({ error: 'Tunggu pendaftaran disetujui admin dulu ya Cak!' });
         }
-        if (registration.registration_tier !== 'Diamond') {
-            return res.status(403).json({ error: 'Hanya pendaftaran Diamond yang bisa klaim hadiah spin.' });
+        if (reg.registration_tier !== 'Diamond') {
+            return res.status(403).json({ error: 'Hanya pendaftaran Diamond yang bisa spin.' });
         }
-        if (registration.has_spun) {
-            return res.status(403).json({ error: 'Hadiah untuk pendaftaran ini sudah diklaim.' });
+        if (reg.has_spun) {
+            return res.status(403).json({ error: 'Cak sudah melakukan spin untuk pendaftaran ini.' });
         }
 
-        // Save prize and mark as spun
+        // 2. Calculate Prize (Weighted Probability)
+        const rand = Math.random() * 100;
+        let targetPrize = "";
+
+        // Check if user already has PINK AURORA (Global check)
+        const auroraCheck = await pool.query(
+            "SELECT id FROM contest_registrations WHERE user_id = $1 AND spin_prize = 'PINK AURORA'",
+            [userId]
+        );
+        const hasPinkAurora = auroraCheck.rows.length > 0;
+
+        if (rand < 1 && !hasPinkAurora) {
+            targetPrize = "PINK AURORA"; // 1%
+        } else if (rand < 50) {
+            targetPrize = "Ikan Random"; // 49%
+        } else {
+            targetPrize = "+1 Entry Gratis"; // 50%
+        }
+
+        // 3. Save to Database immediately to prevent race conditions
         await pool.query(
             "UPDATE contest_registrations SET spin_prize = $1, has_spun = TRUE WHERE id = $2",
-            [prize, registrationId]
+            [targetPrize, registrationId]
         );
 
-        res.json({ success: true, message: 'Hadiah berhasil diklaim!', prize });
+        res.json({
+            success: true,
+            prize: targetPrize,
+            message: "Spin berhasil dihitung!"
+        });
+
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Spin Logic Error:", err);
+        res.status(500).json({ error: "Gagal memproses spin." });
     }
 });
 

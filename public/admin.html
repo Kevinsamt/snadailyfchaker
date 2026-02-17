@@ -422,6 +422,16 @@
             let allEvents = [];
             let allJudges = [];
 
+            const escapeHTML = (str) => {
+                if (!str) return '';
+                return str.toString()
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            };
+
             document.addEventListener('DOMContentLoaded', () => {
                 fetchStats();
                 fetchJudges(); // Load judges early
@@ -459,21 +469,21 @@
                         if (s.recentPending && s.recentPending.length > 0) {
                             document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
                             <tr>
-                                <td style="font-weight: 600;">${r.user_name}</td>
+                                <td style="font-weight: 600;">${escapeHTML(r.user_name)}</td>
                                 <td>
                                     <div style="display: flex; gap: 10px; align-items: center;">
-                                        <img src="${r.fish_image_url || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" onclick="window.open('${r.fish_image_url}', '_blank')">
+                                        <img src="${escapeHTML(r.fish_image_url) || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" onclick="window.open('${escapeHTML(r.fish_image_url)}', '_blank')">
                                         <div>
-                                            <div style="font-weight: 600;">${r.fish_name} (${r.fish_type})</div>
-                                            <div style="font-size: 0.75rem; color: var(--secondary);">${r.team_name || 'No Team'}</div>
+                                            <div style="font-weight: 600;">${escapeHTML(r.fish_name)} (${escapeHTML(r.fish_type)})</div>
+                                            <div style="font-size: 0.75rem; color: var(--secondary);">${escapeHTML(r.team_name) || 'No Team'}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td style="color: var(--primary); font-size: 0.85rem;">${r.contest_name}</td>
+                                <td style="color: var(--primary); font-size: 0.85rem;">${escapeHTML(r.contest_name)}</td>
                                 <td>
-                                    <div style="font-size: 0.8rem;">WA: ${r.wa_number || '-'}</div>
+                                    <div style="font-size: 0.8rem;">WA: ${escapeHTML(r.wa_number) || '-'}</div>
                                     <div style="font-size: 0.75rem; color: var(--primary);">B: ${r.score_body || 0} | F: ${r.score_form || 0} | C: ${r.score_color || 0}</div>
-                                    ${r.video_url ? `<a href="${r.video_url}" target="_blank" style="color: var(--primary); font-size: 0.75rem;"><i class="ri-video-line"></i> Play Video</a>` : ''}
+                                    ${r.video_url ? `<a href="${escapeHTML(r.video_url)}" target="_blank" style="color: var(--primary); font-size: 0.75rem;"><i class="ri-video-line"></i> Play Video</a>` : ''}
                                 </td>
                                 <td>
                                     <div style="display: flex; gap: 5px;">
@@ -525,8 +535,8 @@
                         document.getElementById('judgeList').innerHTML = data.data.map(j => `
                             <div class="glass-panel" style="padding: 1rem; margin-bottom: 1rem; border-left: 3px solid var(--secondary); display: flex; justify-content: space-between; align-items: center;">
                                 <div>
-                                    <div style="font-weight: 700; color: white;">${j.full_name}</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">@${j.username} • ${j.phone}</div>
+                                    <div style="font-weight: 700; color: white;">${escapeHTML(j.full_name)}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">@${escapeHTML(j.username)} • ${escapeHTML(j.phone)}</div>
                                 </div>
                                 <div style="display: flex; gap: 8px; align-items: center;">
                                     <i class="ri-user-star-line" style="color: var(--secondary); font-size: 1.2rem;"></i>
@@ -597,11 +607,11 @@
                     if (data.success) {
                         document.getElementById('userTableBody').innerHTML = data.data.map(u => `
                         <tr>
-                            <td>${u.username}</td>
-                            <td style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${u.password}">${u.password}</td>
-                            <td style="color: var(--primary); font-weight: 600;">${u.full_name}</td>
-                            <td>${u.phone}</td>
-                            <td><span style="background: rgba(0,212,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${u.role}</span></td>
+                            <td>${escapeHTML(u.username)}</td>
+                            <td style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(u.password)}">${escapeHTML(u.password)}</td>
+                            <td style="color: var(--primary); font-weight: 600;">${escapeHTML(u.full_name)}</td>
+                            <td>${escapeHTML(u.phone)}</td>
+                            <td><span style="background: rgba(0,212,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${escapeHTML(u.role)}</span></td>
                             <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(u.created_at).toLocaleDateString()}</td>
                             <td>
                                 <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--error);" title="Hapus User"><i class="ri-delete-bin-line"></i></button>
@@ -643,13 +653,13 @@
                         }
                         document.getElementById('eventList').innerHTML = allEvents.map((ev, index) => `
                         <div class="glass-panel" style="margin-bottom: 1rem; padding: 1rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--secondary);">
-                            <img src="${ev.image_url || 'https://via.placeholder.com/60'}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                            <img src="${escapeHTML(ev.image_url) || 'https://via.placeholder.com/60'}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
                             <div style="flex: 1;">
                                 <div style="font-weight: bold; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 8px;">
                                     <span style="background: #ffdf00; color: #000; font-size: 0.8rem; padding: 2px 10px; border-radius: 4px; font-weight: 800; min-width: 30px; text-align: center; box-shadow: 0 0 10px rgba(255, 223, 0, 0.5);">${ev.registration_count || 0}</span>
-                                    <span>${ev.title}</span>
+                                    <span>${escapeHTML(ev.title)}</span>
                                 </div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted);">${ev.event_date} | ${ev.location}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(ev.event_date)} | ${escapeHTML(ev.location)}</div>
                             </div>
                             <div style="display: flex; gap: 5px;">
                                 <button onclick="openJudgeAssignment(${ev.id})" class="action-btn" title="Tugaskan Juri" style="color: var(--warning);"><i class="ri-user-star-line"></i></button>
@@ -768,34 +778,34 @@
                         }
                         document.getElementById('regTableBody').innerHTML = data.data.map(r => `
                         <tr>
-                            <td style="font-weight: 600;">${r.user_name}</td>
+                            <td style="font-weight: 600;">${escapeHTML(r.user_name)}</td>
                             <td>
                                 <div style="display: flex; gap: 10px; align-items: center;">
-                                    <img src="${r.fish_image_url || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" onclick="window.open('${r.fish_image_url}', '_blank')">
+                                    <img src="${escapeHTML(r.fish_image_url) || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" onclick="window.open('${escapeHTML(r.fish_image_url)}', '_blank')">
                                     <div>
-                                        <div style="font-weight: 600;">${r.fish_name}</div>
-                                        <div style="font-size: 0.75rem; color: var(--secondary);">${r.team_name || 'No Team'}</div>
-                                        <div style="font-size: 0.7rem; color: var(--text-muted);">${r.fish_type} | Tier: <span style="color: var(--primary); font-weight: bold;">${r.registration_tier || 'Early'}</span></div>
+                                        <div style="font-weight: 600;">${escapeHTML(r.fish_name)}</div>
+                                        <div style="font-size: 0.75rem; color: var(--secondary);">${escapeHTML(r.team_name) || 'No Team'}</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-muted);">${escapeHTML(r.fish_type)} | Tier: <span style="color: var(--primary); font-weight: bold;">${escapeHTML(r.registration_tier) || 'Early'}</span></div>
                                     </div>
                                 </div>
                             </td>
-                            <td style="color: var(--primary);">${r.contest_name}</td>
+                            <td style="color: var(--primary);">${escapeHTML(r.contest_name)}</td>
                             <td style="font-size: 0.8rem;">
-                                <div>WA: ${r.wa_number || '-'}</div>
+                                <div>WA: ${escapeHTML(r.wa_number) || '-'}</div>
                                 <div style="font-weight: 700; color: var(--secondary);">SKOR: ${r.score || 0}</div>
                                 <div style="font-size: 0.75rem; color: var(--text-muted);">B:${r.score_body || 0} F:${r.score_form || 0} C:${r.score_color || 0}</div>
-                                ${r.video_url ? `<a href="${r.video_url}" target="_blank" style="color: var(--primary); font-size: 0.75rem;"><i class="ri-video-line"></i> Video Link</a>` : ''}
+                                ${r.video_url ? `<a href="${escapeHTML(r.video_url)}" target="_blank" style="color: var(--primary); font-size: 0.75rem;"><i class="ri-video-line"></i> Video Link</a>` : ''}
                             </td>
                             <td>
                                 <div style="font-size: 0.8rem; max-width: 200px; color: var(--text-muted); font-style: italic;">
-                                    "${r.judge_comment || 'Belum ada komentar'}"
+                                    "${escapeHTML(r.judge_comment) || 'Belum ada komentar'}"
                                 </div>
                             </td>
                             <td>
                                 <span style="background: ${r.status === 'approved' ? 'rgba(0,255,136,0.1)' : r.status === 'rejected' ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.05)'}; 
                                              color: ${r.status === 'approved' ? 'var(--secondary)' : r.status === 'rejected' ? 'var(--error)' : 'white'}; 
                                              padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase;">
-                                    ${r.status}
+                                    ${escapeHTML(r.status)}
                                 </span>
                             </td>
                             <td>

@@ -387,6 +387,16 @@
         let currentEventId = new URLSearchParams(window.location.search).get('eventId');
         let allEntries = [];
 
+        const escapeHTML = (str) => {
+            if (!str) return '';
+            return str.toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             if (!currentEventId) window.location.href = 'judge.html';
             fetchEventInfo();
@@ -437,10 +447,10 @@
                 <div class="entry-card-mini animate-fade-in ${entry.id == document.getElementById('selectedEntryId').value ? 'active' : ''}" 
                     onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})"
                     style="${entry.score ? 'border-left: 4px solid var(--secondary);' : ''}">
-                    <img src="${entry.fish_image_url}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
+                    <img src="${escapeHTML(entry.fish_image_url)}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
                     <div style="flex: 1;">
-                        <div style="font-weight: 800; font-size: 1rem;">${entry.fish_name}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">${entry.team_name || entry.contestant_name} • ${entry.fish_type}</div>
+                        <div style="font-weight: 800; font-size: 1rem;">${escapeHTML(entry.fish_name)}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(entry.team_name || entry.contestant_name)} • ${escapeHTML(entry.fish_type)}</div>
                     </div>
                     ${entry.score ? `<div style="text-align: right;"><div style="font-size: 0.6rem; color: var(--text-muted); font-weight: 700;">TOTAL</div><div style="color: var(--primary); font-weight: 900; font-size: 1.2rem;">${entry.score}</div></div>` : '<i class="ri-edit-2-line" style="color: var(--text-muted);"></i>'}
                 </div>
@@ -449,10 +459,10 @@
             // Grid View
             compareGrid.innerHTML = list.map(entry => `
                 <div class="compare-item animate-fade-in" onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})" style="cursor: pointer; position: relative; ${entry.id == document.getElementById('selectedEntryId').value ? 'border: 2px solid var(--primary);' : ''}">
-                    <img src="${entry.fish_image_url}" style="width: 100%; height: 150px; object-fit: cover;">
+                    <img src="${escapeHTML(entry.fish_image_url)}" style="width: 100%; height: 150px; object-fit: cover;">
                     <div style="padding: 1rem;">
-                        <div style="font-weight: 800; font-size: 0.9rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${entry.fish_name}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">${entry.fish_type}</div>
+                        <div style="font-weight: 800; font-size: 0.9rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${escapeHTML(entry.fish_name)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(entry.fish_type)}</div>
                         ${entry.score ? `<div style="margin-top: 8px; font-weight: 900; color: var(--primary); font-size: 1.1rem;">${entry.score}</div>` : ''}
                     </div>
                 </div>

@@ -571,6 +571,16 @@
             fetchRegistrations();
         });
 
+        const escapeHTML = (str) => {
+            if (!str) return '';
+            return str.toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
+
         async function fetchProfile() {
             const token = localStorage.getItem('sna_user_token');
             try {
@@ -622,16 +632,16 @@
 
                             return `
                                 <div class="glass-panel animate-fade-in" style="animation-delay: ${idx * 0.1}s; display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem; border-left: 4px solid ${reg.status === 'approved' ? 'var(--success)' : reg.status === 'rejected' ? 'var(--error)' : 'var(--warning)'}; position: relative;">
-                                    <img src="${reg.fish_image_url || 'https://via.placeholder.com/100'}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 1px solid var(--glass-border);">
+                                    <img src="${escapeHTML(reg.fish_image_url) || 'https://via.placeholder.com/100'}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 1px solid var(--glass-border);">
                                     <div style="flex: 1;">
                                         <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 0.25rem;">
-                                            <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">${reg.contest_name}</span>
+                                            <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">${escapeHTML(reg.contest_name)}</span>
                                             ${isDiamond ? '<span style="background: rgba(255,215,0,0.1); color: #ffd700; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 800;"><i class="ri-vip-diamond-fill"></i> DIAMOND</span>' : ''}
                                         </div>
-                                        <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.25rem;">${reg.fish_name}</h3>
-                                        <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Status: ${reg.status.toUpperCase()}</div>
-                                        <div style="font-size: 0.7rem; color: var(--primary); font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Tier: ${reg.registration_tier || 'Standard'}</div>
-                                        ${reg.spin_prize ? `<div style="font-size: 0.75rem; color: #ffd700; margin-top: 5px; font-weight: 700;"><i class="ri-gift-line"></i> Hadiah: ${reg.spin_prize}</div>` : ''}
+                                        <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.25rem;">${escapeHTML(reg.fish_name)}</h3>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Status: ${escapeHTML(reg.status).toUpperCase()}</div>
+                                        <div style="font-size: 0.7rem; color: var(--primary); font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Tier: ${escapeHTML(reg.registration_tier) || 'Standard'}</div>
+                                        ${reg.spin_prize ? `<div style="font-size: 0.75rem; color: #ffd700; margin-top: 5px; font-weight: 700;"><i class="ri-gift-line"></i> Hadiah: ${escapeHTML(reg.spin_prize)}</div>` : ''}
                                     </div>
                                     <div style="text-align: right;">
                                         ${canSpin ? `
@@ -640,7 +650,7 @@
                                             </button>
                                         ` : `
                                             <span style="display: inline-block; padding: 5px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; background: ${reg.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : reg.status === 'rejected' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'}; color: ${reg.status === 'approved' ? 'var(--success)' : reg.status === 'rejected' ? 'var(--error)' : 'var(--warning)'}; border: 1px solid ${reg.status === 'approved' ? 'rgba(16, 185, 129, 0.2)' : reg.status === 'rejected' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'};">
-                                                ${reg.status.toUpperCase()}
+                                                ${escapeHTML(reg.status).toUpperCase()}
                                             </span>
                                         `}
                                     </div>
@@ -660,14 +670,14 @@
                                     <i class="ri-gift-fill"></i>
                                 </div>
                                 <div style="flex: 1;">
-                                    <div style="font-size: 0.75rem; font-weight: 800; color: #ffd700; text-transform: uppercase;">SAAT PENDAFTARAN: ${reg.fish_name}</div>
-                                    <h3 style="font-size: 1.2rem; font-weight: 900; margin: 0.2rem 0;">${reg.spin_prize}</h3>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">${reg.contest_name}</div>
+                                    <div style="font-size: 0.75rem; font-weight: 800; color: #ffd700; text-transform: uppercase;">SAAT PENDAFTARAN: ${escapeHTML(reg.fish_name)}</div>
+                                    <h3 style="font-size: 1.2rem; font-weight: 900; margin: 0.2rem 0;">${escapeHTML(reg.spin_prize)}</h3>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(reg.contest_name)}</div>
                                 </div>
                                 ${reg.prize_redeemed ? `
                                     <span style="background: rgba(255,255,255,0.05); color: var(--text-muted); padding: 8px 15px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; border: 1px solid var(--glass-border);">SUDAH DIKLAIM</span>
                                 ` : `
-                                    <button onclick="claimSpecificPrize(${reg.id}, '${reg.spin_prize}', '${reg.fish_name}')" class="btn-primary" style="padding: 8px 15px; font-size: 0.75rem; background: #25D366; color: white; border: none;">
+                                    <button onclick="claimSpecificPrize(${reg.id}, '${escapeHTML(reg.spin_prize)}', '${escapeHTML(reg.fish_name)}')" class="btn-primary" style="padding: 8px 15px; font-size: 0.75rem; background: #25D366; color: white; border: none;">
                                         <i class="ri-whatsapp-line"></i> KLAIM
                                     </button>
                                 `}
@@ -692,11 +702,9 @@
             currentRegId = regId;
             initWheel();
 
-            // Reset Result UI to initial state
-            document.getElementById('prizeDescription').innerText = 'Klik tombol di bawah untuk menyimpan hadiah ke akun Cak.';
-            document.getElementById('savePrizeBtn').style.display = 'block';
-            document.getElementById('savePrizeBtn').disabled = false;
-            document.getElementById('savePrizeBtn').innerHTML = '<i class="ri-save-line"></i> SIMPAN HADIAH';
+            // Result UI initially shows "Spinning..."
+            document.getElementById('prizeDescription').innerText = 'Menghitung keberuntungan Cak...';
+            document.getElementById('savePrizeBtn').style.display = 'none'; // No longer need save button
             document.getElementById('postSaveActions').style.display = 'none';
 
             document.getElementById('wheelOverlay').style.display = 'flex';
@@ -733,42 +741,46 @@
             });
         }
 
-        function spinWheel() {
+        async function spinWheel() {
             if (isSpinning) return;
             isSpinning = true;
+
+            const token = localStorage.getItem('sna_user_token');
             const wheel = document.getElementById('wheel');
             const bulbs = document.querySelectorAll('.bulb');
 
-            // 1. Determine Prize based on weighted probability
-            const rand = Math.random() * 100;
-            let targetPrize = "";
+            // 1. Ask Server for the Prize (Secure)
+            try {
+                const res = await fetch(`/api/contest/start-spin/${currentRegId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
 
-            // Check if user already has PINK AURORA
-            const hasPinkAurora = allRegistrations.some(r => r.spin_prize === "PINK AURORA");
+                if (!data.success) {
+                    alert(data.error || 'Gagal memulai spin.');
+                    isSpinning = false;
+                    return;
+                }
 
-            if (rand < 1 && !hasPinkAurora) {
-                targetPrize = "PINK AURORA"; // 1%
-            } else if (rand < 50) {
-                targetPrize = "Ikan Random"; // 49%
-            } else {
-                targetPrize = "+1 Entry Gratis"; // 50%
+                currentPrize = data.prize;
+            } catch (err) {
+                alert('Sistem sedang sibuk. Coba lagi Cak!');
+                isSpinning = false;
+                return;
             }
 
-            // 2. Find eligible indices for the target prize
+            // 2. Find eligible indices for the target prize in frontend PRIZES array
             const eligibleIndices = [];
             PRIZES.forEach((p, idx) => {
-                if (p === targetPrize) eligibleIndices.push(idx);
+                if (p === currentPrize) eligibleIndices.push(idx);
             });
 
-            // 3. Pick a random index from eligible ones
             const targetIndex = eligibleIndices[Math.floor(Math.random() * eligibleIndices.length)];
 
-            // 4. Calculate rotation to land on targetIndex
-            // Each slice is 60 deg. Slice i is [i*60, (i+1)*60]
-            // We want the marker (Top, 0 deg) to point at this range.
-            // When wheel rotates R deg clockwise, the marker points at (360 - (R % 360)) on the wheel.
+            // 3. Calculate rotation
             const spinRounds = 10;
-            const offsetInSlice = 5 + Math.random() * 50; // Padding to avoid landing on borders
+            const offsetInSlice = 5 + Math.random() * 50;
             const targetWheelDegree = (targetIndex * 60) + offsetInSlice;
             const finalRotation = (spinRounds * 360) + (360 - targetWheelDegree);
 
@@ -776,44 +788,17 @@
             wheel.style.transform = `rotate(${finalRotation}deg)`;
 
             setTimeout(() => {
-                // Marker is at TOP (0 deg). 
-                currentPrize = targetPrize;
-
                 bulbs.forEach(b => b.style.animationDuration = '1.5s');
                 document.getElementById('prizeLabelFinal').innerText = currentPrize;
+                document.getElementById('prizeDescription').innerHTML = '<i class="ri-checkbox-circle-fill" style="color: #00ff88;"></i> HADIAH BERHASIL DISIMPAN!<br>Silakan klaim ke WhatsApp Admin.';
+                document.getElementById('postSaveActions').style.display = 'flex';
                 document.getElementById('prizeResultOverlay').style.display = 'flex';
+                fetchRegistrations(); // Refresh list background
                 isSpinning = false;
             }, 6100);
         }
 
-        async function savePrizeToServer() {
-            const btn = document.getElementById('savePrizeBtn');
-            const token = localStorage.getItem('sna_user_token');
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> MENYIMPAN...';
-
-            try {
-                const res = await fetch(`/api/contest/registrations/${currentRegId}/spin`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ prize: currentPrize })
-                });
-                if (res.ok) {
-                    // Update UI to Saved state
-                    document.getElementById('prizeDescription').innerHTML = '<i class="ri-checkbox-circle-fill" style="color: #00ff88;"></i> Hadiah BERHASIL DISIMPAN!<br>Silakan klaim ke WhatsApp Admin.';
-                    document.getElementById('savePrizeBtn').style.display = 'none';
-                    document.getElementById('postSaveActions').style.display = 'flex';
-                    fetchRegistrations(); // Refresh list to show the prize
-                } else {
-                    throw new Error('Gagal simpan');
-                }
-            } catch (err) {
-                alert('Gagal menyimpan hadiah. Coba lagi Cak!');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="ri-save-line"></i> SIMPAN HADIAH';
-            }
-        }
+        // --- No longer need savePrizeToServer as it is handled by start-spin ---
 
         async function claimViaWA() {
             const token = localStorage.getItem('sna_user_token');
