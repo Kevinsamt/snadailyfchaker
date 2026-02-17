@@ -485,6 +485,34 @@
                 font-size: 2.2rem;
             }
         }
+
+        /* Free Entry Badge */
+        .free-entry-banner {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 1rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 
@@ -572,6 +600,17 @@
 
             <!-- Right: Registration Form -->
             <div class="form-panel">
+                <div id="freeEntryBadge" class="free-entry-banner">
+                    <div
+                        style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: grid; place-items: center;">
+                        <i class="ri-gift-fill" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 800; font-size: 1.1rem;">BONUS ENTRY GRATIS!</div>
+                        <div style="font-size: 0.8rem; opacity: 0.9;">Pilih tier apa saja, biaya pendaftaran GRATIS dari
+                            Diamond Spin.</div>
+                    </div>
+                </div>
                 <form id="entryForm">
                     <h2><i class="ri-ball-pen-fill"></i> Formulir Registrasi</h2>
 
@@ -750,6 +789,17 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const selectedEvent = urlParams.get('event');
+            const isFreeEntry = urlParams.get('claim') === 'free_entry';
+
+            if (isFreeEntry) {
+                document.getElementById('freeEntryBadge').style.display = 'flex';
+                document.querySelectorAll('.tier-price').forEach(el => {
+                    el.innerText = 'FREE';
+                    el.style.color = '#25D366';
+                });
+                // Update hidden payment amount to 0 for initial tier
+                document.getElementById('paymentAmount').value = 0;
+            }
 
             try {
                 const res = await fetch('/api/events');
@@ -842,10 +892,13 @@
         }
 
         function selectTier(tier, price, element) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isFreeEntry = urlParams.get('claim') === 'free_entry';
+
             document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
             document.getElementById('registrationTier').value = tier;
-            document.getElementById('paymentAmount').value = price;
+            document.getElementById('paymentAmount').value = isFreeEntry ? 0 : price;
         }
 
         document.getElementById('entryForm').addEventListener('submit', async (e) => {
