@@ -31,13 +31,14 @@
         }
 
         .track-card {
-            background: rgba(15, 23, 42, 0.4);
+            background: var(--glass-premium);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1px solid var(--glass-border-bright);
-            border-radius: var(--radius-lg);
-            padding: 2.5rem;
-            box-shadow: var(--shadow-premium);
+            border: 1px solid var(--glass-premium-border);
+            border-radius: 30px;
+            padding: 3rem;
+            box-shadow: var(--shadow-diffuse);
+            transition: var(--transition);
         }
 
         .timeline {
@@ -209,12 +210,12 @@
 
                 if (data.history) {
                     header.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <span style="font-family: 'JetBrains Mono', monospace; color: var(--primary); font-weight: 800; font-size: 0.75rem; background: rgba(0,212,255,0.1); padding: 4px 10px; border-radius: 4px;">${data.summary.courier.toUpperCase()} #${waybill}</span>
-                            <span class="badge badge-primary" style="font-size: 0.65rem;">${data.summary.status.toUpperCase()}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <span style="font-family: 'Space Grotesk', monospace; color: var(--primary); font-weight: 900; font-size: 0.8rem; background: rgba(0,212,255,0.05); padding: 6px 15px; border-radius: 10px; border: 1px solid var(--glass-premium-border); letter-spacing: 1px;">${data.summary.courier.toUpperCase()} #${waybill}</span>
+                            <span class="badge" style="background: var(--primary); color: #000; font-weight: 900; letter-spacing: 1px; font-size: 0.65rem;">${data.summary.status.toUpperCase()}</span>
                         </div>
-                        <h2 style="margin: 0.5rem 0; font-size: 1.25rem; font-weight: 800;">${data.summary.destination}</h2>
-                        <p style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500;">Dari: ${data.summary.origin}</p>
+                        <h2 style="margin: 0.5rem 0; font-size: 1.5rem; font-weight: 900; color: white; letter-spacing: -0.5px;">${data.summary.destination}</h2>
+                        <p style="color:var(--text-muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Dari: ${data.summary.origin}</p>
                     `;
 
                     timeline.innerHTML = data.history.map((item, idx) => `

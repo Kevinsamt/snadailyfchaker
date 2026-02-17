@@ -27,20 +27,20 @@
             max-width: 650px;
             margin-top: 3rem;
             position: relative;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border-bright);
-            padding: 8px;
+            background: var(--glass-premium);
+            border: 1px solid var(--glass-premium-border);
+            padding: 10px;
             border-radius: var(--radius-full);
             display: flex;
             align-items: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--shadow-diffuse);
             transition: var(--transition);
         }
 
         .search-container-premium:focus-within {
             border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: var(--shadow-premium);
+            background: var(--glass-premium-bright);
+            box-shadow: var(--shadow-float);
             transform: translateY(-2px);
         }
 
@@ -86,8 +86,11 @@
             padding: 3rem;
             position: relative;
             overflow: hidden;
-            border: 1px solid var(--glass-border-bright);
+            background: var(--glass-premium);
+            border: 1px solid var(--glass-premium-border);
             border-top: 5px solid var(--primary);
+            box-shadow: var(--shadow-float);
+            border-radius: 30px;
         }
 
         .verified-stamp {

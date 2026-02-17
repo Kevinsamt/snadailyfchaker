@@ -29,17 +29,83 @@
     --shadow-glow: 0 0 20px var(--primary-glow);
     --shadow-premium: 0 0 40px rgba(0, 212, 255, 0.2), 0 0 100px rgba(0, 0, 0, 0.4);
 
-    /* Premium Tokens */
-    --glass-premium: rgba(255, 255, 255, 0.05);
-    --glass-premium-border: rgba(255, 255, 255, 0.12);
+    /* Premium World Class Tokens v3.0 */
+    --glass-premium: rgba(255, 255, 255, 0.03);
+    --glass-premium-border: rgba(255, 255, 255, 0.1);
+    --glass-premium-bright: rgba(255, 255, 255, 0.08);
     --neon-glow: 0 0 20px var(--primary-glow);
     --secondary-neon: 0 0 20px var(--secondary-glow);
 
+    --shadow-diffuse: 0 10px 40px rgba(0, 0, 0, 0.5);
+    --shadow-float: 0 20px 60px rgba(0, 212, 255, 0.15);
+
     --radius-sm: 8px;
-    --radius-md: 14px;
-    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-lg: 32px;
     --radius-full: 9999px;
-    --transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    --transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes revealStagger {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulseNeon {
+    0% {
+        box-shadow: 0 0 5px var(--primary-glow);
+    }
+
+    50% {
+        box-shadow: 0 0 25px var(--primary-glow);
+    }
+
+    100% {
+        box-shadow: 0 0 5px var(--primary-glow);
+    }
 }
 
 * {

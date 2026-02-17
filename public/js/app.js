@@ -772,19 +772,23 @@ window.loadProducts = async () => {
         const json = await response.json();
 
         if (json.data && json.data.length > 0) {
-            grid.innerHTML = json.data.map(product => `
-                <div class="product-card animate-fade-in">
-                    <img src="${product.image}" alt="${product.name}" class="product-image">
+            grid.innerHTML = json.data.map((product, index) => `
+                <div class="product-card" style="animation-delay: ${index * 0.1}s">
+                    <div class="product-badge">${product.category}</div>
+                    <div class="product-img-container">
+                        <img src="${product.image}" alt="${product.name}" class="product-image">
+                    </div>
                     <div class="product-info">
-                        <div style="font-size: 0.8rem; color: #a0aec0; text-transform: uppercase; letter-spacing: 1px;">${product.category}</div>
-                        <h3 style="margin: 0.5rem 0; font-size: 1.2rem; color:white;">${product.name}</h3>
-                        <p style="font-size: 0.9rem; color: #cbd5e0; margin-bottom: 1rem; line-height: 1.4;">${product.description}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; line-height: 1.5; flex: 1;">
+                            ${product.description}
+                        </p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
                             <div class="product-price">Rp ${product.price.toLocaleString('id-ID')}</div>
-                            <button onclick="showPaymentModal('${product.name}', ${product.price})" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                Beli Sekarang
-                            </button>
                         </div>
+                        <button onclick="showPaymentModal('${product.name}', ${product.price})" class="btn-primary btn-buy" style="margin-top: 1rem;">
+                            <i class="ri-shopping-cart-2-line"></i> BELI SEKARANG
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -794,7 +798,7 @@ window.loadProducts = async () => {
 
     } catch (err) {
         console.error("Error loading products:", err);
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: white;">Failed to load products. Enable backend to view.</div>';
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: white; padding: 5rem;">Failed to load products. Enable backend to view.</div>';
     }
 };
 

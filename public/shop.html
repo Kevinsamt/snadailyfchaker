@@ -3,103 +3,208 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnaDailyCheker | Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SnaDaily | Premium Fish Shop</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/seasonal-themes.css">
     <script src="js/seasonal-manager.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
-        .shop-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
+        .shop-hero {
+            padding: 8rem 1.5rem 4rem;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(0, 212, 255, 0.1) 0%, transparent 80%);
         }
 
-        @media (max-width: 600px) {
-            .shop-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .cart-float {
-                bottom: 20px;
-                right: 20px;
-                width: 50px;
-                height: 50px;
-            }
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2.5rem;
+            padding-bottom: 5rem;
         }
 
         .product-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
+            background: var(--glass-premium);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-premium-border);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s ease;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
         }
 
         .product-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            background: var(--glass-premium-bright);
+            box-shadow: var(--shadow-float);
+        }
+
+        .product-img-container {
+            width: 100%;
+            aspect-ratio: 4/3;
+            overflow: hidden;
+            position: relative;
         }
 
         .product-image {
             width: 100%;
-            height: 200px;
+            height: 100%;
             object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.1);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--primary);
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 2;
         }
 
         .product-info {
-            padding: 1.5rem;
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
         }
 
         .product-price {
             font-size: 1.25rem;
-            font-weight: bold;
+            font-weight: 800;
             color: var(--secondary);
-            margin: 0.5rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-buy {
+            width: 100%;
+            margin-top: auto;
+            border-radius: 12px;
+            padding: 1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
         }
 
         .cart-float {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 2rem;
+            right: 2rem;
+            width: 65px;
+            height: 65px;
             background: var(--primary);
-            color: white;
-            padding: 1rem;
+            color: black;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: grid;
+            place-items: center;
+            box-shadow: var(--shadow-glow);
             cursor: pointer;
             z-index: 100;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .cart-float:hover {
+            transform: scale(1.1) rotate(15deg);
         }
 
         .cart-badge {
             position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #e53e3e;
+            top: 0;
+            right: 0;
+            background: var(--accent);
             color: white;
-            border-radius: 50%;
             width: 24px;
             height: 24px;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 800;
+            display: grid;
+            place-items: center;
+            border: 3px solid var(--bg-dark);
+        }
+
+        @media (max-width: 768px) {
+            .shop-hero {
+                padding-top: 6rem;
+            }
+
+            .shop-grid {
+                gap: 1.5rem;
+            }
+
+            .cart-float {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 55px;
+                height: 55px;
+            }
+        }
+
+        /* Modal Polish */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            display: none;
             justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 1.5rem;
+        }
+
+        .modal-content {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-premium-border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 3rem;
+            position: relative;
+            animation: scaleIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Ocean Theme Background -->
     <div class="ocean-background">
         <div class="bubble x1"></div>
         <div class="bubble x2"></div>
@@ -108,24 +213,26 @@
         <div class="bubble x5"></div>
     </div>
 
-    <nav class="navbar" style="position: absolute; top: 0; width: 100%; border: none;">
-        <div class="container nav-container">
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="container nav-container" style="padding: 0 1.5rem;">
             <a href="index.html" class="text-gradient"
-                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
+                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1.5px;">SnaDaily<span
                     style="color: white; font-weight: 300;">Checker</span></a>
 
-            <button class="hamburger-btn" onclick="toggleMenu()">
+            <button class="hamburger-btn" onclick="toggleMenu()"
+                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
     </nav>
 
-    <!-- Nav Overlay -->
+    <!-- Nav Overlay (Shared across pages) -->
     <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
     <div class="nav-overlay" id="navOverlay">
         <div class="nav-menu-header">
-            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
-            <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
+            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">NAVIGASI</span>
+            <button class="hamburger-btn" onclick="toggleMenu()">
                 <i class="ri-close-line"></i>
             </button>
         </div>
@@ -146,137 +253,125 @@
         </div>
     </div>
 
-    <div class="container" style="padding-top: 100px; padding-bottom: 50px;">
-        <div id="productGrid" class="shop-grid">
-            <!-- Products will be loaded here -->
-            <div style="grid-column: 1/-1; text-align: center; color: white;">Loading products...</div>
+    <header class="shop-hero animate-fade-in">
+        <div
+            style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 212, 255, 0.08); padding: 8px 18px; border-radius: 50px; border: 1px solid var(--primary-glow); color: var(--primary); font-size: 0.75rem; font-weight: 800; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 2px;">
+            <i class="ri-vip-diamond-line"></i> Premium Collection
         </div>
-    </div>
+        <h1 class="text-gradient" style="font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 800; margin-bottom: 1rem;">
+            Toko <span style="color: white;">Ikan Hias</span></h1>
+        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">
+            Koleksi pilihan dengan kualitas kontes, langsung dari breeder terpercaya.
+        </p>
+    </header>
+
+    <main class="container">
+        <div id="productGrid" class="shop-grid">
+            <!-- Loading State -->
+            <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
+                <i class="ri-loader-4-line ri-spin" style="font-size: 3rem; color: var(--primary);"></i>
+                <p style="margin-top: 1rem; color: var(--text-muted); font-weight: 600;">Menyiapkan koleksi premium...
+                </p>
+            </div>
+        </div>
+    </main>
 
     <!-- Floating Cart -->
-    <div class="cart-float" onclick="alert('Keranjang belanja akan segera hadir!')">
-        <i class="ri-shopping-cart-2-line" style="font-size: 1.5rem;"></i>
+    <button class="cart-float animate-float" onclick="alert('Fitur keranjang akan segera hadir!')">
+        <i class="ri-shopping-bag-3-line" style="font-size: 1.6rem;"></i>
         <span class="cart-badge" id="cartCount">0</span>
-    </div>
+    </button>
 
     <!-- Checkout Modal -->
-    <div id="checkoutModal"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: start; justify-content: center; backdrop-filter: blur(10px); overflow-y: auto; padding: 2rem 0;">
-        <div class="glass-panel animate-reveal"
-            style="max-width: 600px; width: 95%; padding: 2.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); position: relative; margin-bottom: 2rem;">
+    <div id="checkoutModal" class="modal-overlay">
+        <div class="modal-content">
             <button onclick="document.getElementById('checkoutModal').style.display='none'"
-                style="position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                style="position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;">
+                <i class="ri-close-line"></i>
+            </button>
 
-            <h2 style="color: white; margin-bottom: 0.5rem; font-size: 1.8rem;">Checkout Pesanan</h2>
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">Silakan lengkapi data pengiriman anda.</p>
+            <div style="margin-bottom: 2.5rem;">
+                <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;"><span
+                        class="text-gradient">Checkout</span> Pesanan</h2>
+                <p style="color: var(--text-muted);">Silakan lengkapi detail pengiriman untuk melanjutkan.</p>
+            </div>
 
             <form id="checkoutForm" onsubmit="event.preventDefault(); proceedToPayment();">
-                <div class="checkout-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="grid grid-2" style="gap: 1.25rem; margin-bottom: 1.25rem;">
                     <div class="input-group">
-                        <label class="input-label">Nama Lengkap</label>
-                        <input type="text" id="custName" class="glass-input" placeholder="Masukkan nama" required>
+                        <label class="input-label" style="font-size: 0.75rem;">NAMA LENGKAP</label>
+                        <input type="text" id="custName" class="glass-input" placeholder="Nama anda" required>
                     </div>
                     <div class="input-group">
-                        <label class="input-label">Nomor WhatsApp / HP</label>
+                        <label class="input-label" style="font-size: 0.75rem;">NOMOR HP (WA)</label>
                         <input type="tel" id="custPhone" class="glass-input" placeholder="0812xxxx" required>
                     </div>
                 </div>
 
-                <style>
-                    @media (max-width: 480px) {
-                        .checkout-grid {
-                            grid-template-columns: 1fr !important;
-                        }
-                    }
-                </style>
-
                 <div class="input-group">
-                    <label class="input-label">Email (Gmail)</label>
-                    <input type="email" id="custEmail" class="glass-input" placeholder="nama@gmail.com" required>
+                    <label class="input-label" style="font-size: 0.75rem;">EMAIL AKTIF</label>
+                    <input type="email" id="custEmail" class="glass-input" placeholder="email@gmail.com" required>
                 </div>
 
                 <div class="input-group" style="position: relative;">
-                    <label class="input-label">Cari Lokasi (Kota / Kecamatan)</label>
+                    <label class="input-label" style="font-size: 0.75rem;">KOTA / KECAMATAN (Ketik & Pilih)</label>
                     <div style="position: relative;">
-                        <input type="text" id="locSearch" class="glass-input"
-                            placeholder="Ketik nama kota atau kecamatan..." autocomplete="off"
-                            oninput="searchLocation(this.value)">
-                        <i class="ri-search-line"
-                            style="position: absolute; right: 15px; top: 15px; color: var(--text-muted);"></i>
+                        <input type="text" id="locSearch" class="glass-input" placeholder="Cari kota/kecamatan..."
+                            autocomplete="off" oninput="searchLocation(this.value)">
+                        <i class="ri-map-pin-line"
+                            style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--primary);"></i>
                     </div>
                     <div id="locResults"
-                        style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: #1a202c; border: 1px solid #2d3748; border-radius: 8px; z-index: 100; max-height: 200px; overflow-y: auto; margin-top: 5px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);">
-                        <!-- Results will appear here -->
+                        style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: #0f172a; border: 1px solid var(--glass-border); border-radius: 12px; z-index: 100; max-height: 200px; overflow-y: auto; margin-top: 8px; box-shadow: var(--shadow-diffuse);">
                     </div>
-                    <!-- Hidden fields to store selected location info -->
                     <input type="hidden" id="destId">
-                    <input type="hidden" id="custProv">
-                    <input type="hidden" id="custCity">
-                    <input type="hidden" id="custDistrict">
                 </div>
 
                 <div class="input-group">
-                    <label class="input-label">Alamat Lengkap (Jalan, No Rumah, RT/RW)</label>
-                    <input type="text" id="custAddress" class="glass-input" placeholder="Jl. Nama Jalan No. XX"
-                        required>
+                    <label class="input-label" style="font-size: 0.75rem;">ALAMAT LENGKAP</label>
+                    <textarea id="custAddress" class="glass-input"
+                        style="height: 100px; resize: none; padding-top: 1rem;"
+                        placeholder="Nama jalan, Nomor rumah, RT/RW..." required></textarea>
                 </div>
-
-                <div class="input-group">
-                    <label class="input-label">Kode Pos</label>
-                    <input type="text" id="custZip" class="glass-input" placeholder="XXXXX" required>
-                </div>
-
-                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 1.5rem 0;">
-
-                <div id="shippingSelection" style="display: none;">
-                    <label class="input-label">Pilih Layanan Pengiriman</label>
-                    <div id="shippingOptions" style="display: grid; gap: 10px;">
-                        <!-- Options will be populated here -->
-                    </div>
-                </div>
-                <input type="hidden" id="shipCourier">
-                <input type="hidden" id="shipService">
 
                 <!-- Price Summary -->
-                <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; margin-top: 2rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span>Harga Produk:</span>
-                        <span id="priceProduct">Rp 0</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span title="Biaya box styrofoam & oksigen">Biaya Packing (Wajib):</span>
-                        <span>Rp 10.000</span>
+                <div
+                    style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 20px; border: 1px solid var(--glass-border); margin-top: 2rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted);">Produk:</span>
+                        <span id="priceProduct" style="font-weight: 700;">Rp 0</span>
                     </div>
                     <div
-                        style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; padding-bottom: 0.8rem; border-bottom: 1px dashed rgba(255,255,255,0.2);">
-                        <span>Ongkos Kirim:</span>
-                        <span id="priceShipping">Rp 0</span>
+                        style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted);">Biaya Packing:</span>
+                        <span style="font-weight: 700;">Rp 10.000</span>
                     </div>
                     <div
-                        style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; color: var(--secondary);">
-                        <span>Total Bayar:</span>
-                        <span id="priceTotal">Rp 0</span>
+                        style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 0.9rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--glass-border);">
+                        <span style="color: var(--text-muted);">Ongkos Kirim:</span>
+                        <span id="priceShipping" style="font-weight: 700;">Rp 0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 1.25rem;">
+                        <span style="color: white;">TOTAL</span>
+                        <span id="priceTotal" class="text-gradient">Rp 0</span>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary"
-                    style="width: 100%; margin-top: 2rem; justify-content: center; height: 55px; font-size: 1.1rem;">
-                    <i class="ri-secure-payment-line" style="margin-right: 10px;"></i> Bayar Sekarang (QRIS/Transfer)
+                <button type="submit" class="btn-primary btn-buy"
+                    style="height: 60px; font-size: 1rem; margin-top: 2rem;">
+                    <i class="ri-qr-code-line"></i> Bayar Sekarang
                 </button>
             </form>
         </div>
     </div>
-
-    <!-- Midtrans Snap will handle the payment popup -->
 
     <script src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-uo-CK2QCzX1PeMmB"></script>
     <script src="js/navigation.js"></script>
     <script src="js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            if (window.loadProducts) {
-                window.loadProducts();
-            }
+            if (window.loadProducts) window.loadProducts();
         });
     </script>
 </body>
