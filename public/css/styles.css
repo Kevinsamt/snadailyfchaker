@@ -464,7 +464,65 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 1.5rem;
+    padding: 0 2.5rem;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.desktop-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+
+.desktop-nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    position: relative;
+}
+
+.desktop-nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: var(--transition);
+}
+
+.desktop-nav-links a:hover {
+    color: var(--primary);
+}
+
+.desktop-nav-links a:hover::after {
+    width: 100%;
+}
+
+.nav-auth-btn {
+    background: rgba(0, 212, 255, 0.08);
+    color: var(--primary) !important;
+    padding: 10px 24px;
+    border-radius: 50px;
+    border: 1px solid var(--primary-glow);
+    font-weight: 700 !important;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.1);
+}
+
+.nav-auth-btn:hover {
+    background: var(--primary) !important;
+    color: #000 !important;
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+@media (max-width: 1024px) {
+    .desktop-nav-links {
+        gap: 1.5rem;
+    }
 }
 
 @media (max-width: 768px) {
@@ -473,11 +531,11 @@ body {
     }
 
     .nav-container {
-        padding: 0 1rem;
+        padding: 0 1.25rem;
     }
 
-    .nav-links {
-        display: none;
+    .desktop-nav-links {
+        display: none !important;
     }
 }
 
@@ -785,15 +843,56 @@ body {
     0% {
         bottom: -100px;
         transform: translateX(0);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 0.3;
     }
 
     50% {
-        transform: translateX(50px);
+        transform: translateX(80px);
+    }
+
+    80% {
+        opacity: 0.3;
     }
 
     100% {
         bottom: 110vh;
-        transform: translateX(-50px);
+        transform: translateX(-80px);
+        opacity: 0;
+    }
+}
+
+.bubble.x11 {
+    width: 25px;
+    height: 25px;
+    left: 5%;
+    animation-duration: 15s;
+    animation-delay: 2s;
+}
+
+.bubble.x12 {
+    width: 70px;
+    height: 70px;
+    left: 45%;
+    animation-duration: 25s;
+    animation-delay: 4s;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.bubble.x13 {
+    width: 30px;
+    height: 30px;
+    left: 85%;
+    animation-duration: 18s;
+    animation-delay: 1s;
+}
+
+@media (min-width: 1200px) {
+    .bubble {
+        filter: blur(2px);
     }
 }
 

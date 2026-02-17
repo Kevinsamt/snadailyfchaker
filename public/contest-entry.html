@@ -546,13 +546,20 @@
 
     <!-- Premium Navbar -->
     <nav class="navbar glass">
-        <div class="container nav-container" style="padding: 0 1.5rem;">
-            <a href="index.html" class="nav-link-premium" style="background: transparent;">
-                <span class="text-gradient"
-                    style="font-weight: 800; font-size: 1.5rem; letter-spacing: -1px;">SnaDaily</span>
-            </a>
+        <div class="container nav-container">
+            <a href="index.html" class="text-gradient"
+                style="font-size: 1.75rem; font-weight: 800; text-decoration: none; letter-spacing: -2px;">SnaDaily<span
+                    style="color: white; font-weight: 300;">Checker</span></a>
 
-            <button class="hamburger-btn" onclick="toggleMenu()"
+            <!-- Desktop Links -->
+            <div class="desktop-nav-links">
+                <a href="index.html">Beranda</a>
+                <a href="events.html">Event Kontes</a>
+                <a href="track.html">Lacak Pesanan</a>
+                <a href="dashboard.html" id="nav-login-link" class="nav-auth-btn">Dashboard</a>
+            </div>
+
+            <button class="hamburger-btn mobile-only" onclick="toggleMenu()"
                 style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>

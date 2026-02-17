@@ -103,6 +103,7 @@
         /* Floating Stats (Desktop) */
         .floating-badges {
             display: flex;
+            justify-content: center;
             gap: 1.5rem;
             margin-top: 4rem;
         }
@@ -173,12 +174,19 @@
 
     <!-- Navigation -->
     <nav class="navbar glass">
-        <div class="container nav-container" style="padding: 0 1.5rem;">
+        <div class="container nav-container">
             <a href="index.html" class="text-gradient"
-                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1.5px;">SnaDaily<span
+                style="font-size: 1.75rem; font-weight: 800; text-decoration: none; letter-spacing: -2px;">SnaDaily<span
                     style="color: white; font-weight: 300;">Checker</span></a>
 
-            <button class="hamburger-btn" onclick="toggleMenu()"
+            <!-- Desktop Links -->
+            <div class="desktop-nav-links">
+                <a href="events.html">Event Kontes</a>
+                <a href="track.html">Lacak Pesanan</a>
+                <a href="login.html" id="nav-login-link" class="nav-auth-btn">Login</a>
+            </div>
+
+            <button class="hamburger-btn mobile-only" onclick="toggleMenu()"
                 style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>
@@ -209,20 +217,22 @@
     </div>
 
     <main class="hero-container">
-        <div class="animate-fade-in" style="width: 100%; max-width: 850px;">
+        <div class="animate-fade-in"
+            style="width: 100%; max-width: 950px; display: flex; flex-direction: column; align-items: center;">
             <div
                 style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 212, 255, 0.08); padding: 8px 18px; border-radius: 50px; border: 1px solid var(--primary-glow); color: var(--primary); font-size: 0.75rem; font-weight: 800; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 2px;">
                 <i class="ri-shield-flash-line"></i> Blockchain Verified
             </div>
 
             <h1
-                style="font-size: clamp(2.2rem, 9vw, 5rem); font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 1.5rem;">
+                style="font-size: clamp(2.5rem, 8vw, 5.5rem); font-weight: 900; line-height: 1; letter-spacing: -3px; margin-bottom: 2rem;">
                 Buktikan Keaslian <span class="text-gradient">Ikan</span> Anda.
             </h1>
 
             <p
-                style="color: var(--text-muted); font-size: clamp(1rem, 3vw, 1.25rem); max-width: 600px; margin: 0 auto; line-height: 1.6;">
-                Sistem validasi cupang tercanggih di Indonesia. Pastikan koleksi Anda terverifikasi secara digital.
+                style="color: var(--text-muted); font-size: clamp(1rem, 2.5vw, 1.35rem); max-width: 650px; margin: 0 auto 3rem; line-height: 1.8;">
+                Sistem validasi cupang tercanggih di Indonesia. Pastikan koleksi Anda terverifikasi secara digital
+                dengan teknologi <span style="color: var(--secondary); font-weight: 700;">SecureCheck™</span>.
             </p>
 
             <!-- Search Area -->
@@ -364,6 +374,14 @@
         document.getElementById('batchIdInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') checkAuthenticity();
         });
+
+        // Update Desktop Nav Auth Link
+        const loginLink = document.getElementById('nav-login-link');
+        const userData = JSON.parse(localStorage.getItem('sna_user_data'));
+        if (userData && loginLink) {
+            loginLink.innerText = 'Dashboard';
+            loginLink.href = userData.role === 'judge' ? 'judge.html' : 'dashboard.html';
+        }
     </script>
 </body>
 

@@ -150,13 +150,22 @@
         <div class="bubble x5"></div>
     </div>
 
-    <nav class="navbar">
+    <nav class="navbar glass">
         <div class="container nav-container">
             <a href="index.html" class="text-gradient"
-                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
+                style="font-size: 1.75rem; font-weight: 800; text-decoration: none; letter-spacing: -2px;">SnaDaily<span
                     style="color: white; font-weight: 300;">Checker</span></a>
 
-            <button class="hamburger-btn" onclick="toggleMenu()">
+            <!-- Desktop Links -->
+            <div class="desktop-nav-links">
+                <a href="index.html">Beranda</a>
+                <a href="events.html" class="active">Event Kontes</a>
+                <a href="track.html">Lacak Pesanan</a>
+                <a href="login.html" id="nav-login-link" class="nav-auth-btn">Login</a>
+            </div>
+
+            <button class="hamburger-btn mobile-only" onclick="toggleMenu()"
+                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
@@ -337,6 +346,14 @@
                 case 'rejected': return 'rgba(255, 77, 77, 0.2); color: #ff4d4d;';
                 default: return 'rgba(255, 215, 0, 0.2); color: #ffd700;';
             }
+        }
+
+        // Update Desktop Nav Auth Link
+        const loginLink = document.getElementById('nav-login-link');
+        const userData = JSON.parse(localStorage.getItem('sna_user_data'));
+        if (userData && loginLink) {
+            loginLink.innerText = 'Dashboard';
+            loginLink.href = userData.role === 'judge' ? 'judge.html' : 'dashboard.html';
         }
     </script>
 </body>

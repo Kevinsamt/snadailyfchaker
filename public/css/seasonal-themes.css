@@ -54,8 +54,8 @@
 
 @media (min-width: 768px) {
     .theme-imlek .lampion-container {
-        top: -20px;
-        height: 300px;
+        top: -10px;
+        height: 350px;
         z-index: 999;
     }
 }
@@ -124,13 +124,21 @@
 .theme-imlek::after {
     content: '福';
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    font-size: 15vw;
-    color: rgba(255, 215, 0, 0.03);
+    bottom: 40px;
+    right: 40px;
+    font-size: 10vw;
+    color: rgba(255, 215, 0, 0.02);
     font-family: serif;
     pointer-events: none;
     z-index: -1;
+}
+
+@media (min-width: 1200px) {
+    .theme-imlek::after {
+        font-size: 15rem;
+        bottom: 60px;
+        right: 60px;
+    }
 }
 
 /* Adjusting elements for Imlek */
