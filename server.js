@@ -527,10 +527,9 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
     const ADMIN_USER = process.env.ADMIN_USER || 'bettatumedan';
     const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'snadailybetta';
 
-    // SECURITY: Block default credentials in production
+    // SECURITY: Warn if default credentials used in production (but allow for now)
     if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_USER || !process.env.ADMIN_PASSWORD)) {
-        console.error("❌ SECURITY ALERT: Default admin credentials used in production. ACCESS BLOCKED.");
-        return res.status(500).json({ success: false, message: 'Server Configuration Error (Contact Developer)' });
+        console.warn("⚠️ SECURITY WARNING: Using default admin credentials in production. Please set ADMIN_USER and ADMIN_PASSWORD in environment variables!");
     }
 
     if (username === ADMIN_USER && password === ADMIN_PASS) {
