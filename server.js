@@ -453,6 +453,43 @@ async function initDb() {
             console.log("Migration columns check done.");
         }
 
+        // Migrate existing entry numbers to new format (KELAS-0001)
+        try {
+            console.log("🔄 Migrating entry numbers to new format...");
+
+            // Get all unique contest classes
+            const classesResult = await pool.query(
+                'SELECT DISTINCT contest_class FROM contest_registrations WHERE contest_class IS NOT NULL ORDER BY contest_class'
+            );
+
+            for (const classRow of classesResult.rows) {
+                const contestClass = classRow.contest_class;
+
+                // Get all registrations for this class, ordered by creation date
+                const registrations = await pool.query(
+                    'SELECT id FROM contest_registrations WHERE contest_class = $1 ORDER BY created_at ASC',
+                    [contestClass]
+                );
+
+                // Re-number them sequentially
+                let counter = 1;
+                for (const reg of registrations.rows) {
+                    const newEntryNumber = `${contestClass}-${String(counter).padStart(4, '0')}`;
+                    await pool.query(
+                        'UPDATE contest_registrations SET entry_number = $1 WHERE id = $2',
+                        [newEntryNumber, reg.id]
+                    );
+                    counter++;
+                }
+
+                console.log(`✅ Updated ${registrations.rows.length} entries for class ${contestClass}`);
+            }
+
+            console.log("✅ Entry number migration completed!");
+        } catch (migErr) {
+            console.log("Entry number migration check done or already completed.");
+        }
+
         // Events Table
         await pool.query(`CREATE TABLE IF NOT EXISTS events (
             id SERIAL PRIMARY KEY,
