@@ -176,7 +176,11 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS
     'https://snadailyfchaker.vercel.app',
     'https://snadigitaltech.com',
     'https://snadigital.shop',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5500',
+    'http://localhost:8080',
+    'http://127.0.0.1:5500'
 ];
 
 app.use(cors({
@@ -225,8 +229,8 @@ const sanitizeInput = (req, res, next) => {
     next();
 };
 
-app.use(sanitizeInput);
 app.use(bodyParser.json());
+app.use(sanitizeInput);
 app.use('/api/login', loginLimiter);
 app.use('/api/', apiLimiter);
 
@@ -448,14 +452,6 @@ async function initDb() {
             console.log("Migration columns check done.");
         }
 
-        // Event Judges Assignment Table
-        await pool.query(`CREATE TABLE IF NOT EXISTS event_judges (
-            id SERIAL PRIMARY KEY,
-            event_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
-            judge_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-            UNIQUE(event_id, judge_id)
-        )`);
-
         // Events Table
         await pool.query(`CREATE TABLE IF NOT EXISTS events (
             id SERIAL PRIMARY KEY,
@@ -466,6 +462,14 @@ async function initDb() {
             event_date TEXT,
             status TEXT DEFAULT 'upcoming',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Event Judges Assignment Table
+        await pool.query(`CREATE TABLE IF NOT EXISTS event_judges (
+            id SERIAL PRIMARY KEY,
+            event_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
+            judge_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(event_id, judge_id)
         )`);
 
         // Seed initial event if empty
