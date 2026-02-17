@@ -623,6 +623,27 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
             spinPrize = null
         } = req.body;
 
+        // --- Server-side Tier Deadline Validation ---
+        const now = new Date();
+        const tierDeadlines = {
+            'Early': new Date("2026-03-16T00:00:00"),
+            'Mid': new Date("2026-03-26T00:00:00"),
+            'Last': new Date("2026-04-05T00:00:00"),
+            'Diamond': new Date("2026-04-05T00:00:00")
+        };
+        const tierStarts = {
+            'Mid': new Date("2026-03-16T00:00:00"),
+            'Last': new Date("2026-03-26T00:00:00")
+        };
+
+        if (tierDeadlines[registrationTier] && now >= tierDeadlines[registrationTier]) {
+            return res.status(403).json({ error: `Pendaftaran tier ${registrationTier} sudah berakhir.` });
+        }
+        if (tierStarts[registrationTier] && now < tierStarts[registrationTier]) {
+            return res.status(403).json({ error: `Pendaftaran tier ${registrationTier} belum dibuka.` });
+        }
+        // ---------------------------------------------
+
         // Ensure numeric amount
         const paymentAmount = req.body.paymentAmount ? parseInt(req.body.paymentAmount) : 0;
 

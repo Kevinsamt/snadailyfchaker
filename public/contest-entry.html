@@ -234,6 +234,14 @@
             box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
         }
 
+        .tier-card.disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+            filter: grayscale(1);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
         .tier-card .tier-name {
             font-size: 0.7rem;
             font-weight: 700;
@@ -604,19 +612,20 @@
                     <div class="input-box">
                         <label>Pilih Tier Pendaftaran</label>
                         <div class="tier-grid">
-                            <div class="tier-card active" onclick="selectTier('Early', 40000, this)">
+                            <div class="tier-card" id="tierEarly" onclick="selectTier('Early', 40000, this)">
                                 <span class="tier-name">Early Bird</span>
                                 <span class="tier-price">40K</span>
                             </div>
-                            <div class="tier-card" onclick="selectTier('Mid', 60000, this)">
+                            <div class="tier-card" id="tierMid" onclick="selectTier('Mid', 60000, this)">
                                 <span class="tier-name">Mid Phase</span>
                                 <span class="tier-price">60K</span>
                             </div>
-                            <div class="tier-card" onclick="selectTier('Last', 80000, this)">
+                            <div class="tier-card" id="tierLast" onclick="selectTier('Last', 80000, this)">
                                 <span class="tier-name">Last Call</span>
                                 <span class="tier-price">80K</span>
                             </div>
-                            <div class="tier-card diamond" onclick="selectTier('Diamond', 100000, this)">
+                            <div class="tier-card diamond" id="tierDiamond"
+                                onclick="selectTier('Diamond', 100000, this)">
                                 <div
                                     style="position: absolute; top: 8px; right: 12px; font-size: 1rem; color: #ffd700;">
                                     <i class="ri-vip-diamond-fill"></i>
@@ -756,7 +765,52 @@
                 console.error('Error fetching events:', err);
                 document.getElementById('eventName').innerHTML = '<option value="">Gagal memuat event</option>';
             }
+
+            updateTierAvailability();
         });
+
+        function updateTierAvailability() {
+            const now = new Date();
+            // Early Bird: ends March 15, 2026
+            const earlyDeadline = new Date("2026-03-16T00:00:00");
+            // Mid Phase: March 16 - March 25, 2026
+            const midStart = new Date("2026-03-16T00:00:00");
+            const midDeadline = new Date("2026-03-26T00:00:00");
+            // Last Call: March 26 - April 4, 2026
+            const lastStart = new Date("2026-03-26T00:00:00");
+            const lastDeadline = new Date("2026-04-05T00:00:00");
+            // Diamond: ends April 4, 2026
+            const diamondDeadline = new Date("2026-04-05T00:00:00");
+
+            const tiers = [
+                { id: 'tierEarly', deadline: earlyDeadline, name: 'Early', price: 40000, start: null },
+                { id: 'tierMid', deadline: midDeadline, name: 'Mid', price: 60000, start: midStart },
+                { id: 'tierLast', deadline: lastDeadline, name: 'Last', price: 80000, start: lastStart },
+                { id: 'tierDiamond', deadline: diamondDeadline, name: 'Diamond', price: 100000, start: null }
+            ];
+
+            let firstAvailable = null;
+
+            tiers.forEach(t => {
+                const el = document.getElementById(t.id);
+                if (!el) return;
+                const isStarted = t.start ? now >= t.start : true;
+                const isExpired = now >= t.deadline;
+
+                if (!isStarted || isExpired) {
+                    el.classList.add('disabled');
+                    el.classList.remove('active');
+                } else {
+                    el.classList.remove('disabled');
+                    if (!firstAvailable) firstAvailable = t;
+                }
+            });
+
+            if (firstAvailable) {
+                const el = document.getElementById(firstAvailable.id);
+                selectTier(firstAvailable.name, firstAvailable.price, el);
+            }
+        }
 
         function updatePreview(url) {
             const preview = document.getElementById('previewImage');

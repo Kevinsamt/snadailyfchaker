@@ -144,40 +144,34 @@
             padding: 2.5rem;
         }
 
-        /* Luxury Spin Wheel styles */
+        /* Luxury Spin Wheel Refined Styles */
         .spin-wheel-overlay {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.98), #000);
-            backdrop-filter: blur(30px);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(25px);
             z-index: 9999;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
-            animation: fadeIn 0.5s ease;
+            padding: 1rem;
+            animation: fadeIn 0.4s ease-out;
+            overflow-y: auto;
         }
 
         .wheel-outer {
             position: relative;
-            width: min(450px, 90vw);
+            width: min(440px, 90vw);
             aspect-ratio: 1/1;
-            padding: 25px;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 15px;
+            background: #1e293b;
             border-radius: 50%;
-            box-shadow: 0 0 0 10px #334155, 0 0 50px rgba(255, 215, 0, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 0 8px #334155, 0 0 60px rgba(255, 215, 0, 0.2);
             border: 4px solid #ffd700;
             cursor: pointer;
-        }
-
-        .wheel-outer::before {
-            content: '';
-            position: absolute;
-            inset: -15px;
-            border-radius: 50%;
-            border: 2px dashed rgba(255, 215, 0, 0.3);
-            animation: rotate 20s linear infinite;
+            margin: 2rem 0;
+            z-index: 10;
         }
 
         .bulb-container {
@@ -185,30 +179,31 @@
             inset: 0;
             border-radius: 50%;
             pointer-events: none;
+            z-index: 5;
         }
 
         .bulb {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background: #fff;
             border-radius: 50%;
-            top: 5px;
+            top: 4px;
             left: 50%;
             transform: translateX(-50%);
             box-shadow: 0 0 10px #fff, 0 0 20px #ffd700;
-            animation: bulbPulse 1.5s infinite alternate;
+            animation: bulbPulse 1.2s infinite alternate;
         }
 
         @keyframes bulbPulse {
-            from {
-                opacity: 0.4;
+            0% {
+                opacity: 0.3;
                 transform: translateX(-50%) scale(0.8);
             }
 
-            to {
+            100% {
                 opacity: 1;
-                transform: translateX(-50%) scale(1.2);
+                transform: translateX(-50%) scale(1.1);
                 box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
             }
         }
@@ -217,29 +212,41 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            overflow: hidden;
             position: relative;
-            transition: transform 6s cubic-bezier(0.15, 0, 0.05, 1);
-            border: 8px solid #1e293b;
-            background: #0f172a;
+            transition: transform 6s cubic-bezier(0.15, 0, 0.02, 1);
+            border: 5px solid #0f172a;
+            /* conic-gradient for background slots */
+            background: conic-gradient(#ffd700 0deg 60deg,
+                    #ffffff 60deg 120deg,
+                    #ffd700 120deg 180deg,
+                    #ffffff 180deg 240deg,
+                    #ffd700 240deg 300deg,
+                    #475569 300deg 360deg);
         }
 
-        .wheel-segment {
+        .wheel-segment-label {
             position: absolute;
             width: 50%;
-            height: 50%;
-            left: 50%;
+            height: 30px;
             top: 50%;
-            transform-origin: 0 0;
+            left: 50%;
+            transform-origin: 0% 50%;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
+            justify-content: flex-end;
+            padding-right: 25px;
+            font-size: 0.85rem;
             font-weight: 900;
             color: #000;
             text-transform: uppercase;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+            pointer-events: none;
         }
+
+        .wheel-segment-label[data-index="5"] {
+            color: #fff;
+        }
+
+        /* Diamond Pack label white */
 
         .wheel-center-cap {
             position: absolute;
@@ -248,13 +255,13 @@
             transform: translate(-50%, -50%);
             width: 70px;
             height: 70px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 215, 0, 0.5);
+            background: #0f172a;
+            border: 3px solid #ffd700;
             border-radius: 50%;
             z-index: 20;
             display: grid;
             place-items: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
         }
 
         .wheel-center-cap i {
@@ -264,10 +271,10 @@
 
         .wheel-marker {
             position: absolute;
-            top: -20px;
+            top: -25px;
             left: 50%;
             transform: translateX(-50%);
-            width: 40px;
+            width: 44px;
             height: 50px;
             background: #ffd700;
             clip-path: polygon(50% 100%, 0 0, 100% 0);
@@ -275,20 +282,55 @@
             filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
         }
 
+        /* Result Overlay */
+        .prize-glow-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .prize-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 3rem;
+            border-radius: 40px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
         .gift-box-btn {
             background: linear-gradient(135deg, #ffd700, #ff9500);
             color: #000;
             border: none;
-            padding: 8px 15px;
+            padding: 10px 20px;
             border-radius: 12px;
             font-weight: 800;
-            font-size: 0.75rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             animation: giftBlink 1.5s infinite;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        @keyframes giftBlink {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
         }
 
         @keyframes giftBlink {
@@ -429,14 +471,14 @@
 
     <!-- Spin Wheel Overlay -->
     <div id="wheelOverlay" class="spin-wheel-overlay">
-        <div style="text-align: center; margin-bottom: 3rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
             <div
-                style="display: inline-block; padding: 6px 15px; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 50px; color: #ffd700; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem;">
+                style="display: inline-block; padding: 6px 15px; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 50px; color: #ffd700; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">
                 <i class="ri-vip-diamond-fill"></i> Diamond Prize
             </div>
-            <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">DIAMOND <span
+            <h2 style="font-size: 2.2rem; font-weight: 800; margin-top: 1rem;">DIAMOND <span
                     class="text-gradient">SPIN</span></h2>
-            <p style="color: rgba(255,255,255,0.6); font-weight: 600;">Tap/Klik roda untuk memutar!</p>
+            <p style="color: rgba(255,255,255,0.6); font-weight: 600;">Klik roda untuk memutar!</p>
         </div>
 
         <div class="wheel-outer" onclick="spinWheel()" id="wheelOuter">
@@ -447,14 +489,25 @@
                 <i class="ri-vip-diamond-fill"></i>
             </div>
         </div>
+    </div>
 
-        <div id="prizeResult" style="margin-top: 3rem; text-align: center; display: none; animation: fadeIn 0.5s;">
-            <div style="font-size: 0.8rem; color: #ffd700; text-transform: uppercase; font-weight: 800;">Selamat, Cak
-                Dapet:</div>
-            <div id="prizeLabel" style="font-size: 2.5rem; font-weight: 900; margin-top: 0.5rem; color: #fff;">Memuat...
+    <!-- Prize Result Overlay (Highest Priority) -->
+    <div id="prizeResultOverlay" class="prize-glow-overlay">
+        <div class="prize-card">
+            <div
+                style="width: 100px; height: 100px; background: rgba(255,215,0,0.1); border-radius: 50%; display: grid; place-items: center; margin: 0 auto 1.5rem; border: 2px solid #ffd700;">
+                <i class="ri-gift-line" style="font-size: 3.5rem; color: #ffd700;"></i>
             </div>
+            <div
+                style="font-size: 0.9rem; color: #ffd700; text-transform: uppercase; font-weight: 800; letter-spacing: 2px;">
+                Selamat, Cak Dapet:</div>
+            <div id="prizeLabelFinal"
+                style="font-size: 2.5rem; font-weight: 900; margin: 1rem 0; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.3);">
+                Memuat...</div>
+            <p style="color: rgba(255,255,255,0.6); margin-bottom: 2.5rem; font-size: 0.9rem;">Hadiah Cak sudah otomatis
+                tersimpan di sistem kami.</p>
             <button onclick="closeWheel()" class="btn-primary"
-                style="margin-top: 2rem; padding: 1rem 3rem; border-radius: 100px;">KLAIM HADIAH</button>
+                style="width: 100%; padding: 1.2rem; border-radius: 100px; font-weight: 800;">KLAIM & SELESAI</button>
         </div>
     </div>
 
@@ -558,9 +611,7 @@
             currentRegId = regId;
             initWheel();
             document.getElementById('wheelOverlay').style.display = 'flex';
-            document.getElementById('prizeResult').style.display = 'none';
-            document.getElementById('wheelOuter').style.opacity = '1';
-            document.getElementById('wheelOuter').style.pointerEvents = 'auto';
+            document.getElementById('prizeResultOverlay').style.display = 'none';
         }
 
         function initWheel() {
@@ -571,6 +622,7 @@
             wheel.style.transition = 'none';
             wheel.style.transform = 'rotate(0deg)';
 
+            // Render Bulbs
             for (let i = 0; i < 12; i++) {
                 const container = document.createElement('div');
                 container.style.position = 'absolute'; container.style.inset = '0';
@@ -579,14 +631,14 @@
                 bulbContainer.appendChild(container);
             }
 
-            const colors = ['#ffd700', '#ffffff', '#ffd700', '#ffffff', '#ffd700', '#475569'];
+            // Render Prize Labels using simple transform
             PRIZES.forEach((prize, i) => {
-                const segment = document.createElement('div');
-                segment.className = 'wheel-segment';
-                segment.style.transform = `rotate(${i * 60}deg) skewY(-30deg)`;
-                segment.style.backgroundColor = colors[i];
-                segment.innerHTML = `<span style="transform: skewY(30deg) rotate(30deg); display: block; text-align: center; width: 80px; margin-left: 30px;">${prize}</span>`;
-                wheel.appendChild(segment);
+                const label = document.createElement('div');
+                label.className = 'wheel-segment-label';
+                label.dataset.index = i;
+                label.style.transform = `translate(-50%, -50%) rotate(${i * 60 + 30}deg)`;
+                label.innerHTML = `<span>${prize}</span>`;
+                wheel.appendChild(label);
             });
         }
 
@@ -595,22 +647,28 @@
             isSpinning = true;
             const wheel = document.getElementById('wheel');
             const bulbs = document.querySelectorAll('.bulb');
-            const randomDegree = 2880 + Math.floor(Math.random() * 360);
+
+            // Marker is at TOP (270 deg). 
+            // We want to calculate which segment ends up at 270 deg.
+            const spinRounds = 10;
+            const randomAdd = Math.floor(Math.random() * 360);
+            const totalRotate = (spinRounds * 360) + randomAdd;
 
             bulbs.forEach(b => b.style.animationDuration = '0.3s');
-            wheel.style.transition = 'transform 6s cubic-bezier(0.15, 0, 0.05, 1)';
-            wheel.style.transform = `rotate(${randomDegree}deg)`;
+            wheel.style.transition = 'transform 6s cubic-bezier(0.15, 0, 0.02, 1)';
+            wheel.style.transform = `rotate(${totalRotate}deg)`;
 
             setTimeout(() => {
-                const actualDegree = (360 - (randomDegree % 360)) % 360;
-                const prizeIndex = Math.floor(actualDegree / 60);
+                // The position that lands at the top (marker) is:
+                // (270 - totalRotate) % 360
+                let landingDegree = (270 - totalRotate) % 360;
+                if (landingDegree < 0) landingDegree += 360;
+                const prizeIndex = Math.floor(landingDegree / 60);
                 currentPrize = PRIZES[prizeIndex];
 
                 bulbs.forEach(b => b.style.animationDuration = '1.5s');
-                document.getElementById('prizeLabel').innerText = currentPrize;
-                document.getElementById('prizeResult').style.display = 'block';
-                document.getElementById('wheelOuter').style.opacity = '0.3';
-                document.getElementById('wheelOuter').style.pointerEvents = 'none';
+                document.getElementById('prizeLabelFinal').innerText = currentPrize;
+                document.getElementById('prizeResultOverlay').style.display = 'flex';
                 isSpinning = false;
             }, 6100);
         }
