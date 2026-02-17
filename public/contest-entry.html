@@ -572,6 +572,64 @@
             color: white;
             box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .premium-card {
+                grid-template-columns: 1fr;
+            }
+
+            .info-panel {
+                display: none;
+            }
+
+            .main-wrapper {
+                padding: 2rem 1rem;
+            }
+
+            .form-panel {
+                padding: 2rem 1.5rem !important;
+            }
+
+            .tier-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tier-card {
+                padding: 1.25rem;
+            }
+
+            .submit-btn {
+                width: 100%;
+                position: sticky;
+                bottom: 1rem;
+                z-index: 100;
+            }
+
+            .wheel-outer {
+                width: 280px;
+                height: 280px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-panel {
+                padding: 1.5rem 1rem !important;
+            }
+
+            .premium-input {
+                font-size: 14px;
+                padding: 0.75rem 1rem;
+            }
+
+            .tier-card {
+                padding: 1rem;
+            }
+
+            .tier-card h3 {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 

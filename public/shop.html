@@ -95,6 +95,42 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .shop-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .product-card {
+                max-width: 100%;
+            }
+
+            .cart-btn {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 56px;
+                height: 56px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-card {
+                padding: 1rem;
+            }
+
+            .product-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .cart-btn {
+                width: 50px;
+                height: 50px;
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
     </style>
 </head>
 
