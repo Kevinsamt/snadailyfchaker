@@ -1037,7 +1037,7 @@
 
         let currentOrderId = null;
 
-        async function selectTier(tier, price, element) {
+        function selectTier(tier, price, element) {
             const urlParams = new URLSearchParams(window.location.search);
             const isFreeEntry = urlParams.get('claim') === 'free_entry';
 
@@ -1046,7 +1046,7 @@
             document.getElementById('registrationTier').value = tier;
             document.getElementById('paymentAmount').value = isFreeEntry ? 0 : price;
 
-            // Dynamic QRIS Loader
+            // Manual QRIS Helper
             const finalAmount = isFreeEntry ? 0 : price;
             const paymentArea = document.getElementById('directPaymentArea');
             const displayBadge = document.getElementById('displayAmountDirect');
@@ -1054,29 +1054,8 @@
 
             if (finalAmount > 0) {
                 paymentArea.style.display = 'block';
-                displayBadge.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Generate QRIS...`;
-
-                try {
-                    const response = await fetch('/api/payment/qris', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            amount: finalAmount,
-                            customerName: document.getElementById('waNumber').value || 'Peserta'
-                        })
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        qrisImg.src = data.qrUrl;
-                        displayBadge.innerText = 'Rp ' + finalAmount.toLocaleString('id-ID');
-                        currentOrderId = data.orderId;
-                    } else {
-                        throw new Error(data.error);
-                    }
-                } catch (err) {
-                    console.error("Gagal generate QRIS:", err);
-                    displayBadge.innerText = 'Gagal memuat QRIS Dinamis';
-                }
+                displayBadge.innerText = 'Rp ' + finalAmount.toLocaleString('id-ID');
+                qrisImg.src = 'img/qris-pembayaran.jpg'; // Revert to static image
             } else {
                 paymentArea.style.display = 'none';
             }

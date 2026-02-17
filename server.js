@@ -32,11 +32,6 @@ const snap = new midtransClient.Snap({
     clientKey: process.env.MIDTRANS_CLIENT_KEY
 });
 
-const core = new midtransClient.CoreApi({
-    isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
-    serverKey: process.env.MIDTRANS_SERVER_KEY,
-    clientKey: process.env.MIDTRANS_CLIENT_KEY
-});
 
 // Supabase Configuration
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -1312,45 +1307,7 @@ app.get('/api/products', apiLimiter, async (req, res) => {
     }
 });
 
-app.post('/api/payment/qris', apiLimiter, async (req, res) => {
-    try {
-        const { amount, customerName } = req.body;
 
-        if (!process.env.MIDTRANS_SERVER_KEY) {
-            return res.status(500).json({ error: "MIDTRANS_SERVER_KEY belum diatur!" });
-        }
-
-        const orderId = `SNA-${Date.now()}`;
-        const parameter = {
-            "payment_type": "qris",
-            "transaction_details": {
-                "order_id": orderId,
-                "gross_amount": amount
-            },
-            "customer_details": {
-                "first_name": customerName || "Peserta Kontes"
-            }
-        };
-
-        const chargeResponse = await core.charge(parameter);
-
-        // Midtrans returns QRIS data in the 'actions' array
-        const qrAction = chargeResponse.actions.find(a => a.name === 'generate-qr-code');
-
-        if (!qrAction) {
-            throw new Error("Gagal mendapatkan data QRIS dari Midtrans.");
-        }
-
-        res.json({
-            success: true,
-            qrUrl: qrAction.url,
-            orderId: orderId
-        });
-    } catch (err) {
-        console.error("QRIS Generation Error:", err);
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
 
 // Midtrans: Create Transaction Token
 app.post('/api/payment/token', apiLimiter, async (req, res) => {
