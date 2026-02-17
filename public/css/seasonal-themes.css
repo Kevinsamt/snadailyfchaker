@@ -151,8 +151,10 @@
 }
 
 .theme-imlek .text-gradient {
+    display: inline-block;
     background: linear-gradient(to right, #FFD700, #FF4500);
     -webkit-background-clip: text;
     background-clip: text;
+    color: transparent;
     -webkit-text-fill-color: transparent;
 }

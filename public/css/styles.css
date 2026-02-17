@@ -192,10 +192,49 @@ body {
 }
 
 .text-gradient {
+    display: inline-block;
     background: linear-gradient(to right, var(--primary), var(--secondary));
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Gradient Variants */
+.text-gradient-gold {
+    display: inline-block;
+    background: linear-gradient(135deg, #ffd700, #fff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-platinum {
+    display: inline-block;
+    background: linear-gradient(135deg, #e5e7eb, #fff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-fire {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff4d4d, #ffd700);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-ocean {
+    display: inline-block;
+    background: linear-gradient(135deg, #00d4ff, #00fa9a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
 }
 
 /* Spacing Utilities */
