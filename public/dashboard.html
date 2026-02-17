@@ -235,7 +235,10 @@
             align-items: center;
             justify-content: flex-end;
             padding-right: 25px;
-            font-size: 0.85rem;
+            padding-left: 50px;
+            /* Avoid overlapping the center cap */
+            font-size: 0.75rem;
+            /* Slightly smaller for long text */
             font-weight: 900;
             color: #000;
             text-transform: uppercase;
@@ -617,7 +620,7 @@
         }
 
         // --- SPIN WHEEL LOGIC ---
-        const PRIZES = ["Slot Registrasi", "Ikan Random", "Pink Aurora", "Free Entry", "Merchandise", "Diamond Pack"];
+        const PRIZES = ["Diamond Pack", "Slot Registrasi", "Ikan Random", "Pink Aurora", "Free Entry", "Merchandise"];
         let currentRegId = null;
         let isSpinning = false;
         let currentPrize = "";
@@ -659,7 +662,8 @@
                 const label = document.createElement('div');
                 label.className = 'wheel-segment-label';
                 label.dataset.index = i;
-                label.style.transform = `translate(-50%, -50%) rotate(${i * 60 + 30}deg)`;
+                // Removed translate(-50%, -50%) because transform-origin is at 0% 50% (center of wheel)
+                label.style.transform = `rotate(${i * 60 + 30}deg)`;
                 label.innerHTML = `<span>${prize}</span>`;
                 wheel.appendChild(label);
             });
@@ -682,10 +686,10 @@
             wheel.style.transform = `rotate(${totalRotate}deg)`;
 
             setTimeout(() => {
-                // The position that lands at the top (marker) is:
-                // (270 - totalRotate) % 360
-                let landingDegree = (270 - totalRotate) % 360;
-                if (landingDegree < 0) landingDegree += 360;
+                // Marker is at TOP (0 deg). 
+                // When wheel rotates R degrees clockwise, the point landing at the marker 
+                // is the one that was at -R degrees.
+                let landingDegree = (360 - (totalRotate % 360)) % 360;
                 const prizeIndex = Math.floor(landingDegree / 60);
                 currentPrize = PRIZES[prizeIndex];
 
