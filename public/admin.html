@@ -159,6 +159,19 @@
         }
 
         @media (max-width: 768px) {
+            .admin-nav .container {
+                padding: 0.5rem 1rem !important;
+            }
+
+            .admin-nav .text-gradient {
+                font-size: 1.1rem !important;
+                letter-spacing: -1px !important;
+            }
+
+            .admin-nav .text-gradient span {
+                font-size: 0.9rem !important;
+            }
+
             .admin-grid {
                 gap: 1.25rem;
             }
@@ -183,16 +196,60 @@
             .stat-card div:last-child {
                 font-size: 1.75rem !important;
             }
+
+            .tab-btn {
+                padding: 0.5rem 0.85rem;
+                font-size: 0.75rem;
+            }
+
+            .tab-btn i {
+                font-size: 0.95rem;
+            }
         }
 
         @media (max-width: 480px) {
+            .admin-nav .container>div:first-child {
+                gap: 0.5rem !important;
+            }
+
+            .admin-nav .container>div:first-child>div:first-child {
+                width: 32px !important;
+                height: 32px !important;
+            }
+
+            .admin-nav .container>div:first-child>div:first-child i {
+                font-size: 1rem !important;
+            }
+
+            .admin-nav .text-gradient {
+                font-size: 1rem !important;
+                font-weight: 800 !important;
+            }
+
+            .admin-nav .text-gradient span {
+                font-size: 0.85rem !important;
+            }
+
             .grid-4 {
                 grid-template-columns: 1fr;
             }
 
             .tab-btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.75rem;
+                padding: 0.45rem 0.75rem;
+                font-size: 0.7rem;
+            }
+
+            .tab-btn i {
+                font-size: 0.9rem;
+            }
+
+            .action-btn {
+                width: 36px !important;
+                height: 36px !important;
+            }
+
+            .action-btn i {
+                font-size: 1.1rem !important;
             }
         }
     </style>
