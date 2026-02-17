@@ -421,7 +421,6 @@ async function initDb() {
             registration_tier TEXT,
             payment_amount INTEGER,
             spin_prize TEXT,
-            entry_number TEXT,
             status TEXT DEFAULT 'pending',
             score INTEGER,
             score_body INTEGER DEFAULT 0,
@@ -448,46 +447,8 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS has_spun BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS prize_redeemed BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS payment_proof_url TEXT");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS entry_number TEXT");
         } catch (migErr) {
             console.log("Migration columns check done.");
-        }
-
-        // Migrate existing entry numbers to new format (KELAS-0001)
-        try {
-            console.log("🔄 Migrating entry numbers to new format...");
-
-            // Get all unique contest classes
-            const classesResult = await pool.query(
-                'SELECT DISTINCT contest_class FROM contest_registrations WHERE contest_class IS NOT NULL ORDER BY contest_class'
-            );
-
-            for (const classRow of classesResult.rows) {
-                const contestClass = classRow.contest_class;
-
-                // Get all registrations for this class, ordered by creation date
-                const registrations = await pool.query(
-                    'SELECT id FROM contest_registrations WHERE contest_class = $1 ORDER BY created_at ASC',
-                    [contestClass]
-                );
-
-                // Re-number them sequentially
-                let counter = 1;
-                for (const reg of registrations.rows) {
-                    const newEntryNumber = `${contestClass}-${String(counter).padStart(4, '0')}`;
-                    await pool.query(
-                        'UPDATE contest_registrations SET entry_number = $1 WHERE id = $2',
-                        [newEntryNumber, reg.id]
-                    );
-                    counter++;
-                }
-
-                console.log(`✅ Updated ${registrations.rows.length} entries for class ${contestClass}`);
-            }
-
-            console.log("✅ Entry number migration completed!");
-        } catch (migErr) {
-            console.log("Entry number migration check done or already completed.");
         }
 
         // Events Table
@@ -588,77 +549,6 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
     }
 });
 
-
-// ADMIN: Manual Migration Endpoint for Entry Numbers
-app.post('/api/admin/migrate-entry-numbers', adminAuthMiddleware, async (req, res) => {
-    try {
-        console.log("🔄 Starting manual entry number migration...");
-
-        // Get all unique contest classes
-        const classesResult = await pool.query(
-            'SELECT DISTINCT contest_class FROM contest_registrations WHERE contest_class IS NOT NULL ORDER BY contest_class'
-        );
-
-        let totalUpdated = 0;
-
-        for (const classRow of classesResult.rows) {
-            const contestClass = classRow.contest_class;
-
-            // Get all registrations for this class, ordered by creation date
-            const registrations = await pool.query(
-                'SELECT id FROM contest_registrations WHERE contest_class = $1 ORDER BY created_at ASC',
-                [contestClass]
-            );
-
-            // Re-number them sequentially
-            let counter = 1;
-            for (const reg of registrations.rows) {
-                const newEntryNumber = `${contestClass}-${String(counter).padStart(4, '0')}`;
-                await pool.query(
-                    'UPDATE contest_registrations SET entry_number = $1 WHERE id = $2',
-                    [newEntryNumber, reg.id]
-                );
-                counter++;
-            }
-
-            totalUpdated += registrations.rows.length;
-            console.log(`✅ Updated ${registrations.rows.length} entries for class ${contestClass}`);
-        }
-
-        console.log(`✅ Migration completed! Total updated: ${totalUpdated}`);
-
-        res.json({
-            success: true,
-            message: 'Entry number migration completed successfully',
-            totalUpdated: totalUpdated
-        });
-
-    } catch (err) {
-        console.error('Migration error:', err);
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
-
-// ADMIN: Delete All Contest Registrations
-app.post('/api/admin/clear-entries', adminAuthMiddleware, async (req, res) => {
-    try {
-        console.log("🗑️ Deleting all contest registrations...");
-
-        const result = await pool.query('DELETE FROM contest_registrations');
-
-        console.log(`✅ Deleted ${result.rowCount} contest registrations`);
-
-        res.json({
-            success: true,
-            message: 'All contest registrations deleted successfully',
-            deletedCount: result.rowCount
-        });
-
-    } catch (err) {
-        console.error('Delete error:', err);
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
 
 
 // USER AUTHENTICATION & CONTEST ROUTES
@@ -817,18 +707,9 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         }
 
 
-
-        // Generate Entry Number: KELAS-XXXX (e.g., A1-0001)
-        const countResult = await pool.query(
-            'SELECT COUNT(*) FROM contest_registrations WHERE contest_class = $1',
-            [contestClass]
-        );
-        const sequenceNum = parseInt(countResult.rows[0].count) + 1;
-        const entryNumber = `${contestClass || 'X'}-${String(sequenceNum).padStart(4, '0')}`;
-
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url, entry_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
-            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl, entryNumber]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
+            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl]
         );
 
         res.json({ success: true, data: result.rows[0] });
@@ -971,25 +852,6 @@ app.post('/api/user/profile', userAuthMiddleware, async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 });
-
-// Get Single Registration by ID (for print card)
-app.get('/api/user/registrations/:id', userAuthMiddleware, async (req, res) => {
-    try {
-        const result = await pool.query(
-            'SELECT * FROM contest_registrations WHERE id = $1 AND user_id = $2',
-            [req.params.id, req.user.id]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ success: false, error: 'Registrasi tidak ditemukan' });
-        }
-
-        res.json({ success: true, data: result.rows[0] });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
-
 
 // --- ADMIN SPECIFIC ROUTES ---
 
