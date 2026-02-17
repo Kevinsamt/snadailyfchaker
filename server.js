@@ -14,13 +14,17 @@ const { Readable } = require('stream');
 require('dotenv').config();
 
 // Trigger redeploy to pick up new env vars
-// SECURITY: Strict configuration - System will fail if JWT_SECRET is missing
-const JWT_SECRET = process.env.JWT_SECRET || 'snadaily_temporary_secret_please_change';
+const JWT_SECRET = process.env.JWT_SECRET;
 
-if (!process.env.JWT_SECRET) {
-    console.warn("⚠️ WARNING: JWT_SECRET tidak ditemukan! Menggunakan kunci sementara.");
-    console.warn("Segera tambahkan JWT_SECRET di Vercel Dashboard agar data aman.");
+if (!JWT_SECRET) {
+    if (process.env.NODE_ENV === 'production') {
+        console.error("❌ FATAL: JWT_SECRET IS MISSING IN PRODUCTION!");
+        process.exit(1); // Stop server in production 
+    } else {
+        console.warn("⚠️ WARNING: JWT_SECRET missing. Using insecure fallback for local development.");
+    }
 }
+const ACTUAL_SECRET = JWT_SECRET || 'snadaily_dev_insecure_secret';
 
 
 const app = express();
@@ -79,7 +83,7 @@ const adminAuthMiddleware = (req, res, next) => {
 
     if (!token) return res.status(401).json({ error: 'Unauthorized Admin Access (Token missing)' });
 
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, ACTUAL_SECRET, (err, decoded) => {
         if (err || decoded.role !== 'admin') {
             return res.status(403).json({ error: 'Forbidden: Invalid or expired admin token' });
         }
@@ -95,7 +99,7 @@ const userAuthMiddleware = (req, res, next) => {
 
     if (!token) return res.status(401).json({ error: 'Sesi habis atau tidak valid. Silakan login kembali.' });
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    jwt.verify(token, ACTUAL_SECRET, (err, user) => {
         if (err) return res.status(403).json({ error: 'Sesi habis atau tidak valid.' });
         req.user = user;
         next();
@@ -179,8 +183,12 @@ app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
 
-        const isLocal = origin.includes('localhost');
-        const isAllowed = allowedOrigins.some(o => origin === o.trim() || origin.endsWith(o.trim().replace('https://', '')));
+        const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1');
+        const isAllowed = allowedOrigins.some(o => {
+            const cleanAllowed = o.trim().replace('https://', '').replace('http://', '');
+            const cleanOrigin = origin.replace('https://', '').replace('http://', '');
+            return cleanOrigin === cleanAllowed || cleanOrigin.endsWith('.' + cleanAllowed);
+        });
 
         if (isLocal || isAllowed) {
             callback(null, true);
@@ -191,12 +199,17 @@ app.use(cors({
     }
 }));
 
-// Input Sanitization Middleware (Basic XSS protection)
 const sanitizeInput = (req, res, next) => {
     const sanitize = (val) => {
         if (typeof val !== 'string') return val;
-        // More robust basic XSS prevention: escape < and > and remove script-like strings
-        return val.replace(/[<>]/g, '').replace(/javascript:/gi, '').replace(/on\w+=/gi, '');
+        // Advanced XSS prevention: remove tags and common attack patterns
+        return val
+            .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "") // Remove scripts
+            .replace(/<[^>]+>/g, "") // Remove all HTML tags
+            .replace(/javascript:/gi, "[blocked]")
+            .replace(/on\w+=/gi, "[blocked]")
+            .replace(/expression\(/gi, "[blocked]")
+            .trim();
     };
 
     if (req.body) {
@@ -511,10 +524,16 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
     const ADMIN_USER = process.env.ADMIN_USER || 'bettatumedan';
     const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'snadailybetta';
 
+    // SECURITY: Block default credentials in production
+    if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_USER || !process.env.ADMIN_PASSWORD)) {
+        console.error("❌ SECURITY ALERT: Default admin credentials used in production. ACCESS BLOCKED.");
+        return res.status(500).json({ success: false, message: 'Server Configuration Error (Contact Developer)' });
+    }
+
     if (username === ADMIN_USER && password === ADMIN_PASS) {
         const token = jwt.sign(
             { username: ADMIN_USER, role: 'admin' },
-            JWT_SECRET,
+            ACTUAL_SECRET,
             { expiresIn: '12h' }
         );
 
@@ -536,8 +555,16 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, password, fullName, phone } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
 
+        // SECURITY: Password Strength Validation
+        if (!password || password.length < 8) {
+            return res.status(400).json({ error: 'Password minimal 8 karakter!' });
+        }
+        if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+            return res.status(400).json({ error: 'Password harus mengandung huruf dan angka!' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
             'INSERT INTO users (username, password, full_name, phone) VALUES ($1, $2, $3, $4) RETURNING id, username, full_name',
             [username, hashedPassword, fullName, phone]
@@ -574,7 +601,7 @@ app.post('/api/auth/login', async (req, res) => {
 
         const token = jwt.sign(
             { id: user.id, username: user.username, role: user.role },
-            JWT_SECRET,
+            ACTUAL_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -647,15 +674,23 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         let photoUrl = null;
         let videoUrl = null;
 
-        // Upload Photo to Supabase
+        // Upload Photo to Supabase with MIME check
         if (req.files && req.files.fishPhoto) {
             const photo = req.files.fishPhoto[0];
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(photo.mimetype)) {
+                return res.status(400).json({ success: false, error: "Format foto tidak didukung. Gunakan JPG/PNG/WebP." });
+            }
             photoUrl = await uploadToSupabase(photo.buffer, photo.originalname, photo.mimetype);
         }
 
-        // Upload Video to Supabase
+        // Upload Video to Supabase with MIME check
         if (req.files && req.files.fishVideo) {
             const video = req.files.fishVideo[0];
+            const allowedTypes = ['video/mp4', 'video/quicktime', 'video/webm'];
+            if (!allowedTypes.includes(video.mimetype)) {
+                return res.status(400).json({ success: false, error: "Format video tidak didukung. Gunakan MP4/MOV/WebM." });
+            }
             videoUrl = await uploadToSupabase(video.buffer, video.originalname, video.mimetype);
         }
 
