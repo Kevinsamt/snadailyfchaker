@@ -490,15 +490,17 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 1999;
     display: none;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s ease;
 }
+
 
 .nav-overlay-backdrop.active {
     display: block;
