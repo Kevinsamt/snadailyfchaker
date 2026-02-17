@@ -655,7 +655,7 @@
                     const prizesWon = list.filter(r => r.spin_prize);
                     if (prizesWon.length > 0) {
                         document.getElementById('prizeList').innerHTML = prizesWon.map((reg, idx) => `
-                            <div class="glass-panel animate-fade-in" style="animation-delay: ${idx * 0.1}s; display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem; border-left: 4px solid #ffd700;">
+                            <div class="glass-panel animate-fade-in" style="animation-delay: ${idx * 0.1}s; display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem; border-left: 4px solid #ffd700; ${reg.prize_redeemed ? 'opacity: 0.7;' : ''}">
                                 <div style="width: 60px; height: 60px; background: rgba(255,215,0,0.1); border-radius: 12px; display: grid; place-items: center; color: #ffd700; font-size: 1.5rem;">
                                     <i class="ri-gift-fill"></i>
                                 </div>
@@ -664,9 +664,13 @@
                                     <h3 style="font-size: 1.2rem; font-weight: 900; margin: 0.2rem 0;">${reg.spin_prize}</h3>
                                     <div style="font-size: 0.8rem; color: var(--text-muted);">${reg.contest_name}</div>
                                 </div>
-                                <button onclick="claimSpecificPrize('${reg.spin_prize}', '${reg.fish_name}')" class="btn-primary" style="padding: 8px 15px; font-size: 0.75rem; background: #25D366; color: white; border: none;">
-                                    <i class="ri-whatsapp-line"></i> KLAIM
-                                </button>
+                                ${reg.prize_redeemed ? `
+                                    <span style="background: rgba(255,255,255,0.05); color: var(--text-muted); padding: 8px 15px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; border: 1px solid var(--glass-border);">SUDAH DIKLAIM</span>
+                                ` : `
+                                    <button onclick="claimSpecificPrize(${reg.id}, '${reg.spin_prize}', '${reg.fish_name}')" class="btn-primary" style="padding: 8px 15px; font-size: 0.75rem; background: #25D366; color: white; border: none;">
+                                        <i class="ri-whatsapp-line"></i> KLAIM
+                                    </button>
+                                `}
                             </div>
                         `).join('');
                     } else {
@@ -811,7 +815,16 @@
             }
         }
 
-        function claimViaWA() {
+        async function claimViaWA() {
+            const token = localStorage.getItem('sna_user_token');
+            // Mark current spin as redeemed
+            try {
+                await fetch(`/api/contest/registrations/${currentRegId}/redeem`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (err) { console.error("Redeem error:", err); }
+
             if (currentPrize === "+1 Entry Gratis") {
                 window.location.href = 'contest-entry.html?claim=free_entry';
                 return;
@@ -840,7 +853,19 @@
             }
         }
 
-        function claimSpecificPrize(prize, fish) {
+        async function claimSpecificPrize(id, prize, fish) {
+            const token = localStorage.getItem('sna_user_token');
+            // Mark as redeemed first
+            try {
+                const res = await fetch(`/api/contest/registrations/${id}/redeem`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    fetchRegistrations(); // Refresh UI
+                }
+            } catch (err) { console.error("Redeem error:", err); }
+
             if (prize === "+1 Entry Gratis") {
                 window.location.href = 'contest-entry.html?claim=free_entry';
                 return;

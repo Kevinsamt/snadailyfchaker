@@ -433,6 +433,7 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_form INTEGER DEFAULT 0");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_color INTEGER DEFAULT 0");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS has_spun BOOLEAN DEFAULT FALSE");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS prize_redeemed BOOLEAN DEFAULT FALSE");
         } catch (migErr) {
             console.log("Migration columns check done.");
         }
@@ -716,6 +717,27 @@ app.post('/api/contest/registrations/:id/spin', userAuthMiddleware, async (req, 
         );
 
         res.json({ success: true, message: 'Hadiah berhasil diklaim!', prize });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Redeem Spin Prize (Mark as Used)
+app.post('/api/contest/registrations/:id/redeem', userAuthMiddleware, async (req, res) => {
+    try {
+        const registrationId = req.params.id;
+
+        // Mark as redeemed
+        const result = await pool.query(
+            "UPDATE contest_registrations SET prize_redeemed = TRUE WHERE id = $1 AND user_id = $2 RETURNING prize_redeemed",
+            [registrationId, req.user.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Registrasi tidak ditemukan.' });
+        }
+
+        res.json({ success: true, message: 'Hadiah berhasil ditandai sebagai sudah diklaim.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
