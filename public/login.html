@@ -209,7 +209,12 @@
                         window.location.href = 'admin.html';
                     } else if (data.role === 'judge') {
                         localStorage.setItem('sna_user_token', data.token);
-                        window.location.href = 'judge-scoring.html';
+                        localStorage.setItem('sna_user_data', JSON.stringify({
+                            username: data.user.username,
+                            fullName: data.user.fullName,
+                            role: 'judge'
+                        }));
+                        window.location.href = 'judge.html';
                     } else {
                         localStorage.setItem('sna_user_token', data.token);
                         localStorage.setItem('sna_user_data', JSON.stringify({
