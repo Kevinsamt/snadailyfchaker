@@ -429,17 +429,47 @@
 
             <!-- Main Content -->
             <main>
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                    <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;"></div>
-                    <h2 style="font-size: 1.75rem; font-weight: 800;">Riwayat <span class="text-gradient">Kontes</span>
-                    </h2>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 5px;"
+                    class="hide-scrollbar">
+                    <button id="tabContests" onclick="switchDashboardTab('contests')" class="tab-btn active"
+                        style="flex: 1; min-width: 140px;">
+                        <i class="ri-history-line"></i> Riwayat Kontes
+                    </button>
+                    <button id="tabPrizes" onclick="switchDashboardTab('prizes')" class="tab-btn"
+                        style="flex: 1; min-width: 140px;">
+                        <i class="ri-gift-line"></i> Hadiah Saya
+                    </button>
                 </div>
 
-                <div id="registrationList" class="grid" style="grid-template-columns: 1fr;">
-                    <div style="text-align: center; padding: 5rem; color: var(--text-muted);">
-                        <i class="ri-loader-3-line ri-spin"
-                            style="font-size: 2.5rem; color: var(--primary); display: block; margin-bottom: 1rem;"></i>
-                        Memuat riwayat pendaftaran...
+                <!-- Contests Section -->
+                <div id="sectionContests" class="tab-section active animate-fade-in">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;"></div>
+                        <h2 style="font-size: 1.5rem; font-weight: 800;">Riwayat <span
+                                class="text-gradient">Kontes</span></h2>
+                    </div>
+                    <div id="registrationList" class="grid" style="grid-template-columns: 1fr; gap: 1rem;">
+                        <div style="text-align: center; padding: 5rem; color: var(--text-muted);">
+                            <i class="ri-loader-3-line ri-spin"
+                                style="font-size: 2.5rem; color: var(--primary); display: block; margin-bottom: 1rem;"></i>
+                            Memuat riwayat pendaftaran...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prizes Section -->
+                <div id="sectionPrizes" class="tab-section animate-fade-in" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="width: 4px; height: 24px; background: #ffd700; border-radius: 10px;"></div>
+                        <h2 style="font-size: 1.5rem; font-weight: 800;">Hadiah <span class="text-gradient"
+                                style="background: linear-gradient(135deg, #ffd700, #fff);">Saya</span></h2>
+                    </div>
+                    <div id="prizeList" class="grid" style="grid-template-columns: 1fr; gap: 1rem;">
+                        <div style="text-align: center; padding: 5rem; color: var(--text-muted);">
+                            <i class="ri-loader-3-line ri-spin"
+                                style="font-size: 2.5rem; color: #ffd700; display: block; margin-bottom: 1rem;"></i>
+                            Memuat daftar hadiah...
+                        </div>
                     </div>
                 </div>
             </main>
@@ -580,6 +610,7 @@
                     document.getElementById('totalReg').innerText = list.length;
                     document.getElementById('approvedReg').innerText = list.filter(r => r.status === 'approved').length;
 
+                    // Populate Contests
                     if (list.length > 0) {
                         document.getElementById('registrationList').innerHTML = list.map((reg, idx) => {
                             const isDiamond = reg.registration_tier && reg.registration_tier.toLowerCase() === 'diamond';
@@ -612,6 +643,30 @@
                                 </div>
                             `;
                         }).join('');
+                    } else {
+                        document.getElementById('registrationList').innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-muted);">Belum ada riwayat pendaftaran.</div>';
+                    }
+
+                    // Populate Prizes
+                    const prizesWon = list.filter(r => r.spin_prize);
+                    if (prizesWon.length > 0) {
+                        document.getElementById('prizeList').innerHTML = prizesWon.map((reg, idx) => `
+                            <div class="glass-panel animate-fade-in" style="animation-delay: ${idx * 0.1}s; display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem; border-left: 4px solid #ffd700;">
+                                <div style="width: 60px; height: 60px; background: rgba(255,215,0,0.1); border-radius: 12px; display: grid; place-items: center; color: #ffd700; font-size: 1.5rem;">
+                                    <i class="ri-gift-fill"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 0.75rem; font-weight: 800; color: #ffd700; text-transform: uppercase;">SAAT PENDAFTARAN: ${reg.fish_name}</div>
+                                    <h3 style="font-size: 1.2rem; font-weight: 900; margin: 0.2rem 0;">${reg.spin_prize}</h3>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">${reg.contest_name}</div>
+                                </div>
+                                <button onclick="claimSpecificPrize('${reg.spin_prize}', '${reg.fish_name}')" class="btn-primary" style="padding: 8px 15px; font-size: 0.75rem; background: #25D366; color: white; border: none;">
+                                    <i class="ri-whatsapp-line"></i> KLAIM
+                                </button>
+                            </div>
+                        `).join('');
+                    } else {
+                        document.getElementById('prizeList').innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-muted);">Cak belum punya hadiah simpanan.</div>';
                     }
                 }
             } catch (err) {
@@ -739,6 +794,25 @@
         function finalCloseWheel() {
             document.getElementById('wheelOverlay').style.display = 'none';
             document.getElementById('prizeResultOverlay').style.display = 'none';
+        }
+
+        function switchDashboardTab(tab) {
+            document.querySelectorAll('.tab-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            if (tab === 'contests') {
+                document.getElementById('sectionContests').style.display = 'block';
+                document.getElementById('tabContests').classList.add('active');
+            } else {
+                document.getElementById('sectionPrizes').style.display = 'block';
+                document.getElementById('tabPrizes').classList.add('active');
+            }
+        }
+
+        function claimSpecificPrize(prize, fish) {
+            const msg = `Halo Admin SnaDaily! Saya mau klaim hadiah *${prize}* dari pendaftaran ikan *${fish}*. Mohon dibantu proses ya Cak!`;
+            const adminWA = "6281362002517";
+            window.open(`https://wa.me/${adminWA}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function openModal() { document.getElementById('editModal').style.display = 'flex'; }
