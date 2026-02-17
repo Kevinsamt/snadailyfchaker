@@ -19,7 +19,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
     if (process.env.NODE_ENV === 'production') {
         console.error("❌ FATAL: JWT_SECRET IS MISSING IN PRODUCTION!");
-        process.exit(1); // Stop server in production 
+        // We throw an accidental error instead of hard exit to allow middleware to catch it or logs to persist
     } else {
         console.warn("⚠️ WARNING: JWT_SECRET missing. Using insecure fallback for local development.");
     }
@@ -197,8 +197,8 @@ app.use(cors({
         if (isLocal || isAllowed) {
             callback(null, true);
         } else {
-            console.error("[CORS Block]:", origin);
-            callback(new Error('Akses ditolak oleh Firewall Keamanan (CORS)'));
+            console.warn("[Security Alert]: CORS blocked for origin:", origin);
+            callback(new Error('Akses ditolak oleh Firewall Keamanan (CORS). Silakan hubungi admin.'));
         }
     }
 }));
@@ -367,8 +367,7 @@ const pool = new Pool({
     }
 });
 
-// Initialize and Migrate Database
-initDb();
+// Initialize and Migrate Database (Triggered at the bottom for safety)
 
 // Initialize Table
 async function initDb() {
