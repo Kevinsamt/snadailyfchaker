@@ -639,20 +639,19 @@ app.post('/api/admin/migrate-entry-numbers', adminAuthMiddleware, async (req, re
     }
 });
 
-
 // ADMIN: Delete All Contest Registrations
-app.post('/api/admin/delete-all-registrations', adminAuthMiddleware, async (req, res) => {
+app.post('/api/admin/clear-entries', adminAuthMiddleware, async (req, res) => {
     try {
         console.log("🗑️ Deleting all contest registrations...");
 
         const result = await pool.query('DELETE FROM contest_registrations');
 
-        console.log(`✅ Deleted ${result.rowCount} registrations`);
+        console.log(`✅ Deleted ${result.rowCount} contest registrations`);
 
         res.json({
             success: true,
             message: 'All contest registrations deleted successfully',
-            deleted: result.rowCount
+            deletedCount: result.rowCount
         });
 
     } catch (err) {
