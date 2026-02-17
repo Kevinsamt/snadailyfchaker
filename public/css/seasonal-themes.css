@@ -1,160 +1,202 @@
 /* 
-   Seasonal Themes - Imlek 2026 
-   Nuansa Merah & Emas dengan dekorasi Lampion
+   Seasonal Themes - Ramadhan 2026 
+   Nuansa Hijau Islami & Emas dengan dekorasi Bulan Bintang
 */
 
-:root.theme-imlek {
+:root.theme-ramadhan {
     --primary: #FFD700;
     /* Gold */
     --primary-glow: rgba(255, 215, 0, 0.4);
-    --secondary: #FF4D4D;
-    /* Light Red */
-    --secondary-glow: rgba(255, 77, 77, 0.3);
-    --accent: #FF0000;
-    /* Bright Red */
-    --bg-dark: #2a0505;
-    /* Deep Maroon */
-    --bg-deep: #1a0303;
-    --bg-card: rgba(139, 0, 0, 0.15);
-    --glass-bg: rgba(139, 0, 0, 0.2);
+    --secondary: #00A86B;
+    /* Islamic Green */
+    --secondary-glow: rgba(0, 168, 107, 0.3);
+    --accent: #E8F5E9;
+    /* Soft Green */
+    --bg-dark: #0a1e1a;
+    /* Deep Green */
+    --bg-deep: #051410;
+    --bg-card: rgba(0, 168, 107, 0.1);
+    --glass-bg: rgba(0, 168, 107, 0.15);
     --glass-border: rgba(255, 215, 0, 0.2);
     --glass-border-bright: rgba(255, 215, 0, 0.4);
 }
 
-.theme-imlek body {
+.theme-ramadhan body {
     background-color: var(--bg-dark);
     background-image:
-        radial-gradient(circle at 0% 0%, rgba(255, 215, 0, 0.1) 0%, transparent 40%),
-        radial-gradient(circle at 100% 100%, rgba(255, 0, 0, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 0% 0%, rgba(255, 215, 0, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(0, 168, 107, 0.1) 0%, transparent 40%),
         radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
         linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.7));
 }
 
-/* Lampion Decoration */
-.theme-imlek .lampion-container {
+/* Crescent Moon & Stars Decoration */
+.theme-ramadhan .celestial-container {
     position: fixed;
-    top: -40px;
-    /* Move higher to stay away from text */
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 100px;
+    height: 100%;
     pointer-events: none;
     z-index: -1;
-    /* Place behind all content to ensure visibility of text */
-    display: flex;
-    justify-content: space-around;
     overflow: hidden;
 }
 
-/* Hide some lampions on mobile to reduce clutter */
+/* Crescent Moon */
+.theme-ramadhan .crescent-moon {
+    position: absolute;
+    top: 60px;
+    right: 80px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    box-shadow:
+        inset 20px -10px 0 0 #FFD700,
+        0 0 30px rgba(255, 215, 0, 0.3);
+    animation: moonGlow 4s ease-in-out infinite alternate;
+}
+
+@media (max-width: 768px) {
+    .theme-ramadhan .crescent-moon {
+        width: 50px;
+        height: 50px;
+        top: 40px;
+        right: 40px;
+        box-shadow:
+            inset 15px -8px 0 0 #FFD700,
+            0 0 20px rgba(255, 215, 0, 0.3);
+    }
+}
+
+@keyframes moonGlow {
+    from {
+        filter: brightness(1);
+    }
+
+    to {
+        filter: brightness(1.3);
+    }
+}
+
+/* Stars */
+.theme-ramadhan .star {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #FFD700;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    animation: twinkle 3s ease-in-out infinite;
+}
+
+.theme-ramadhan .star:nth-child(1) {
+    top: 100px;
+    left: 15%;
+    animation-delay: 0s;
+}
+
+.theme-ramadhan .star:nth-child(2) {
+    top: 150px;
+    left: 25%;
+    animation-delay: 0.5s;
+}
+
+.theme-ramadhan .star:nth-child(3) {
+    top: 120px;
+    right: 20%;
+    animation-delay: 1s;
+}
+
+.theme-ramadhan .star:nth-child(4) {
+    top: 180px;
+    right: 30%;
+    animation-delay: 1.5s;
+}
+
+.theme-ramadhan .star:nth-child(5) {
+    top: 200px;
+    left: 40%;
+    animation-delay: 2s;
+}
+
 @media (max-width: 640px) {
-    .theme-imlek .lampion:nth-child(n+5) {
+    .theme-ramadhan .star:nth-child(n+4) {
         display: none !important;
     }
 }
 
-@media (min-width: 768px) {
-    .theme-imlek .lampion-container {
-        top: -10px;
-        height: 350px;
-        z-index: 999;
+@keyframes twinkle {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.3);
     }
 }
 
-.theme-imlek .lampion {
-    width: 35px;
-    /* Even smaller on mobile */
-    height: 45px;
-    background: #FF0000;
-    border-radius: 40% 40% 40% 40% / 15% 15% 15% 15%;
-    position: relative;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.4), inset 0 0 8px rgba(255, 215, 0, 0.2);
-    animation: swing 4s ease-in-out infinite alternate;
-    transform-origin: top center;
-}
-
-@media (min-width: 768px) {
-    .theme-imlek .lampion {
-        width: 60px;
-        height: 80px;
-    }
-}
-
-.theme-imlek .lampion::before {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    width: 2px;
-    height: 25px;
-    background: #d4af37;
-}
-
-.theme-imlek .lampion::after {
-    content: '';
-    position: absolute;
-    bottom: -15px;
-    left: 10%;
-    width: 80%;
-    height: 15px;
-    background: repeating-linear-gradient(to right, #d4af37, #d4af37 2px, transparent 2px, transparent 4px);
-}
-
-.theme-imlek .lampion-gold-band {
-    position: absolute;
-    width: 100%;
-    height: 6px;
-    /* Thinner bands */
-    background: #d4af37;
-    top: 15%;
-    left: 0;
-    box-shadow: 0 35px 0 #d4af37;
-}
-
-@keyframes swing {
-    from {
-        transform: rotate(-5deg);
-    }
-
-    to {
-        transform: rotate(5deg);
-    }
-}
-
-/* Character Calligraphy - Subtle Watermark */
-.theme-imlek::after {
-    content: '福';
+/* Islamic Pattern Watermark */
+.theme-ramadhan::after {
+    content: '☪';
     position: fixed;
     bottom: 40px;
     right: 40px;
     font-size: 10vw;
-    color: rgba(255, 215, 0, 0.02);
+    color: rgba(255, 215, 0, 0.03);
     font-family: serif;
     pointer-events: none;
     z-index: -1;
 }
 
 @media (min-width: 1200px) {
-    .theme-imlek::after {
+    .theme-ramadhan::after {
         font-size: 15rem;
         bottom: 60px;
         right: 60px;
     }
 }
 
-/* Adjusting elements for Imlek */
-.theme-imlek .btn-primary {
-    background: linear-gradient(135deg, #FFD700, #b8860b);
+/* Adjusting elements for Ramadhan */
+.theme-ramadhan .btn-primary {
+    background: linear-gradient(135deg, #FFD700, #00A86B);
 }
 
-.theme-imlek .glass-panel {
+.theme-ramadhan .glass-panel {
     border-color: rgba(255, 215, 0, 0.15);
 }
 
-.theme-imlek .text-gradient {
+.theme-ramadhan .text-gradient {
     display: inline-block;
-    background: linear-gradient(to right, #FFD700, #FF4500);
+    background: linear-gradient(to right, #FFD700, #00A86B);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
+}
+
+/* Mosque Silhouette (Optional subtle background) */
+.theme-ramadhan .mosque-silhouette {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 150px;
+    background: linear-gradient(to top, rgba(0, 168, 107, 0.1), transparent);
+    clip-path: polygon(50% 0%,
+            45% 20%, 40% 20%, 40% 100%, 60% 100%, 60% 20%, 55% 20%);
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+@media (max-width: 768px) {
+    .theme-ramadhan .mosque-silhouette {
+        width: 200px;
+        height: 100px;
+    }
 }
