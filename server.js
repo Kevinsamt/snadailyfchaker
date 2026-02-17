@@ -589,6 +589,56 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
 });
 
 
+// ADMIN: Manual Migration Endpoint for Entry Numbers
+app.post('/api/admin/migrate-entry-numbers', adminAuthMiddleware, async (req, res) => {
+    try {
+        console.log("🔄 Starting manual entry number migration...");
+
+        // Get all unique contest classes
+        const classesResult = await pool.query(
+            'SELECT DISTINCT contest_class FROM contest_registrations WHERE contest_class IS NOT NULL ORDER BY contest_class'
+        );
+
+        let totalUpdated = 0;
+
+        for (const classRow of classesResult.rows) {
+            const contestClass = classRow.contest_class;
+
+            // Get all registrations for this class, ordered by creation date
+            const registrations = await pool.query(
+                'SELECT id FROM contest_registrations WHERE contest_class = $1 ORDER BY created_at ASC',
+                [contestClass]
+            );
+
+            // Re-number them sequentially
+            let counter = 1;
+            for (const reg of registrations.rows) {
+                const newEntryNumber = `${contestClass}-${String(counter).padStart(4, '0')}`;
+                await pool.query(
+                    'UPDATE contest_registrations SET entry_number = $1 WHERE id = $2',
+                    [newEntryNumber, reg.id]
+                );
+                counter++;
+            }
+
+            totalUpdated += registrations.rows.length;
+            console.log(`✅ Updated ${registrations.rows.length} entries for class ${contestClass}`);
+        }
+
+        console.log(`✅ Migration completed! Total updated: ${totalUpdated}`);
+
+        res.json({
+            success: true,
+            message: 'Entry number migration completed successfully',
+            totalUpdated: totalUpdated
+        });
+
+    } catch (err) {
+        console.error('Migration error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 
 // USER AUTHENTICATION & CONTEST ROUTES
 
