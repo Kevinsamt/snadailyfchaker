@@ -234,18 +234,19 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            padding-right: 25px;
+            padding-right: 35px;
+            /* Increased padding from edge */
             padding-left: 50px;
-            /* Avoid overlapping the center cap */
-            font-size: 0.75rem;
-            /* Slightly smaller for long text */
+            font-size: 0.65rem;
+            /* Even smaller to avoid "keluar-keluar" */
             font-weight: 900;
             color: #000;
             text-transform: uppercase;
             pointer-events: none;
+            letter-spacing: -0.2px;
         }
 
-        .wheel-segment-label[data-index="5"] {
+        .wheel-segment-label[data-index="0"] {
             color: #fff;
         }
 
@@ -675,7 +676,7 @@
         }
 
         // --- SPIN WHEEL LOGIC ---
-        const PRIZES = ["Diamond Pack", "Slot Registrasi", "Ikan Random", "Pink Aurora", "Free Entry", "Merchandise"];
+        const PRIZES = ["Merchandise", "Diamond Pack", "Slot Registrasi", "Ikan Random", "Pink Aurora", "Free Entry"];
         let currentRegId = null;
         let isSpinning = false;
         let currentPrize = "";
@@ -717,8 +718,9 @@
                 const label = document.createElement('div');
                 label.className = 'wheel-segment-label';
                 label.dataset.index = i;
-                // Removed translate(-50%, -50%) because transform-origin is at 0% 50% (center of wheel)
-                label.style.transform = `rotate(${i * 60 + 30}deg)`;
+                // Center of slice i is (i * 60 + 30) deg from 12 o'clock.
+                // rotate() 0 deg is 3 o'clock, so subtract 90.
+                label.style.transform = `rotate(${i * 60 + 30 - 90}deg)`;
                 label.innerHTML = `<span>${prize}</span>`;
                 wheel.appendChild(label);
             });
@@ -741,9 +743,9 @@
             wheel.style.transform = `rotate(${totalRotate}deg)`;
 
             setTimeout(() => {
-                // Marker is at TOP (0 deg). 
-                // When wheel rotates R degrees clockwise, the point landing at the marker 
-                // is the one that was at -R degrees.
+                // Marker is at TOP (12 o'clock).
+                // totalRotate is how much the wheel moved clockwise.
+                // landingDegree is where the marker is pointing on the original wheel map.
                 let landingDegree = (360 - (totalRotate % 360)) % 360;
                 const prizeIndex = Math.floor(landingDegree / 60);
                 currentPrize = PRIZES[prizeIndex];
