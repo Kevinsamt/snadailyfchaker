@@ -87,29 +87,27 @@
                         <h2 style="font-size: 1.5rem; font-weight: 800;">Pendaftaran <span
                                 class="text-gradient">Terkini</span></h2>
                     </div>
-                    <button onclick="testDriveConnection()" class="tab-btn"
-                        style="font-size: 0.75rem; border-color: var(--primary); color: var(--primary);">
-                        <i class="ri-google-fill"></i> Test Google Drive
-                    </button>
                 </div>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 0 10px;">
-                        <thead>
-                            <tr
-                                style="text-align: left; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">
-                                <th style="padding: 0 1rem;">User</th>
-                                <th style="padding: 0 1rem;">Ikan</th>
-                                <th style="padding: 0 1rem;">Event</th>
-                                <th style="padding: 0 1rem;">Waktu</th>
-                                <th style="padding: 0 1rem;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pendingTableBody">
-                            <!-- Data populated by JS -->
-                        </tbody>
-                    </table>
-                </div>
+                <!-- Legacy Google Drive Button Removed -->
             </div>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0 10px;">
+                    <thead>
+                        <tr
+                            style="text-align: left; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">
+                            <th style="padding: 0 1rem;">User</th>
+                            <th style="padding: 0 1rem;">Ikan</th>
+                            <th style="padding: 0 1rem;">Event</th>
+                            <th style="padding: 0 1rem;">Waktu</th>
+                            <th style="padding: 0 1rem;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingTableBody">
+                        <!-- Data populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
         </div>
 
         <!-- Section: Fish Data -->
@@ -494,24 +492,6 @@
                 }
             }
 
-            async function testDriveConnection() {
-                const token = sessionStorage.getItem('sna_admin_token');
-                try {
-                    const res = await fetch('/api/admin/debug-drive', { headers: { 'Authorization': `Bearer ${token}` } });
-                    const data = await res.json();
-                    if (data.success) {
-                        alert(`BERHASIL! ✅\nFolder: ${data.folderName}\nID: ${data.folderId}`);
-                    } else {
-                        let msg = `GAGAL! ❌\nError: ${data.error}\nDetail: ${JSON.stringify(data.details)}`;
-                        if (data.diagnostics) {
-                            msg += `\n\nDIAGNOSA:\n- Panjang Kunci: ${data.diagnostics.keyLength}\n- Header OKE: ${data.diagnostics.keyValidHeader}\n- Footer OKE: ${data.diagnostics.keyValidFooter}`;
-                        }
-                        alert(msg);
-                    }
-                } catch (err) {
-                    alert('Error Koneksi: ' + err.message);
-                }
-            }
 
             async function quickAction(id, status) {
                 const token = sessionStorage.getItem('sna_admin_token');
