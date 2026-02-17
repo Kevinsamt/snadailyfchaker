@@ -39,8 +39,10 @@
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-bottom: 1px solid var(--glass-border);
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
             width: 100%;
         }
@@ -294,7 +296,7 @@
         </div>
     </nav>
 
-    <main class="container" style="padding-top: 1rem;">
+    <main class="container" style="padding-top: 140px;">
         <!-- Dashboard Overview -->
         <div id="section-overview" class="admin-section active animate-fade-in">
             <div class="grid grid-4 mb-4">
