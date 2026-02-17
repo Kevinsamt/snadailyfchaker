@@ -16,118 +16,111 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         body {
-            background: var(--bg-dark);
+            background: radial-gradient(circle at 50% 0%, #0a192f 0%, #010409 100%);
             min-height: 100vh;
         }
 
         .scoring-card {
-            background: var(--glass-premium);
-            backdrop-filter: blur(40px);
-            border: 1px solid var(--glass-premium-border);
-            border-radius: 30px;
-            padding: 2.5rem;
-            box-shadow: var(--shadow-diffuse);
-            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
         }
 
         .criteria-row {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-bottom: 1.25rem;
-            border: 1px solid var(--glass-premium-border);
-            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            transition: all 0.3s;
         }
 
         .criteria-row:hover {
-            background: var(--glass-premium-bright);
-            border-color: var(--primary);
-            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 212, 255, 0.3);
         }
 
         .range-slider {
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.05);
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             outline: none;
-            margin: 20px 0;
+            margin: 15px 0;
         }
 
         .range-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             background: var(--primary);
             cursor: pointer;
             border-radius: 50%;
-            box-shadow: 0 0 15px var(--primary-glow);
-            transition: var(--transition);
-            border: 3px solid white;
+            box-shadow: 0 0 10px var(--primary);
+            transition: all 0.2s;
         }
 
         .range-slider::-webkit-slider-thumb:hover {
             transform: scale(1.2);
-            box-shadow: 0 0 25px var(--primary-glow);
         }
 
         .entry-card-mini {
-            background: var(--glass-premium);
-            border: 1px solid var(--glass-premium-border);
-            border-radius: 20px;
-            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1rem;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s;
             display: flex;
             align-items: center;
-            gap: 1.25rem;
+            gap: 1rem;
         }
 
         .entry-card-mini:hover {
-            background: var(--glass-premium-bright);
+            background: rgba(255, 255, 255, 0.08);
             border-color: var(--primary);
-            transform: translateX(10px) translateY(-2px);
-            box-shadow: var(--shadow-float);
+            transform: translateX(5px);
         }
 
         .entry-card-mini.active {
             background: rgba(0, 212, 255, 0.1);
             border-color: var(--primary);
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
         }
 
         .total-score-display {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 900;
             line-height: 1;
-            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
         }
 
         .compare-item {
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
-            background: var(--glass-premium);
-            border: 1px solid var(--glass-premium-border);
-            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s;
         }
 
         .compare-item:hover {
             border-color: var(--primary);
-            transform: translateY(-10px);
-            box-shadow: var(--shadow-float);
+            transform: scale(1.02);
         }
 
         .judge-scoring-main {
             display: grid;
-            grid-template-columns: 1fr 480px;
-            gap: 2.5rem;
+            grid-template-columns: 1fr 450px;
+            gap: 2rem;
             margin-top: 2rem;
             padding-bottom: 5rem;
         }
@@ -277,10 +270,10 @@
                             style="width: 100%; aspect-ratio: 16/9; height: auto; display: none; object-fit: contain; background: #000;"></video>
 
                         <div id="mediaToggleContainer"
-                            style="position: absolute; bottom: 1.5rem; right: 1.5rem; display: none; z-index: 10;">
+                            style="position: absolute; bottom: 1rem; right: 1rem; display: none;">
                             <button id="mediaToggleBtn" onclick="toggleMedia()" class="btn-primary"
-                                style="font-size: 0.8rem; padding: 12px 24px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-float); border: 1px solid rgba(255,255,255,0.3); font-weight: 800; letter-spacing: 1px;">
-                                <i class="ri-play-mini-fill" style="font-size: 1.4rem;"></i> LIHAT VIDEO
+                                style="font-size: 0.75rem; padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);">
+                                <i class="ri-play-circle-fill" style="font-size: 1.2rem;"></i> LIAT VIDEO
                             </button>
                         </div>
                     </div>
@@ -450,47 +443,27 @@
             }
 
             // List View
-            entriesList.innerHTML = list.map((entry, index) => `
-                <div class="entry-card-mini animate-reveal ${entry.id == document.getElementById('selectedEntryId').value ? 'active' : ''}" 
+            entriesList.innerHTML = list.map(entry => `
+                <div class="entry-card-mini animate-fade-in ${entry.id == document.getElementById('selectedEntryId').value ? 'active' : ''}" 
                     onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})"
-                    style="animation-delay: ${index * 0.05}s; ${entry.score ? 'border-left: 4px solid var(--secondary);' : ''}">
-                    <div style="width: 70px; height: 70px; border-radius: 14px; overflow: hidden; border: 1px solid var(--glass-premium-border); flex-shrink: 0;">
-                        <img src="${escapeHTML(entry.fish_image_url)}" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
+                    style="${entry.score ? 'border-left: 4px solid var(--secondary);' : ''}">
+                    <img src="${escapeHTML(entry.fish_image_url)}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
                     <div style="flex: 1;">
-                        <div style="font-weight: 900; font-size: 1.1rem; color: white; letter-spacing: -0.5px;">${escapeHTML(entry.fish_name)}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-top: 4px;">
-                            ${escapeHTML(entry.team_name || entry.contestant_name)} • <span style="color: var(--primary)">${escapeHTML(entry.fish_type)}</span>
-                        </div>
+                        <div style="font-weight: 800; font-size: 1rem;">${escapeHTML(entry.fish_name)}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(entry.team_name || entry.contestant_name)} • ${escapeHTML(entry.fish_type)}</div>
                     </div>
-                    ${entry.score ? `
-                        <div style="text-align: right; background: rgba(0,255,136,0.1); padding: 8px 15px; border-radius: 12px; border: 1px solid rgba(0,255,136,0.2);">
-                            <div style="font-size: 0.6rem; color: var(--secondary); font-weight: 900; letter-spacing: 1px;">TOTAL</div>
-                            <div style="color: var(--secondary); font-weight: 900; font-size: 1.4rem; line-height: 1;">${entry.score}</div>
-                        </div>
-                    ` : `
-                        <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.05); border-radius: 10px; display: grid; place-items: center; color: var(--text-muted);">
-                            <i class="ri-edit-2-line"></i>
-                        </div>
-                    `}
+                    ${entry.score ? `<div style="text-align: right;"><div style="font-size: 0.6rem; color: var(--text-muted); font-weight: 700;">TOTAL</div><div style="color: var(--primary); font-weight: 900; font-size: 1.2rem;">${entry.score}</div></div>` : '<i class="ri-edit-2-line" style="color: var(--text-muted);"></i>'}
                 </div>
             `).join('');
 
             // Grid View
-            compareGrid.innerHTML = list.map((entry, index) => `
-                <div class="compare-item animate-reveal" onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})" 
-                    style="cursor: pointer; position: relative; animation-delay: ${index * 0.05}s; ${entry.id == document.getElementById('selectedEntryId').value ? 'border: 2px solid var(--primary); transform: translateY(-5px);' : ''}">
-                    <div style="aspect-ratio: 4/3; overflow: hidden; position: relative;">
-                        <img src="${escapeHTML(entry.fish_image_url)}" style="width: 100%; height: 100%; object-fit: cover;">
-                        ${entry.score ? `
-                            <div style="position: absolute; top: 10px; right: 10px; background: var(--secondary); color: #000; font-weight: 900; padding: 4px 10px; border-radius: 8px; font-size: 0.9rem; box-shadow: 0 5px 15px rgba(0,255,136,0.4);">
-                                ${entry.score}
-                            </div>
-                        ` : ''}
-                    </div>
-                    <div style="padding: 1.25rem;">
-                        <div style="font-weight: 900; font-size: 1rem; color: white; letter-spacing: -0.5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${escapeHTML(entry.fish_name)}</div>
-                        <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-top: 4px;">${escapeHTML(entry.fish_type)}</div>
+            compareGrid.innerHTML = list.map(entry => `
+                <div class="compare-item animate-fade-in" onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})" style="cursor: pointer; position: relative; ${entry.id == document.getElementById('selectedEntryId').value ? 'border: 2px solid var(--primary);' : ''}">
+                    <img src="${escapeHTML(entry.fish_image_url)}" style="width: 100%; height: 150px; object-fit: cover;">
+                    <div style="padding: 1rem;">
+                        <div style="font-weight: 800; font-size: 0.9rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${escapeHTML(entry.fish_name)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(entry.fish_type)}</div>
+                        ${entry.score ? `<div style="margin-top: 8px; font-weight: 900; color: var(--primary); font-size: 1.1rem;">${entry.score}</div>` : ''}
                     </div>
                 </div>
             `).join('');

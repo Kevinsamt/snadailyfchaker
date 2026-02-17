@@ -28,100 +28,118 @@
         }
 
         .admin-nav {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border-bottom: 1px solid var(--glass-premium-border);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
             position: sticky;
             top: 0;
             z-index: 1000;
-            padding: 0.75rem 0;
+            padding: 0.5rem 0;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+            scrollbar-width: none;
+        }
+
+        .tab-container::-webkit-scrollbar {
+            display: none;
         }
 
         .tab-btn {
-            background: var(--glass-premium);
-            border: 1px solid var(--glass-premium-border);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
             color: var(--text-muted);
-            padding: 0.75rem 1.5rem;
-            border-radius: 14px;
+            padding: 0.6rem 1.25rem;
+            border-radius: 12px;
             font-size: 0.85rem;
-            font-weight: 700;
-            transition: var(--transition);
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
             white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+        }
+
+        .tab-btn i {
+            font-size: 1.1rem;
         }
 
         .tab-btn.active {
             background: var(--admin-primary);
             color: #000;
             border-color: var(--admin-primary);
-            box-shadow: 0 0 25px rgba(0, 212, 255, 0.4);
-            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            transform: translateY(-1px);
         }
 
         .stat-card {
-            background: var(--glass-premium);
-            border: 1px solid var(--glass-premium-border);
-            border-top: 4px solid var(--accent, var(--admin-primary)) !important;
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            background: var(--glass-premium-bright);
-            box-shadow: var(--shadow-float);
+            border-top: 4px solid var(--accent, var(--admin-primary));
         }
 
         .admin-table-container {
-            background: var(--glass-premium);
+            background: rgba(15, 23, 42, 0.4);
             backdrop-filter: blur(40px);
-            border: 1px solid var(--glass-premium-border);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
             overflow: hidden;
             margin-top: 1.5rem;
-            box-shadow: var(--shadow-diffuse);
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
         .admin-table th {
             text-align: left;
-            padding: 1.5rem 1.25rem;
+            padding: 1.25rem 1rem;
             color: var(--text-muted);
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid var(--glass-premium-border);
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .admin-table td {
-            padding: 1.5rem 1.25rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             vertical-align: middle;
-            transition: var(--transition);
         }
 
-        .admin-table tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-section {
+            display: none;
+            padding: 2rem 0 5rem;
+        }
+
+        .admin-section.active {
+            display: block;
         }
 
         .action-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: grid;
             place-items: center;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--glass-premium-border);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
             color: white;
-            transition: var(--transition);
+            transition: all 0.2s;
         }
 
         .action-btn:hover {
             background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-3px) scale(1.1);
-            border-color: var(--primary);
+            transform: scale(1.1);
         }
 
         @media (max-width: 768px) {
@@ -536,23 +554,23 @@
 
                     if (s.recentPending && s.recentPending.length > 0) {
                         document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
-                        <tr class="animate-reveal" style="animation-delay: \${index * 0.05}s">
+                            <tr class="animate-fade-in">
                                 <td>
-                                    <div style="font-weight: 800; color: white; font-size: 1rem;">${escapeHTML(r.user_name)}</div>
-                                    <div style="font-size: 0.65rem; color: var(--text-muted); font-family: 'Space Grotesk', monospace; letter-spacing: 1px;">ID: ${r.id}</div>
+                                    <div style="font-weight: 700; color: white;">${escapeHTML(r.user_name)}</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted); font-family: monospace;">UUID: ${r.id}</div>
                                 </td>
                                 <td>
-                                    <div style="display: flex; gap: 15px; align-items: center;">
-                                        <div style="position: relative; width: 55px; height: 55px; flex-shrink: 0;">
-                                            <img src="${escapeHTML(r.fish_image_url) || 'https://via.placeholder.com/55'}" style="width: 100%; height: 100%; border-radius: 12px; object-fit: cover; border: 1px solid var(--glass-premium-border); box-shadow: var(--shadow-diffuse);">
-                                            <div onclick="window.open('${escapeHTML(r.fish_image_url)}', '_blank')" style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); opacity: 0; display: grid; place-items: center; cursor: pointer; border-radius: 12px; transition: var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
-                                                <i class="ri-zoom-in-line" style="color: white; font-size: 1rem;"></i>
+                                    <div style="display: flex; gap: 12px; align-items: center;">
+                                        <div style="position: relative; width: 45px; height: 45px; flex-shrink: 0;">
+                                            <img src="${escapeHTML(r.fish_image_url) || 'https://via.placeholder.com/45'}" style="width: 100%; height: 100%; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
+                                            <div onclick="window.open('${escapeHTML(r.fish_image_url)}', '_blank')" style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; display: grid; place-items: center; cursor: pointer; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+                                                <i class="ri-external-link-line" style="color: white; font-size: 0.8rem;"></i>
                                             </div>
                                         </div>
                                         <div>
-                                            <div style="font-weight: 800; color: white; font-size: 1.1rem; letter-spacing: -0.5px;">${escapeHTML(r.fish_name)}</div>
-                                            <div style="font-size: 0.75rem; color: var(--admin-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${escapeHTML(r.fish_type)}</div>
-                                            <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(r.team_name) || 'Independent Participant'}</div>
+                                            <div style="font-weight: 700; color: white;">${escapeHTML(r.fish_name)}</div>
+                                            <div style="font-size: 0.75rem; color: var(--admin-primary); font-weight: 600;">${escapeHTML(r.fish_type)}</div>
+                                            <div style="font-size: 0.75rem; color: var(--text-dim);">${escapeHTML(r.team_name) || 'Independent'}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -675,19 +693,21 @@
             try {
                 const res = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
-                document.getElementById('userTableBody').innerHTML = data.data.map((u, index) => `
-                    <tr class="animate-reveal" style="animation-delay: ${index * 0.05}s">
-                        <td style="font-weight: 800; color: white;">${escapeHTML(u.username)}</td>
-                        <td style="font-family: 'Space Grotesk', monospace; font-size: 0.65rem; color: var(--text-dim); max-width: 120px; overflow: hidden; text-overflow: ellipsis; letter-spacing: 1px;">*******</td>
-                        <td style="color: var(--admin-primary); font-weight: 800; font-size: 1rem;">${escapeHTML(u.full_name)}</td>
-                        <td style="font-weight: 600;">${escapeHTML(u.phone)}</td>
-                        <td><span style="background: rgba(0,212,255,0.03); color: var(--admin-primary); padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; border: 1px solid var(--glass-premium-border); letter-spacing: 1px;">${escapeHTML(u.role).toUpperCase()}</span></td>
-                        <td style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">${new Date(u.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                if (data.success) {
+                    document.getElementById('userTableBody').innerHTML = data.data.map(u => `
+                    <tr>
+                        <td style="font-weight: 600;">${escapeHTML(u.username)}</td>
+                        <td style="font-family: monospace; font-size: 0.7rem; color: var(--text-dim); max-width: 120px; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(u.password)}</td>
+                        <td style="color: var(--admin-primary); font-weight: 700;">${escapeHTML(u.full_name)}</td>
+                        <td>${escapeHTML(u.phone)}</td>
+                        <td><span style="background: rgba(0,212,255,0.1); color: var(--admin-primary); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 800;">${escapeHTML(u.role).toUpperCase()}</span></td>
+                        <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(u.created_at).toLocaleDateString()}</td>
                         <td>
                             <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus User"><i class="ri-user-unfollow-line"></i></button>
                         </td>
                     </tr>
                 `).join('');
+                }
             } catch (err) { console.error(err); }
         }
 
@@ -811,46 +831,41 @@
                         body.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 4rem; color: var(--text-muted);">No registrations.</td></tr>`;
                         return;
                     }
-                    body.innerHTML = data.data.map((r, index) => {
+                    body.innerHTML = data.data.map(r => {
                         const score = r.score || 0;
                         const statusClass = r.status === 'approved' ? 'admin-secondary' : r.status === 'rejected' ? 'admin-error' : 'text-muted';
                         return `
-                        <tr class="animate-reveal" style="animation-delay: ${index * 0.05}s">
+                        <tr>
+                            <td><div style="font-weight: 700;">${escapeHTML(r.user_name)}</div></td>
                             <td>
-                                <div style="font-weight: 800; color: white;">${escapeHTML(r.user_name)}</div>
-                                <div style="font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase;">User Account</div>
-                            </td>
-                            <td>
-                                <div style="display: flex; gap: 15px; align-items: center;">
-                                    <div style="position: relative; width: 45px; height: 45px; flex-shrink: 0;">
-                                        <img src="${escapeHTML(r.fish_image_url) || 'https://via.placeholder.com/45'}" style="width: 100%; height: 100%; border-radius: 10px; object-fit: cover; border: 1px solid var(--glass-premium-border);">
-                                    </div>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <img src="${escapeHTML(r.fish_image_url) || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
                                     <div>
-                                        <div style="font-weight: 800; color: white; font-size: 1rem;">${escapeHTML(r.fish_name)}</div>
-                                        <div style="font-size: 0.7rem; color: var(--admin-primary); font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">${escapeHTML(r.registration_tier)}</div>
+                                        <div style="font-weight: 700;">${escapeHTML(r.fish_name)}</div>
+                                        <div style="font-size: 0.75rem; color: var(--admin-primary); font-weight: 800;">${escapeHTML(r.registration_tier)}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><div style="font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</div></td>
+                            <td><div style="font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</div></td>
                             <td>
-                                <div style="font-size: 1.25rem; font-weight: 900; color: var(--admin-secondary); line-height: 1;">${score}</div>
-                                <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 4px; font-family: monospace;">B:${r.score_body} F:${r.score_form} C:${r.score_color}</div>
+                                <div style="font-size: 1rem; font-weight: 800; color: var(--admin-secondary);">${score}</div>
+                                <div style="font-size: 0.7rem; color: var(--text-dim);">B:${r.score_body} F:${r.score_form} C:${r.score_color}</div>
                             </td>
-                            <td><div style="font-size: 0.75rem; color: var(--text-muted); max-width: 150px; font-style: italic; line-height: 1.4;">"${escapeHTML(r.judge_comment) || 'Belum ada penilaian'}"</div></td>
+                            <td><div style="font-size: 0.75rem; color: var(--text-muted); max-width: 150px; font-style: italic;">"${escapeHTML(r.judge_comment) || 'No comment'}"</div></td>
                             <td>
-                                <span style="background: rgba(255,255,255,0.03); color: var(--${statusClass}); padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; border: 1px solid var(--glass-premium-border); letter-spacing: 1px;">${escapeHTML(r.status)}</span>
+                                <span style="background: rgba(255,255,255,0.05); color: var(--${statusClass}); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1);">${escapeHTML(r.status)}</span>
                             </td>
                             <td>
                                 <div style="display: flex; gap: 8px;">
                                     ${r.status === 'pending' ? `
-                                        <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary);" title="Setujui"><i class="ri-check-double-line"></i></button>
-                                        <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error);" title="Tolak"><i class="ri-close-circle-line"></i></button>
+                                        <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary);" title="Approve"><i class="ri-check-line"></i></button>
+                                        <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error);" title="Reject"><i class="ri-close-line"></i></button>
                                     ` : `
-                                        <button onclick="quickAction(${r.id}, 'pending')" class="action-btn" style="color: var(--text-dim);" title="Reset ke Pending"><i class="ri-history-line"></i></button>
+                                        <button onclick="quickAction(${r.id}, 'pending')" class="action-btn" style="color: var(--text-dim);" title="Reset"><i class="ri-refresh-line"></i></button>
                                     `}
-                                    <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus"><i class="ri-delete-bin-line"></i></button>
+                                    <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--admin-error);" title="Delete"><i class="ri-delete-bin-4-line"></i></button>
                                     ${r.status === 'approved' ? `
-                                        <button onclick="window.open('print-entry.html?id=${r.id}', '_blank')" class="action-btn" style="color: #ffd700;" title="Cetak Label"><i class="ri-printer-line"></i></button>
+                                        <button onclick="window.open('print-entry.html?id=${r.id}', '_blank')" class="action-btn" style="color: #ffd700;" title="Print Label"><i class="ri-printer-line"></i></button>
                                     ` : ''}
                                 </div>
                             </td>
