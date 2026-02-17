@@ -253,9 +253,9 @@ body {
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .container {
-        padding: 0.75rem;
+        padding: 0 1.25rem;
     }
 
     body {
@@ -273,7 +273,7 @@ body {
 }
 
 .mobile-only {
-    display: none;
+    display: none !important;
 }
 
 /* Animations */
