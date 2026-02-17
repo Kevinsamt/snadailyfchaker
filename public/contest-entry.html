@@ -534,6 +534,74 @@
                 transform: scale(1);
             }
         }
+
+        /* Payment Modal */
+        .payment-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 5, 10, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .payment-card {
+            background: #111827;
+            border: 1px solid var(--glass-border-bright);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .qris-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .qris-image {
+            width: 100%;
+            height: auto;
+            max-width: 280px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .amount-badge {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 1rem;
+            border-radius: 16px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+
+        .proof-upload {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .proof-upload:hover {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.03);
+        }
     </style>
 </head>
 
@@ -637,6 +705,41 @@
                         <div style="font-weight: 800; font-size: 1.1rem;">BONUS ENTRY GRATIS!</div>
                         <div style="font-size: 0.8rem; opacity: 0.9;">Selamat! Pendaftaran ini GRATIS dari hadiah
                             Diamond Spin Cak.</div>
+                    </div>
+                </div>
+                <div id="paymentSection" style="display: none;">
+                    <h2><i class="ri-qr-code-line"></i> Pembayaran QRIS</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        Scan QRIS di bawah untuk menyelesaikan pendaftaran. Total yang harus dibayar:
+                    </p>
+                    <div id="displayAmount" class="amount-badge">Rp 40.000</div>
+                    <div class="qris-container">
+                        <img src="img/qris-pembayaran.jpg" class="qris-image" alt="QRIS SnaDaily"
+                            onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=PROSES-PEMBAYARAN-SNADAILY-CHECKER'">
+                        <p
+                            style="color: #000; font-size: 0.7rem; font-weight: 700; margin-top: 10px; text-transform: uppercase;">
+                            TERRA ARRIES PESADA
+                        </p>
+                    </div>
+                    <div class="input-box">
+                        <label>Upload Bukti Transfer (Screenshot)</label>
+                        <div class="proof-upload" onclick="document.getElementById('paymentProofFile').click()">
+                            <i class="ri-upload-cloud-2-line" style="font-size: 1.5rem; color: var(--primary);"></i>
+                            <div id="proofFileName"
+                                style="font-size: 0.8rem; margin-top: 5px; color: rgba(255,255,255,0.6);">
+                                Klik untuk upload bukti foto
+                            </div>
+                        </div>
+                        <input type="file" id="paymentProofFile" hidden accept="image/*"
+                            onchange="handleProofSelect(this)">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem;">
+                        <button type="button" onclick="backToForm()" class="tab-btn"
+                            style="height: 55px; border-radius: 100px;">KEMBALI</button>
+                        <button type="button" onclick="finalSubmit()" id="finalSubmitBtn" class="btn-primary"
+                            style="height: 55px; border-radius: 100px; font-weight: 800;">
+                            KONFIRMASI BAYAR
+                        </button>
                     </div>
                 </div>
                 <form id="entryForm">
@@ -943,12 +1046,40 @@
             document.getElementById('paymentAmount').value = isFreeEntry ? 0 : price;
         }
 
-        document.getElementById('entryForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const token = localStorage.getItem('sna_user_token');
-            const tier = document.getElementById('registrationTier').value;
+        async function handleProofSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const fileName = file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name;
+            document.getElementById('proofFileName').innerText = fileName;
+            document.getElementById('proofFileName').style.color = 'var(--secondary)';
+        }
 
+        function backToForm() {
+            document.getElementById('entryForm').style.display = 'block';
+            document.getElementById('paymentSection').style.display = 'none';
+        }
+
+        async function finalSubmit() {
+            const btn = document.getElementById('finalSubmitBtn');
+            const proofFile = document.getElementById('paymentProofFile').files[0];
+
+            if (!proofFile) {
+                alert('Tolong upload bukti transfer dulu ya Cak!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> MENGUPLOAD...';
+
+            // Trigger the actual form submission logic
+            const formData = buildFormData();
+            formData.append('paymentProof', proofFile);
+
+            await sendRegistration(formData);
+        }
+
+        function buildFormData() {
+            const tier = document.getElementById('registrationTier').value;
             const formData = new FormData();
             formData.append('contestName', document.getElementById('eventName').value);
             formData.append('fishName', document.getElementById('fishName').value);
@@ -966,8 +1097,14 @@
             if (photoFile) formData.append('fishPhoto', photoFile);
             if (videoFile) formData.append('fishVideo', videoFile);
 
-            btn.disabled = true;
-            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> MEMPROSES DATA...';
+            return formData;
+        }
+
+        async function sendRegistration(formData) {
+            const btn = document.getElementById('finalSubmitBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const token = localStorage.getItem('sna_user_token');
+            const tier = document.getElementById('registrationTier').value;
 
             try {
                 const response = await fetch('/api/contest/register', {
@@ -983,15 +1120,41 @@
                     document.getElementById('successOverlay').style.display = 'flex';
                 } else {
                     if (response.status === 413) {
-                        throw new Error("File terlalu besar! Maksimal total 4.5 MB.");
+                        throw new Error("File terlalu besar! Maksimal total 4.5 MB (termasuk bukti bayar).");
                     }
                     const data = await response.json();
                     throw new Error(data.error || 'Gagal mendaftar');
                 }
             } catch (err) {
                 alert(err.message);
-                btn.disabled = false;
-                btn.innerHTML = '<i class="ri-rocket-2-fill"></i> KIRIM SEKARANG';
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'KONFIRMASI BAYAR';
+                }
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="ri-rocket-2-fill"></i> KIRIM SEKARANG';
+            }
+        }
+
+        document.getElementById('entryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const amount = parseInt(document.getElementById('paymentAmount').value);
+            const isFreeEntry = amount === 0;
+
+            if (isFreeEntry) {
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> MEMPROSES...';
+                await sendRegistration(buildFormData());
+            } else {
+                // Show Payment Section
+                document.getElementById('entryForm').style.display = 'none';
+                document.getElementById('paymentSection').style.display = 'block';
+                document.getElementById('displayAmount').innerText = 'Rp ' + amount.toLocaleString('id-ID');
+
+                // Scroll to top of form panel
+                document.querySelector('.form-panel').scrollIntoView({ behavior: 'smooth' });
             }
         });
     </script>
