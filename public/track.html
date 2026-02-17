@@ -4,23 +4,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnaDailyCheker | Lacak Pesanan</title>
+    <title>SnaDaily | Lacak Pesanan</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/seasonal-themes.css">
     <script src="js/seasonal-manager.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
+        .track-hero {
+            padding: 8rem 1.5rem 4rem;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(0, 212, 255, 0.1) 0%, transparent 80%);
+        }
+
+        .track-hero h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            letter-spacing: -2px;
+        }
+
+        .track-container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 0 1.5rem 5rem;
+        }
+
         .track-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-top: 2rem;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border-bright);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-premium);
         }
 
         .timeline {
-            border-left: 2px dashed rgba(255, 255, 255, 0.2);
+            border-left: 2px dashed var(--glass-border);
             margin-left: 20px;
             padding-left: 30px;
             position: relative;
@@ -28,20 +49,26 @@
 
         .timeline-item {
             position: relative;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .timeline-item::before {
             content: '';
             position: absolute;
             left: -41px;
-            top: 0;
+            top: 5px;
             width: 20px;
             height: 20px;
-            background: var(--secondary);
+            background: var(--primary);
             border-radius: 50%;
-            border: 4px solid #0a0e17;
+            border: 4px solid var(--bg-dark);
+            box-shadow: 0 0 15px var(--primary-glow);
             z-index: 2;
+        }
+
+        .timeline-item.active::before {
+            background: var(--secondary);
+            box-shadow: 0 0 15px var(--secondary-glow);
         }
 
         @media (max-width: 480px) {
@@ -57,17 +84,8 @@
             }
 
             .track-card {
-                padding: 1.25rem;
+                padding: 1.5rem;
             }
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
         }
     </style>
 </head>
@@ -79,14 +97,15 @@
         <div class="bubble x3"></div>
     </div>
 
+    <!-- Navigation -->
     <nav class="navbar">
-        <div class="container nav-container"
-            style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="container nav-container">
             <a href="index.html" class="text-gradient"
-                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
+                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1.5px;">SnaDaily<span
                     style="color: white; font-weight: 300;">Checker</span></a>
 
-            <button class="hamburger-btn" onclick="toggleMenu()">
+            <button class="hamburger-btn" onclick="toggleMenu()"
+                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
@@ -96,8 +115,8 @@
     <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
     <div class="nav-overlay" id="navOverlay">
         <div class="nav-menu-header">
-            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
-            <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
+            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">NAVIGASI</span>
+            <button class="hamburger-btn" onclick="toggleMenu()">
                 <i class="ri-close-line"></i>
             </button>
         </div>
@@ -115,43 +134,52 @@
         </div>
     </div>
 
-    <div class="container" style="max-width: 600px; margin-top: 50px;">
-        <div class="glass-panel" style="padding: 2.5rem;">
-            <p style="color: var(--text-muted); margin-bottom: 1rem;">Sudah punya nomor resi? Silakan masukkan di bawah
-                ini.</p>
-            <div id="trackSearchBox" style="display: flex; gap: 10px; flex-direction: column;">
-                <input type="text" id="waybillInput" class="glass-input" placeholder="Contoh: ABC12345"
-                    style="margin-bottom: 0; width: 100%;">
-                <button onclick="trackOrder()" class="btn-primary" style="width: 100%; white-space: nowrap;">Cek
-                    Status</button>
-            </div>
+    <header class="track-hero animate-fade-in">
+        <h1 class="text-gradient">Lacak <span style="color: white;">Pesanan</span></h1>
+        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">
+            Pantau perjalanan ikan kebanggaan Anda hingga sampai ke tujuan dengan aman.
+        </p>
+    </header>
 
-            <style>
-                @media (min-width: 480px) {
-                    #trackSearchBox {
-                        flex-direction: row !important;
-                    }
-                }
-            </style>
-
-            <div id="trackResult" style="display: none;">
-                <div class="track-card">
-                    <div id="shipHeader"
-                        style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
-                        <!-- Shipment basic info -->
-                    </div>
-                    <div class="timeline" id="shipTimeline">
-                        <!-- History items -->
-                    </div>
+    <main class="track-container animate-fade-in" style="animation-delay: 0.1s;">
+        <div class="track-card">
+            <div id="trackSearchBox" style="display: flex; gap: 10px; flex-direction: column; margin-bottom: 2rem;">
+                <label
+                    style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Nomor
+                    Resi / Waybill</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="waybillInput" class="glass-input" placeholder="ABC12345XXXX"
+                        style="margin-bottom: 0; flex: 1;">
+                    <button onclick="trackOrder()" id="trackBtn" class="btn-primary hover-glow"
+                        style="padding: 0 1.5rem; height: 50px; border-radius: 12px;">CEK</button>
                 </div>
             </div>
 
-            <div id="trackError" style="display: none; margin-top: 2rem; color: #ff5e5e; text-align: center;">
-                <i class="ri-error-warning-line" style="font-size: 2rem;"></i>
-                <p id="errorTxt">Resi tidak ditemukan atau ada kendala teknis.</p>
+            <div id="trackResult" style="display: none;" class="animate-reveal">
+                <div id="shipHeader"
+                    style="margin-bottom: 2.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1.5rem;">
+                    <!-- Shipment basic info -->
+                </div>
+                <div class="timeline" id="shipTimeline">
+                    <!-- History items -->
+                </div>
+            </div>
+
+            <div id="trackError"
+                style="display: none; margin-top: 2rem; color: var(--error); text-align: center; background: rgba(255, 77, 77, 0.1); padding: 2rem; border-radius: var(--radius-md); border: 1px solid rgba(255, 77, 77, 0.2);">
+                <i class="ri-error-warning-fill" style="font-size: 2.5rem; display: block; margin-bottom: 1rem;"></i>
+                <p id="errorTxt" style="font-weight: 600;">Resi tidak ditemukan atau ada kendala koneksi.</p>
+                <button onclick="location.reload()" class="btn-primary"
+                    style="margin-top: 1rem; padding: 0.5rem 1.5rem; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border);">KEMBALI</button>
+            </div>
+
+            <div id="loadingState" style="display: none; text-align: center; padding: 4rem 0;">
+                <i class="ri-loader-4-line ri-spin" style="font-size: 3rem; color: var(--primary);"></i>
+                <p style="margin-top: 1rem; color: var(--text-muted); font-weight: 500;">Menghubungkan ke ekspedisi...
+                </p>
             </div>
         </div>
-    </div>
+    </main>
 
     <script src="js/navigation.js"></script>
     <script>
@@ -161,17 +189,19 @@
 
             const resultDiv = document.getElementById('trackResult');
             const errorDiv = document.getElementById('trackError');
+            const loadingDiv = document.getElementById('loadingState');
             const header = document.getElementById('shipHeader');
             const timeline = document.getElementById('shipTimeline');
+            const btn = document.getElementById('trackBtn');
 
             resultDiv.style.display = 'none';
             errorDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            btn.disabled = true;
 
             try {
-                // Try to detect courier (simple logic)
                 let courier = 'jne';
                 if (waybill.toUpperCase().includes('TIKI')) courier = 'tiki';
-
                 const cleanWaybill = waybill.replace(/jne|tiki| /gi, '');
 
                 const response = await fetch(`/api/shipping/track/${cleanWaybill}?courier=${courier}`);
@@ -179,27 +209,31 @@
 
                 if (data.history) {
                     header.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="color:white; margin:0;">${data.summary.courier.toUpperCase()} - ${waybill}</h3>
-                            <span class="status-badge" style="background:var(--secondary); color:#000;">${data.summary.status}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="font-family: 'JetBrains Mono', monospace; color: var(--primary); font-weight: 800; font-size: 0.75rem; background: rgba(0,212,255,0.1); padding: 4px 10px; border-radius: 4px;">${data.summary.courier.toUpperCase()} #${waybill}</span>
+                            <span class="badge badge-primary" style="font-size: 0.65rem;">${data.summary.status.toUpperCase()}</span>
                         </div>
-                        <p style="color:var(--text-muted); margin-top:0.5rem;">Dari: ${data.summary.origin} | Tujuan: ${data.summary.destination}</p>
+                        <h2 style="margin: 0.5rem 0; font-size: 1.25rem; font-weight: 800;">${data.summary.destination}</h2>
+                        <p style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500;">Dari: ${data.summary.origin}</p>
                     `;
 
-                    timeline.innerHTML = data.history.map(item => `
-                        <div class="timeline-item">
-                            <div style="font-weight:bold; color:white;">${item.desc}</div>
-                            <div style="font-size:0.85rem; color:var(--text-muted);">${item.date}</div>
+                    timeline.innerHTML = data.history.map((item, idx) => `
+                        <div class="timeline-item ${idx === 0 ? 'active' : ''}">
+                            <div style="font-weight: 800; color: white; margin-bottom: 4px; line-height: 1.4;">${item.desc}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-dim); font-weight: 600;">${item.date}</div>
                         </div>
                     `).join('');
 
                     resultDiv.style.display = 'block';
                 } else {
-                    throw new Error("Resi tidak ditemukan");
+                    throw new Error("Resi tidak ditemukan di sistem ekspedisi. Pastikan nomor resi benar.");
                 }
             } catch (err) {
                 errorDiv.style.display = 'block';
                 document.getElementById('errorTxt').innerText = err.message;
+            } finally {
+                loadingDiv.style.display = 'none';
+                btn.disabled = false;
             }
         }
     </script>

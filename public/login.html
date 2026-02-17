@@ -9,207 +9,231 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/seasonal-themes.css">
     <script src="js/seasonal-manager.js" defer></script>
+    <style>
+        .auth-card {
+            max-width: 1000px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border-bright);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-premium);
+            animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .auth-sidebar {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 114, 255, 0.05));
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .auth-sidebar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .auth-card {
+                grid-template-columns: 1fr;
+                margin: 1rem;
+                border-radius: var(--radius-md);
+            }
+
+            .auth-sidebar {
+                display: none;
+            }
+
+            .auth-form-container {
+                padding: 3rem 1.5rem !important;
+            }
+        }
+    </style>
 </head>
 
-<nav class="navbar" style="position: absolute; top: 0; left: 0; width: 100%; background: transparent; border: none;">
-    <div class="container nav-container">
-        <a href="index.html" class="text-gradient"
-            style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
-                style="color: white; font-weight: 300;">Checker</span></a>
-
-        <button class="hamburger-btn" onclick="toggleMenu()">
-            <i class="ri-menu-4-line"></i>
-        </button>
+<body>
+    <div class="ocean-background">
+        <div class="bubble x1"></div>
+        <div class="bubble x2"></div>
+        <div class="bubble x3"></div>
     </div>
-</nav>
 
-<!-- Nav Overlay -->
-<div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
-<div class="nav-overlay" id="navOverlay" style="text-align: left;">
-    <div class="nav-menu-header">
-        <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
-        <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
-            <i class="ri-close-line"></i>
-        </button>
-    </div>
-    <div class="nav-menu-links">
-        <a href="index.html" class="nav-menu-link">
-            <i class="ri-home-4-line"></i> Beranda
-        </a>
-        <a href="events.html" class="nav-menu-link">
-            <i class="ri-calendar-event-line"></i> Event Kontes
-        </a>
-        <a href="track.html" class="nav-menu-link">
-            <i class="ri-truck-line"></i> Lacak Pesanan
-        </a>
-        <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
-        <a href="login.html" class="nav-menu-link active">
-            <i class="ri-user-line"></i> Login
-        </a>
-        <a href="register.html" class="nav-menu-link" style="color: var(--secondary);">
-            <i class="ri-user-add-line"></i> Daftar Akun
-        </a>
-    </div>
-</div>
+    <nav class="navbar"
+        style="position: absolute; top: 0; left: 0; width: 100%; background: transparent; border: none;">
+        <div class="container nav-container">
+            <a href="index.html" class="text-gradient"
+                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
+                    style="color: white; font-weight: 300;">Checker</span></a>
 
-<main class="container flex-center" style="min-height: 100vh;">
-    <div class="glass-panel animate-fade-in auth-card" id="authPanel">
-        <!-- Left Side: Branding -->
-        <div class="m-hide"
-            style="background: linear-gradient(135deg, var(--bg-deep), var(--bg-dark)); padding: 4rem; display: flex; flex-direction: column; justify-content: center; position: relative;">
-            <div style="z-index: 1;">
-                <div
-                    style="width: 60px; height: 6px; background: var(--primary); margin-bottom: 2rem; border-radius: 10px;">
-                </div>
-                <h1
-                    style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; line-height: 1; margin-bottom: 1.5rem;">
-                    SnaDaily<br><span class="text-gradient">Cheker</span></h1>
-                <p style="color: var(--text-dim); font-size: 1.1rem; line-height: 1.6; max-width: 300px;">Masuk ke
-                    sistem pengelolaan kontes cupang profesional.</p>
-            </div>
+            <button class="hamburger-btn" onclick="toggleMenu()">
+                <i class="ri-menu-4-line"></i>
+            </button>
         </div>
+    </nav>
 
-        <!-- Right Side: Form -->
-        <div style="padding: 4rem 3rem; background: rgba(0,0,0,0.2);">
-            <div style="margin-bottom: 2.5rem;">
-                <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Selamat <span
-                        class="text-gradient">Datang</span></h2>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Gunakan akun Anda untuk masuk</p>
-            </div>
-
-            <form id="loginForm">
-                <div class="input-group">
-                    <label class="input-label">Username</label>
-                    <div style="position: relative;">
-                        <i class="ri-user-line"
-                            style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
-                        <input type="text" id="username" class="glass-input" required placeholder="Username"
-                            style="padding-left: 3rem;">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Password</label>
-                    <div style="position: relative;">
-                        <i class="ri-lock-line"
-                            style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
-                        <input type="password" id="password" class="glass-input" required placeholder="••••••••"
-                            style="padding-left: 3rem;">
-                    </div>
-                </div>
-                <div id="errorMsg" class="error-msg" style="margin-bottom: 1rem; text-align: center;"></div>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" id="loginBtn">
-                    MASUK PANEL <i class="ri-arrow-right-line"></i>
-                </button>
-            </form>
-
-            <div style="margin-top: 3rem; text-align: center; font-size: 0.9rem;">
-                <span style="color: var(--text-muted);">Belum punya akun?</span>
-                <a href="register.html"
-                    style="color: var(--primary); text-decoration: none; font-weight: 700; margin-left: 5px;">Daftar</a>
-            </div>
+    <!-- Nav Overlay -->
+    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
+    <div class="nav-overlay" id="navOverlay" style="text-align: left;">
+        <div class="nav-menu-header">
+            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
+            <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="nav-menu-links">
+            <a href="index.html" class="nav-menu-link">
+                <i class="ri-home-4-line"></i> Beranda
+            </a>
+            <a href="events.html" class="nav-menu-link">
+                <i class="ri-calendar-event-line"></i> Event Kontes
+            </a>
+            <a href="track.html" class="nav-menu-link">
+                <i class="ri-truck-line"></i> Lacak Pesanan
+            </a>
+            <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
+            <a href="login.html" class="nav-menu-link active">
+                <i class="ri-user-line"></i> Login
+            </a>
+            <a href="register.html" class="nav-menu-link" style="color: var(--secondary);">
+                <i class="ri-user-add-line"></i> Daftar Akun
+            </a>
         </div>
     </div>
-</main>
 
-<style>
-    .auth-card {
-        max-width: 900px;
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1.2fr 1fr;
-        overflow: hidden;
-        padding: 0 !important;
-        /* Ensure no global padding interferes */
-        margin: 0 auto;
-    }
+    <main class="container flex-center" style="min-height: 100vh;">
+        <div class="auth-card" id="authPanel">
+            <!-- Left Side: Branding -->
+            <div class="auth-sidebar">
+                <div style="z-index: 1;">
+                    <div
+                        style="width: 50px; height: 5px; background: var(--primary); margin-bottom: 2rem; border-radius: 10px;">
+                    </div>
+                    <h1
+                        style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; line-height: 1; margin-bottom: 1.5rem; letter-spacing: -2px;">
+                        SnaDaily <span class="text-gradient">Checker</span>
+                    </h1>
+                    <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; max-width: 320px;">
+                        Masuk ke ekosistem kontes cupang paling aman dan terpercaya di Indonesia.
+                    </p>
+                </div>
+            </div>
 
-    @media (max-width: 768px) {
-        .auth-card {
-            grid-template-columns: 1fr !important;
-            margin: 0.5rem;
-        }
+            <!-- Right Side: Form -->
+            <div class="auth-form-container" style="padding: 4rem 3rem; background: rgba(0,0,0,0.2);">
+                <div style="margin-bottom: 2.5rem;">
+                    <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Selamat <span
+                            class="text-gradient">Datang</span></h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Kelola ikan kontes Anda dengan mudah.</p>
+                </div>
 
-        .glass-panel>div:last-child {
-            padding: 2rem 1.25rem !important;
-        }
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label class="input-label">Username</label>
+                        <div style="position: relative;">
+                            <i class="ri-user-6-line"
+                                style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                            <input type="text" id="username" class="glass-input" required placeholder="Username"
+                                style="padding-left: 3rem;">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Password</label>
+                        <div style="position: relative;">
+                            <i class="ri-lock-password-line"
+                                style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                            <input type="password" id="password" class="glass-input" required placeholder="••••••••"
+                                style="padding-left: 3rem;">
+                        </div>
+                    </div>
+                    <div id="errorMsg" class="error-msg" style="margin-bottom: 1rem; text-align: center;"></div>
+                    <button type="submit" class="btn-primary"
+                        style="width: 100%; height: 55px; border-radius: 100px; font-weight: 800;" id="loginBtn">
+                        MASUK SEKARANG <i class="ri-arrow-right-up-line"></i>
+                    </button>
+                </form>
 
-        /* Show a mini branding on mobile instead of hiding completely */
-        #authPanel::before {
-            content: 'SnaDaily';
-            display: block;
-            padding: 2rem 1rem 0.5rem;
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-align: center;
-            grid-column: 1 / -1;
-        }
-    }
-</style>
+                <div style="margin-top: 3rem; text-align: center; font-size: 0.85rem;">
+                    <span style="color: var(--text-muted);">Belum punya akses?</span>
+                    <a href="register.html"
+                        style="color: var(--primary); text-decoration: none; font-weight: 800; margin-left: 5px;">Daftar
+                        Akun</a>
+                </div>
+            </div>
+        </div>
+    </main>
 
-<script src="js/navigation.js"></script>
-<script src="js/app.js"></script>
-<script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('loginBtn');
-        const errorMsg = document.getElementById('errorMsg');
+    <script src="js/navigation.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errorMsg = document.getElementById('errorMsg');
 
-        btn.disabled = true;
-        btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> MEMERIKSA...';
-        errorMsg.style.display = 'none';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> MEMERIKSA...';
+            errorMsg.style.display = 'none';
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-        // Simple differentiator for Admin vs User (Optional UI hint)
-        let endpoint = '/api/auth/login';
-        if (username === 'bettatumedan') {
-            endpoint = '/api/admin/login';
-        }
+            let endpoint = '/api/auth/login';
+            if (username === 'bettatumedan') {
+                endpoint = '/api/admin/login';
+            }
 
-        try {
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
 
-            if (data.success || data.token) { // Check for success or presence of token
-                if (data.role === 'admin') {
-                    sessionStorage.setItem('sna_admin_token', data.token);
-                    window.location.href = 'admin.html';
-                } else {
-                    localStorage.setItem('sna_user_token', data.token);
-                    localStorage.setItem('sna_user_data', JSON.stringify({
-                        username: data.user.username,
-                        fullName: data.user.fullName,
-                        role: data.role // Critical: Save role for security checks
-                    }));
-
-                    // Redirect based on role
-                    if (data.role === 'judge') {
-                        window.location.href = 'judge.html';
+                if (data.success || data.token) {
+                    if (data.role === 'admin') {
+                        sessionStorage.setItem('sna_admin_token', data.token);
+                        window.location.href = 'admin.html';
+                    } else if (data.role === 'judge') {
+                        localStorage.setItem('sna_user_token', data.token);
+                        window.location.href = 'judge-scoring.html';
                     } else {
+                        localStorage.setItem('sna_user_token', data.token);
+                        localStorage.setItem('sna_user_data', JSON.stringify({
+                            username: data.user.username,
+                            fullName: data.user.fullName,
+                            role: data.role
+                        }));
                         window.location.href = 'dashboard.html';
                     }
+                } else {
+                    errorMsg.innerText = data.error || data.message || 'Username atau password salah!';
+                    errorMsg.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'MASUK PANEL <i class="ri-arrow-right-line"></i>';
                 }
-            } else {
-                errorMsg.innerText = data.error || data.message || 'Username atau password salah!';
+            } catch (err) {
+                console.error("Login attempt failed:", err);
+                errorMsg.innerText = 'Gagal terhubung ke server.';
                 errorMsg.style.display = 'block';
                 btn.disabled = false;
                 btn.innerHTML = 'MASUK PANEL <i class="ri-arrow-right-line"></i>';
             }
-        } catch (err) {
-            console.error("Login attempt failed:", err);
-            errorMsg.innerText = 'Gagal terhubung ke server.';
-            errorMsg.style.display = 'block';
-            btn.disabled = false;
-            btn.innerHTML = 'MASUK PANEL <i class="ri-arrow-right-line"></i>';
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 
 </html>

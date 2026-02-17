@@ -4,188 +4,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnaDaily | Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/seasonal-themes.css">
     <script src="js/seasonal-manager.js" defer></script>
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .auth-card {
+            max-width: 1000px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border-bright);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-premium);
+            animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .auth-sidebar {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(0, 114, 255, 0.05));
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .auth-sidebar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .auth-card {
+                grid-template-columns: 1fr;
+                margin: 1rem;
+                border-radius: var(--radius-md);
+            }
+
+            .auth-sidebar {
+                display: none;
+            }
+
+            .auth-form-container {
+                padding: 2.5rem 1.5rem !important;
+            }
+        }
+    </style>
 </head>
 
-<nav class="navbar" style="position: absolute; top: 0; left: 0; width: 100%; background: transparent; border: none;">
-    <div class="container nav-container">
-        <a href="index.html" class="text-gradient"
-            style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
-                style="color: white; font-weight: 300;">Checker</span></a>
-
-        <button class="hamburger-btn" onclick="toggleMenu()">
-            <i class="ri-menu-4-line"></i>
-        </button>
+<body>
+    <div class="ocean-background">
+        <div class="bubble x1"></div>
+        <div class="bubble x2"></div>
+        <div class="bubble x3"></div>
     </div>
-</nav>
 
-<!-- Nav Overlay -->
-<div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
-<div class="nav-overlay" id="navOverlay" style="text-align: left;">
-    <div class="nav-menu-header">
-        <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
-        <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
-            <i class="ri-close-line"></i>
-        </button>
-    </div>
-    <div class="nav-menu-links">
-        <a href="index.html" class="nav-menu-link">
-            <i class="ri-home-4-line"></i> Beranda
-        </a>
-        <a href="events.html" class="nav-menu-link">
-            <i class="ri-calendar-event-line"></i> Event Kontes
-        </a>
-        <a href="track.html" class="nav-menu-link">
-            <i class="ri-truck-line"></i> Lacak Pesanan
-        </a>
-        <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
-        <a href="login.html" class="nav-menu-link">
-            <i class="ri-user-line"></i> Login
-        </a>
-        <a href="register.html" class="nav-menu-link active" style="color: var(--secondary);">
-            <i class="ri-user-add-line"></i> Daftar Akun
-        </a>
-    </div>
-</div>
+    <nav class="navbar"
+        style="position: absolute; top: 0; left: 0; width: 100%; background: transparent; border: none;">
+        <div class="container nav-container">
+            <a href="index.html" class="text-gradient"
+                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -1px;">SnaDaily<span
+                    style="color: white; font-weight: 300;">Checker</span></a>
 
-<main class="container flex-center" style="min-height: 100vh; padding: 1rem 0;">
-    <div class="glass-panel animate-fade-in auth-card" id="authPanel">
-        <!-- Left Side: Branding -->
-        <div class="m-hide"
-            style="background: linear-gradient(135deg, var(--bg-deep), var(--bg-dark)); padding: 4rem; display: flex; flex-direction: column; justify-content: center; position: relative;">
-            <div style="z-index: 1;">
-                <div
-                    style="width: 60px; height: 6px; background: var(--secondary); margin-bottom: 2rem; border-radius: 10px;">
-                </div>
-                <h1
-                    style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; line-height: 1; margin-bottom: 1.5rem;">
-                    Bergabung di<br><span class="text-gradient">SnaDaily</span></h1>
-                <p style="color: var(--text-dim); font-size: 1.1rem; line-height: 1.6; max-width: 300px;">Jadilah
-                    bagian dari komunitas pecinta cupang dan ikuti kontes terbaik.</p>
-            </div>
+            <button class="hamburger-btn" onclick="toggleMenu()">
+                <i class="ri-menu-4-line"></i>
+            </button>
         </div>
+    </nav>
 
-        <!-- Right Side: Register Form -->
-        <div style="padding: 3rem; background: rgba(0,0,0,0.2);">
-            <div style="margin-bottom: 2rem;">
-                <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Daftar <span
-                        class="text-gradient">Akun</span></h2>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Lengkapi data diri Anda dibawah ini</p>
-            </div>
-
-            <form id="registerForm">
-                <div class="input-group">
-                    <label class="input-label">Username</label>
-                    <input type="text" id="username" class="glass-input" required placeholder="Pilih username unik">
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Password</label>
-                    <input type="password" id="password" class="glass-input" required placeholder="Minimal 6 karakter">
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Nama Lengkap</label>
-                    <input type="text" id="fullName" class="glass-input" required placeholder="Nama sesuai identitas">
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Nomor WhatsApp</label>
-                    <input type="tel" id="phone" class="glass-input" required placeholder="e.g., 08123456789">
-                </div>
-
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 0.5rem;" id="regBtn">
-                    DAFTAR SEKARANG <i class="ri-user-add-line"></i>
-                </button>
-            </form>
-
-            <div style="margin-top: 2rem; text-align: center; font-size: 0.9rem;">
-                <span style="color: var(--text-muted);">Sudah punya akun?</span>
-                <a href="login.html"
-                    style="color: var(--primary); text-decoration: none; font-weight: 700; margin-left: 5px;">Masuk</a>
-            </div>
+    <!-- Nav Overlay -->
+    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
+    <div class="nav-overlay" id="navOverlay" style="text-align: left;">
+        <div class="nav-menu-header">
+            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
+            <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="nav-menu-links">
+            <a href="index.html" class="nav-menu-link">
+                <i class="ri-home-4-line"></i> Beranda
+            </a>
+            <a href="events.html" class="nav-menu-link">
+                <i class="ri-calendar-event-line"></i> Event Kontes
+            </a>
+            <a href="track.html" class="nav-menu-link">
+                <i class="ri-truck-line"></i> Lacak Pesanan
+            </a>
+            <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
+            <a href="login.html" class="nav-menu-link">
+                <i class="ri-user-line"></i> Login
+            </a>
+            <a href="register.html" class="nav-menu-link active" style="color: var(--secondary);">
+                <i class="ri-user-add-line"></i> Daftar Akun
+            </a>
         </div>
     </div>
-</main>
 
-<style>
-    .auth-card {
-        max-width: 900px;
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1.2fr 1fr;
-        overflow: hidden;
-        padding: 0;
-    }
+    <main class="container flex-center" style="min-height: 100vh; padding: 2rem 0;">
+        <div class="auth-card" id="authPanel">
+            <!-- Left Side: Branding -->
+            <div class="auth-sidebar">
+                <div style="z-index: 1;">
+                    <div
+                        style="width: 50px; height: 5px; background: var(--secondary); margin-bottom: 2rem; border-radius: 10px;">
+                    </div>
+                    <h1
+                        style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; line-height: 1; margin-bottom: 1.5rem; letter-spacing: -2px;">
+                        Join <span class="text-gradient"
+                            style="background: linear-gradient(135deg, var(--secondary), #ff4d4d);">SnaDaily</span>
+                    </h1>
+                    <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; max-width: 320px;">
+                        Jadilah bagian dari komunitas pecinta cupang terbesar dan ikuti berbagai kontes bergengsi.
+                    </p>
+                </div>
+            </div>
 
-    @media (max-width: 768px) {
-        .auth-card {
-            grid-template-columns: 1fr !important;
-            margin: 0.5rem;
-            padding-top: 1rem;
-        }
+            <!-- Right Side: Form -->
+            <div class="auth-form-container" style="padding: 3rem; background: rgba(0,0,0,0.2);">
+                <div style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Daftar <span
+                            class="text-gradient"
+                            style="background: linear-gradient(135deg, var(--secondary), #ff4d4d);">Akun</span></h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Lengkapi data diri Anda untuk memulai.</p>
+                </div>
 
-        .glass-panel>div:first-child {
-            display: none;
-        }
+                <form id="registerForm">
+                    <div class="input-group">
+                        <label class="input-label">Username</label>
+                        <input type="text" id="username" class="glass-input" required placeholder="Pilih username unik">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Password</label>
+                        <input type="password" id="password" class="glass-input" required
+                            placeholder="Minimal 6 karakter">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Nama Lengkap</label>
+                        <input type="text" id="fullName" class="glass-input" required
+                            placeholder="Nama sesuai identitas">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Nomor WhatsApp</label>
+                        <input type="tel" id="phone" class="glass-input" required placeholder="e.g., 08123456789">
+                    </div>
 
-        .glass-panel>div:last-child {
-            padding: 2.5rem 1.5rem;
-        }
+                    <button type="submit" class="btn-primary"
+                        style="width: 100%; margin-top: 1rem; border-radius: 100px; height: 55px; background: linear-gradient(135deg, var(--secondary), #ff4d4d); border: none; font-weight: 800;"
+                        id="regBtn">
+                        DAFTAR SEKARANG <i class="ri-user-add-line"></i>
+                    </button>
+                </form>
 
-        /* Mini branding for mobile */
-        #authPanel::before {
-            content: 'SnaDaily';
-            display: block;
-            padding: 1rem 1.5rem 0;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--secondary);
-            text-align: center;
-        }
-    }
-</style>
+                <div style="margin-top: 2rem; text-align: center; font-size: 0.85rem;">
+                    <span style="color: var(--text-muted);">Sudah punya akun?</span>
+                    <a href="login.html"
+                        style="color: var(--secondary); text-decoration: none; font-weight: 800; margin-left: 5px;">Masuk</a>
+                </div>
+            </div>
+        </div>
+    </main>
 
-<script src="js/navigation.js"></script>
-<script>
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('regBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> PROSES...';
+    <script src="js/navigation.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('regBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> PROSES...';
 
-        const payload = {
-            username: document.getElementById('username').value,
-            password: document.getElementById('password').value,
-            fullName: document.getElementById('fullName').value,
-            phone: document.getElementById('phone').value
-        };
+            const payload = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value
+            };
 
-        try {
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
 
-            if (data.success) {
-                alert('Registrasi Berhasil! Silakan masuk.');
-                window.location.href = 'login.html';
-            } else {
-                alert(data.error || 'Gagal registrasi');
+                if (data.success) {
+                    alert('Registrasi Berhasil! Silakan masuk.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.error || 'Gagal registrasi');
+                    btn.disabled = false;
+                    btn.innerHTML = 'DAFTAR SEKARANG <i class="ri-user-add-line"></i>';
+                }
+            } catch (err) {
+                console.error("Register attempt failed:", err);
+                alert('Terjadi kesalahan server');
                 btn.disabled = false;
                 btn.innerHTML = 'DAFTAR SEKARANG <i class="ri-user-add-line"></i>';
             }
-        } catch (err) {
-            console.error("Register attempt failed:", err);
-            alert('Terjadi kesalahan server');
-            btn.disabled = false;
-            btn.innerHTML = 'DAFTAR SEKARANG <i class="ri-user-add-line"></i>';
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 
 </html>
