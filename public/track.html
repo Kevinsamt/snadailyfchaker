@@ -72,6 +72,15 @@
         }
 
         @media (max-width: 480px) {
+            .track-hero {
+                padding: 5rem 1rem 2rem;
+            }
+
+            .track-hero h1 {
+                font-size: 2.5rem;
+                letter-spacing: -1px;
+            }
+
             .timeline {
                 margin-left: 10px;
                 padding-left: 20px;
@@ -84,7 +93,15 @@
             }
 
             .track-card {
-                padding: 1.5rem;
+                padding: 1.5rem 1.25rem;
+            }
+
+            #trackSearchBox .flex-row {
+                flex-direction: column !important;
+            }
+
+            #trackSearchBox button {
+                width: 100% !important;
             }
         }
     </style>
@@ -147,7 +164,7 @@
                 <label
                     style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Nomor
                     Resi / Waybill</label>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px;" class="flex-row">
                     <input type="text" id="waybillInput" class="glass-input" placeholder="ABC12345XXXX"
                         style="margin-bottom: 0; flex: 1;">
                     <button onclick="trackOrder()" id="trackBtn" class="btn-primary hover-glow"

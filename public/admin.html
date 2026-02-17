@@ -86,8 +86,9 @@
             backdrop-filter: blur(40px);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
-            overflow: hidden;
+            overflow-x: auto;
             margin-top: 1.5rem;
+            -webkit-overflow-scrolling: touch;
         }
 
         .admin-table {
@@ -148,7 +149,27 @@
             }
 
             .grid-4 {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                padding: 1.25rem !important;
+            }
+
+            .stat-card div:last-child {
+                font-size: 1.75rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-grid {
+                gap: 1.5rem !important;
+            }
+
+            .tab-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
             }
         }
     </style>
