@@ -29,20 +29,56 @@
                 position: relative;
                 top: 0;
             }
+
+            .stat-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
         }
 
         @media (max-width: 480px) {
             .dashboard-container {
-                margin: 1rem auto;
-                padding: 0 1rem;
+                margin: 0.5rem auto;
+                padding: 0 0.75rem;
+                max-width: 100%;
             }
 
             .profile-card {
-                padding: 1.5rem !important;
+                padding: 1.25rem !important;
+                margin: 0;
+            }
+
+            .user-avatar {
+                width: 80px;
+                height: 80px;
             }
 
             .stat-grid {
-                padding: 1rem 0 !important;
+                padding: 0.75rem 0 !important;
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .stat-item {
+                padding: 1rem;
+            }
+
+            .reg-card-premium {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .fish-thumb {
+                width: 70px;
+                height: 70px;
+            }
+
+            h1 {
+                font-size: 1.5rem !important;
+            }
+
+            h2 {
+                font-size: 1.25rem !important;
             }
         }
 
