@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNA Daily - Admin Tools</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card" id="loginCard">
+        <h1>Admin Login</h1>
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" id="username" class="glass-input" value="bettatumedan">
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" class="glass-input" value="snadailybetta">
+        </div>
+        <button onclick="login()" class="btn-primary" style="width: 100%; margin-top: 1rem;">LOGIN</button>
+        <div id="loginStatus" class="status"></div>
+    </div>
+
+    <div class="card" id="toolsCard" style="display: none;">
+        <h1>⚠️ Danger Zone</h1>
+        <p>Hati-hati! Tindakan di sini tidak bisa dibatalkan.</p>
+
+        <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #eee;">
+
+        <h3>1. Hapus SEMUA Data Kontes</h3>
+        <p style="font-size: 0.9rem; color: #666;">Menghapus semua registrasi peserta. Nomor entry akan mulai dari 0001
+            lagi.</p>
+        <button onclick="clearEntries()" class="btn-danger">🗑️ HAPUS SEMUA DATA</button>
+
+        <div id="actionStatus" class="status"></div>
+    </div>
+
+    <script>
+        let token = '';
+
+        async function login() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const status = document.getElementById('loginStatus');
+
+            try {
+                status.style.display = 'block';
+                status.className = 'status';
+                status.innerText = 'Logging in...';
+
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    token = data.token;
+                    document.getElementById('loginCard').style.display = 'none';
+                    document.getElementById('toolsCard').style.display = 'block';
+                } else {
+                    status.className = 'status error';
+                    status.innerText = 'Login Failed: ' + data.error;
+                }
+            } catch (err) {
+                status.className = 'status error';
+                status.innerText = 'Error: ' + err.message;
+            }
+        }
+
+        async function clearEntries() {
+            if (!confirm('YAKIN MAU HAPUS SEMUA DATA KONTES? Data yang sudah dihapus TIDAK BISA kembali!')) return;
+
+            const status = document.getElementById('actionStatus');
+            try {
+                status.style.display = 'block';
+                status.className = 'status';
+                status.innerText = 'Menghapus data...';
+
+                const res = await fetch('/api/admin/clear-entries', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    status.className = 'status success';
+                    status.innerText = `✅ SUKSES! ${data.deletedCount} data berhasil dihapus.`;
+                    setTimeout(() => alert('Semua data berhasil dihapus!'), 100);
+                } else {
+                    status.className = 'status error';
+                    status.innerText = 'Gagal: ' + data.error;
+                }
+            } catch (err) {
+                status.className = 'status error';
+                status.innerText = 'Error: ' + err.message;
+            }
+        }
+    </script>
+</body>
+
+</html>
