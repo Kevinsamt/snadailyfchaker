@@ -262,14 +262,19 @@
             <div id="scoringSection" class="scoring-card animate-fade-in"
                 style="position: sticky; top: 6rem; display: none;">
                 <div id="selectedFishInfo" style="margin-bottom: 2.5rem;">
-                    <div style="position: relative; margin-bottom: 1.5rem;">
+                    <div
+                        style="position: relative; margin-bottom: 1.5rem; border-radius: 20px; overflow: hidden; background: #000; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                         <img id="fishPreview" src=""
-                            style="width: 100%; aspect-ratio: 16/9; height: auto; object-fit: cover; border-radius: 20px; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                        <div id="videoContainer" style="position: absolute; bottom: 1rem; right: 1rem;">
-                            <a id="videoLink" href="#" target="_blank" class="btn-primary"
-                                style="font-size: 0.75rem; padding: 10px 15px; border-radius: 12px; display: flex; align-items: center; gap: 8px; text-decoration: none;">
-                                <i class="ri-play-circle-fill" style="font-size: 1.2rem;"></i> VIDEO
-                            </a>
+                            style="width: 100%; aspect-ratio: 16/9; height: auto; object-fit: contain; display: block;">
+                        <video id="fishVideo" controls
+                            style="width: 100%; aspect-ratio: 16/9; height: auto; display: none; object-fit: contain; background: #000;"></video>
+
+                        <div id="mediaToggleContainer"
+                            style="position: absolute; bottom: 1rem; right: 1rem; display: none;">
+                            <button id="mediaToggleBtn" onclick="toggleMedia()" class="btn-primary"
+                                style="font-size: 0.75rem; padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);">
+                                <i class="ri-play-circle-fill" style="font-size: 1.2rem;"></i> LIAT VIDEO
+                            </button>
                         </div>
                     </div>
 
@@ -483,14 +488,24 @@
             document.getElementById('teamVal').innerText = entry.team_name || '-';
             document.getElementById('waVal').innerText = entry.wa_number || '-';
 
-            // Video
-            const videoContainer = document.getElementById('videoContainer');
-            const videoLink = document.getElementById('videoLink');
+            // Video Reset
+            const fishPreview = document.getElementById('fishPreview');
+            const fishVideo = document.getElementById('fishVideo');
+            const toggleContainer = document.getElementById('mediaToggleContainer');
+            const toggleBtn = document.getElementById('mediaToggleBtn');
+
+            // Always start with photo
+            fishPreview.style.display = 'block';
+            fishVideo.style.display = 'none';
+            fishVideo.pause();
+            fishVideo.src = '';
+            toggleBtn.innerHTML = '<i class="ri-play-circle-fill" style="font-size: 1.2rem;"></i> LIAT VIDEO';
+
             if (entry.video_url) {
-                videoContainer.style.display = 'block';
-                videoLink.href = entry.video_url;
+                toggleContainer.style.display = 'block';
+                fishVideo.src = entry.video_url;
             } else {
-                videoContainer.style.display = 'none';
+                toggleContainer.style.display = 'none';
             }
 
             // Set scores from entry (if any)
@@ -520,6 +535,24 @@
 
             const total = Math.round((body + form + color) / 3);
             document.getElementById('totalScoreVal').innerText = total;
+        }
+
+        function toggleMedia() {
+            const preview = document.getElementById('fishPreview');
+            const video = document.getElementById('fishVideo');
+            const btn = document.getElementById('mediaToggleBtn');
+
+            if (video.style.display === 'none') {
+                preview.style.display = 'none';
+                video.style.display = 'block';
+                video.play();
+                btn.innerHTML = '<i class="ri-image-fill" style="font-size: 1.2rem;"></i> LIAT FOTO';
+            } else {
+                preview.style.display = 'block';
+                video.style.display = 'none';
+                video.pause();
+                btn.innerHTML = '<i class="ri-play-circle-fill" style="font-size: 1.2rem;"></i> LIAT VIDEO';
+            }
         }
 
         function cancelScoring() {
