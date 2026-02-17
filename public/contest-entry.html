@@ -650,7 +650,7 @@
 
                     <div class="input-box">
                         <label>Pilih Tier Pendaftaran</label>
-                        <div class="tier-grid">
+                        <div class="tier-grid" id="standardTierGrid">
                             <div class="tier-card" id="tierEarly" onclick="selectTier('Early', 40000, this)">
                                 <span class="tier-name">Early Bird</span>
                                 <span class="tier-price">40K</span>
@@ -674,6 +674,19 @@
                                 <div style="font-size: 0.6rem; color: #ffd700; margin-top: 4px; font-weight: 700;">+
                                     DIAMOND SPIN</div>
                             </div>
+                        </div>
+
+                        <!-- Free Entry Prize Card (Hidden by default) -->
+                        <div id="freeEntryPrizeCard" class="tier-card active"
+                            style="display: none; border-color: #25D366; background: rgba(37, 211, 102, 0.1); padding: 2rem; text-align: center; cursor: default;">
+                            <div style="font-size: 2rem; color: #25D366; margin-bottom: 1rem;">
+                                <i class="ri-gift-fill"></i>
+                            </div>
+                            <span class="tier-name" style="color: #25D366; font-size: 0.9rem;">HADIAH SPIN WHEEL</span>
+                            <span class="tier-price" style="color: #25D366; font-size: 2rem;">GRATIS</span>
+                            <div
+                                style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 0.5rem; font-weight: 600;">
+                                Pendaftaran ikan ini dibiayai oleh SnaDaily.</div>
                         </div>
                         <input type="hidden" id="registrationTier" value="Early">
                         <input type="hidden" id="paymentAmount" value="40000">
@@ -793,11 +806,11 @@
 
             if (isFreeEntry) {
                 document.getElementById('freeEntryBadge').style.display = 'flex';
-                document.querySelectorAll('.tier-price').forEach(el => {
-                    el.innerText = 'FREE';
-                    el.style.color = '#25D366';
-                });
-                // Update hidden payment amount to 0 for initial tier
+                document.getElementById('standardTierGrid').style.display = 'none';
+                document.getElementById('freeEntryPrizeCard').style.display = 'block';
+
+                // Set fixed values for registration
+                document.getElementById('registrationTier').value = 'Free Prize';
                 document.getElementById('paymentAmount').value = 0;
             }
 
