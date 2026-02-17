@@ -43,40 +43,10 @@
             padding: 2rem 2.5rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             display: grid;
-            grid-template-columns: 240px 1fr 480px;
+            grid-template-columns: 1fr 480px;
             gap: 2.5rem;
             align-items: center;
             min-height: 280px;
-        }
-
-        /* Fish Image Section */
-        .fish-image-section {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fish-box {
-            width: 220px;
-            height: 220px;
-            border: 4px solid #000;
-            border-radius: 15px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-        }
-
-        .fish-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .fish-placeholder {
-            font-size: 5rem;
-            color: #ddd;
         }
 
         /* Contest Info Section */
@@ -175,10 +145,6 @@
                 padding: 2rem;
             }
 
-            .fish-box {
-                margin: 0 auto;
-            }
-
             .entry-number {
                 font-size: 2rem;
             }
@@ -195,14 +161,6 @@
         <button class="print-btn no-print" onclick="window.print()">🖨️ Print Entry Card</button>
 
         <div class="entry-card">
-            <!-- Fish Image -->
-            <div class="fish-image-section">
-                <div class="fish-box">
-                    <img id="fishImage" class="fish-image" src="" alt="Fish Photo" style="display: none;">
-                    <div id="fishPlaceholder" class="fish-placeholder">🐠</div>
-                </div>
-            </div>
-
             <!-- Contest Info -->
             <div class="contest-info">
                 <div class="contest-title" id="contestName">BETTATUMEDAN MID CHAMPIONSHIP</div>
@@ -267,13 +225,6 @@
                 document.getElementById('contestClass').textContent = reg.contest_class || '-';
                 document.getElementById('registrationTier').textContent = reg.registration_tier || '-';
                 document.getElementById('teamName').textContent = reg.team_name || '-';
-
-                if (reg.fish_image_url) {
-                    const img = document.getElementById('fishImage');
-                    img.src = reg.fish_image_url;
-                    img.style.display = 'block';
-                    document.getElementById('fishPlaceholder').style.display = 'none';
-                }
 
             } catch (err) {
                 console.error('Error:', err);
