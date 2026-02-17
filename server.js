@@ -421,6 +421,7 @@ async function initDb() {
             registration_tier TEXT,
             payment_amount INTEGER,
             spin_prize TEXT,
+            entry_number TEXT,
             status TEXT DEFAULT 'pending',
             score INTEGER,
             score_body INTEGER DEFAULT 0,
@@ -447,6 +448,7 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS has_spun BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS prize_redeemed BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS payment_proof_url TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS entry_number TEXT");
         } catch (migErr) {
             console.log("Migration columns check done.");
         }
@@ -707,9 +709,18 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         }
 
 
+
+        // Generate Entry Number: CLASS-TIER-XXX (e.g., A-A1-001)
+        const countResult = await pool.query(
+            'SELECT COUNT(*) FROM contest_registrations WHERE contest_class = $1 AND registration_tier = $2',
+            [contestClass, registrationTier]
+        );
+        const sequenceNum = parseInt(countResult.rows[0].count) + 1;
+        const entryNumber = `${contestClass || 'X'}-${registrationTier || 'N'}-${String(sequenceNum).padStart(3, '0')}`;
+
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
-            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url, entry_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
+            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl, entryNumber]
         );
 
         res.json({ success: true, data: result.rows[0] });
@@ -852,6 +863,25 @@ app.post('/api/user/profile', userAuthMiddleware, async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 });
+
+// Get Single Registration by ID (for print card)
+app.get('/api/user/registrations/:id', userAuthMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM contest_registrations WHERE id = $1 AND user_id = $2',
+            [req.params.id, req.user.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Registrasi tidak ditemukan' });
+        }
+
+        res.json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 
 // --- ADMIN SPECIFIC ROUTES ---
 

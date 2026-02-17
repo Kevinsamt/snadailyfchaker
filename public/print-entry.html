@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entry Card - Kontes Ikan</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        @media print {
+            body {
+                background: white !important;
+                margin: 0;
+                padding: 20mm;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .entry-card {
+                border: 3px solid #000 !important;
+                page-break-after: always;
+                box-shadow: none !important;
+            }
+        }
+
+        .entry-card-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .entry-card {
+            background: white;
+            border: 3px solid #000;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            color: #000;
+        }
+
+        .entry-header {
+            text-align: center;
+            border-bottom: 3px solid #000;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .entry-header h1 {
+            font-size: 2rem;
+            color: #000;
+            margin: 0;
+            font-weight: 800;
+        }
+
+        .entry-header h2 {
+            font-size: 1.25rem;
+            color: #555;
+            margin: 0.5rem 0 0 0;
+        }
+
+        .entry-number-box {
+            background: linear-gradient(135deg, #00d4ff, #00fa9a);
+            color: #000;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .entry-number-box h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .entry-number-box .number {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            margin: 0.5rem 0 0 0;
+        }
+
+        .entry-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .detail-item {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 0.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            color: #000;
+            font-weight: 700;
+        }
+
+        .fish-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 2px solid #ddd;
+        }
+
+        .qr-placeholder {
+            text-align: center;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, #00d4ff, #00a3cc);
+            color: #000;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+            margin: 1rem auto;
+            display: block;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.6);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="entry-card-container">
+        <button class="print-btn no-print" onclick="window.print()">🖨️ Print Entry Card</button>
+
+        <div class="entry-card">
+            <div class="entry-header">
+                <h1>🐠 ENTRY CARD</h1>
+                <h2 id="contestName">Kontes Betta Championship</h2>
+            </div>
+
+            <div class="entry-number-box">
+                <h3>Nomor Entry</h3>
+                <div class="number" id="entryNumber">A-A1-001</div>
+            </div>
+
+            <div class="entry-details">
+                <div class="detail-item">
+                    <div class="detail-label">Kelas</div>
+                    <div class="detail-value" id="contestClass">A</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Spesifikasi</div>
+                    <div class="detail-value" id="registrationTier">A1</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Nama Ikan</div>
+                    <div class="detail-value" id="fishName">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Jenis</div>
+                    <div class="detail-value" id="fishType">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Nama Team</div>
+                    <div class="detail-value" id="teamName">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">WhatsApp</div>
+                    <div class="detail-value" id="waNumber">-</div>
+                </div>
+            </div>
+
+            <img id="fishImage" class="fish-image" src="" alt="Fish Photo" style="display: none;">
+
+            <div class="qr-placeholder">
+                <small>Scan QR Code untuk verifikasi online</small><br>
+                <div style="font-size: 3rem; margin: 0.5rem 0;">📱</div>
+                <small id="qrData">Verifikasi: <span id="regId"></span></small>
+            </div>
+        </div>
+
+        <button class="print-btn no-print" onclick="window.print()">🖨️ Print Entry Card</button>
+    </div>
+
+    <script>
+        // Get registration ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const regId = urlParams.get('id');
+
+        if (regId) {
+            fetchEntryData(regId);
+        } else {
+            alert('ID Registrasi tidak ditemukan!');
+            window.location.href = '/dashboard.html';
+        }
+
+        async function fetchEntryData(id) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/user/registrations/${id}`, {
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data');
+                }
+
+                const data = await response.json();
+                const reg = data.data;
+
+                // Populate card
+                document.getElementById('entryNumber').textContent = reg.entry_number || 'N/A';
+                document.getElementById('contestName').textContent = reg.contest_name || 'Kontes Ikan';
+                document.getElementById('contestClass').textContent = reg.contest_class || '-';
+                document.getElementById('registrationTier').textContent = reg.registration_tier || '-';
+                document.getElementById('fishName').textContent = reg.fish_name || '-';
+                document.getElementById('fishType').textContent = reg.fish_type || '-';
+                document.getElementById('teamName').textContent = reg.team_name || '-';
+                document.getElementById('waNumber').textContent = reg.wa_number || '-';
+                document.getElementById('regId').textContent = `REG-${id}`;
+
+                if (reg.fish_image_url) {
+                    const img = document.getElementById('fishImage');
+                    img.src = reg.fish_image_url;
+                    img.style.display = 'block';
+                }
+
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Gagal memuat data entry: ' + err.message);
+            }
+        }
+    </script>
+</body>
+
+</html>
