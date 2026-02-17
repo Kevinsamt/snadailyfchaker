@@ -533,6 +533,45 @@
                 transform: scale(1);
             }
         }
+
+        .class-card {
+            text-align: center;
+            padding: 1.25rem 0.5rem;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .class-card.active {
+            border-color: var(--admin-primary);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .sub-pill {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.6rem 1.25rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .sub-pill:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .sub-pill.active {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
+        }
     </style>
 </head>
 
@@ -649,23 +688,40 @@
                         </div>
                         <div class="input-box" style="margin-bottom: 0;">
                             <label>Kategori Kelas</label>
-                            <select id="contestClass" class="premium-input" required>
-                                <optgroup label="Kelas A - Plakat Series">
-                                    <option value="A1">A1 - Plakat Basic</option>
-                                    <option value="A2">A2 - Multicolor</option>
-                                    <option value="A3">A3 - Rim Series</option>
-                                </optgroup>
-                                <optgroup label="Kelas B - Halfmoon Series">
-                                    <option value="B1">B1 - HM Basic</option>
-                                    <option value="B2">B2 - HM Multi</option>
-                                </optgroup>
-                                <optgroup label="Kelas C - Special Class">
-                                    <option value="C1">C1 - FM Open</option>
-                                    <option value="C2">C2 - Longfin VT</option>
-                                    <option value="C3">C3 - PK Dumbo</option>
-                                    <option value="C4">C4 - HMPK</option>
-                                </optgroup>
-                            </select>
+                            <div class="tier-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 0.5rem;">
+                                <div class="tier-card class-card" id="classA" onclick="selectContestClass('A', this)">
+                                    <span class="tier-name">Kelas A</span>
+                                    <div
+                                        style="font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem; color: var(--admin-primary);">
+                                        PLAKAT</div>
+                                </div>
+                                <div class="tier-card class-card" id="classB" onclick="selectContestClass('B', this)">
+                                    <span class="tier-name">Kelas B</span>
+                                    <div
+                                        style="font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem; color: var(--admin-secondary);">
+                                        HALFMOON</div>
+                                </div>
+                                <div class="tier-card class-card" id="classC" onclick="selectContestClass('C', this)">
+                                    <span class="tier-name">Kelas C</span>
+                                    <div
+                                        style="font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem; color: var(--admin-warning);">
+                                        SPECIAL</div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-category Selection (Dynamic) -->
+                            <div id="subClassContainer"
+                                style="margin-top: 1.5rem; display: none; animation: slideUp 0.4s ease;">
+                                <label id="subClassLabel"
+                                    style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Pilih
+                                    Spesifikasi</label>
+                                <div id="subClassPills"
+                                    style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem;">
+                                    <!-- Pills injected via JS -->
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="contestClass" value="" required>
                         </div>
                     </div>
 
@@ -852,6 +908,61 @@
 
             updateTierAvailability();
         });
+
+        const CONTEST_CLASSES = {
+            'A': {
+                label: 'Kelas A - Plakat Series',
+                subs: [
+                    { id: 'A1', name: 'A1 - Plakat Basic' },
+                    { id: 'A2', name: 'A2 - Multicolor' },
+                    { id: 'A3', name: 'A3 - Rim Series' }
+                ]
+            },
+            'B': {
+                label: 'Kelas B - Halfmoon Series',
+                subs: [
+                    { id: 'B1', name: 'B1 - HM Basic' },
+                    { id: 'B2', name: 'B2 - HM Multi' }
+                ]
+            },
+            'C': {
+                label: 'Kelas C - Special Class',
+                subs: [
+                    { id: 'C1', name: 'C1 - FM Open' },
+                    { id: 'C2', name: 'C2 - Longfin VT' },
+                    { id: 'C3', name: 'C3 - PK Dumbo' },
+                    { id: 'C4', name: 'C4 - HMPK' }
+                ]
+            }
+        };
+
+        function selectContestClass(mainClass, element) {
+            // UI Update
+            document.querySelectorAll('.class-card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+
+            // Show Sub-category Container
+            const container = document.getElementById('subClassContainer');
+            const pillsDiv = document.getElementById('subClassPills');
+            const label = document.getElementById('subClassLabel');
+
+            container.style.display = 'block';
+            label.innerText = `Spesifikasi ${CONTEST_CLASSES[mainClass].label}`;
+
+            // Render Pills
+            pillsDiv.innerHTML = CONTEST_CLASSES[mainClass].subs.map(sub => `
+                <div class="sub-pill" onclick="selectSubClass('${sub.id}', this)">${sub.name}</div>
+            `).join('');
+
+            // Reset hidden input
+            document.getElementById('contestClass').value = '';
+        }
+
+        function selectSubClass(subId, element) {
+            document.querySelectorAll('.sub-pill').forEach(p => p.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('contestClass').value = subId;
+        }
 
         function updateTierAvailability() {
             const now = new Date();
