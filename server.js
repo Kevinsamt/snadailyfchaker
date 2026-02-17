@@ -435,7 +435,6 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_color INTEGER DEFAULT 0");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS has_spun BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS prize_redeemed BOOLEAN DEFAULT FALSE");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS entry_number TEXT");
         } catch (migErr) {
             console.log("Migration columns check done.");
         }
@@ -667,16 +666,9 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
             videoUrl = await uploadToSupabase(video.buffer, video.originalname, video.mimetype);
         }
 
-        // Generate Sequential Entry Number (4 digits, e.g., 0001)
-        const countRes = await pool.query(
-            "SELECT COUNT(*) FROM contest_registrations WHERE contest_name = $1",
-            [contestName]
-        );
-        const nextNum = (parseInt(countRes.rows[0].count) + 1).toString().padStart(4, '0');
-
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, entry_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
-            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, nextNum]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
+            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize]
         );
 
         res.json({ success: true, data: result.rows[0] });
@@ -774,22 +766,6 @@ app.post('/api/contest/registrations/:id/redeem', userAuthMiddleware, async (req
         }
 
         res.json({ success: true, message: 'Hadiah berhasil ditandai sebagai sudah diklaim.' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Get Single Registration
-app.get('/api/contest/registrations/:id', userAuthMiddleware, async (req, res) => {
-    try {
-        const result = await pool.query(
-            'SELECT * FROM contest_registrations WHERE id = $1 AND (user_id = $2 OR (SELECT role FROM users WHERE id = $2) = \'admin\')',
-            [req.params.id, req.user.id]
-        );
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Registrasi tidak ditemukan.' });
-        }
-        res.json({ success: true, data: result.rows[0] });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

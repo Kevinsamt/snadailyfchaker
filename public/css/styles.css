@@ -83,10 +83,6 @@ body {
     .container {
         padding: 1rem;
     }
-
-    .glass-panel {
-        padding: 1.5rem !important;
-    }
 }
 
 .glass-panel {
@@ -257,38 +253,11 @@ body {
     }
 
     .container {
-        padding: 1rem;
+        padding: 0.75rem;
     }
 
     body {
-        font-size: 14px;
-        line-height: 1.5;
-    }
-
-    h1 {
-        font-size: 1.75rem !important;
-        line-height: 1.2;
-    }
-
-    h2 {
-        font-size: 1.5rem !important;
-        line-height: 1.3;
-    }
-
-    h3 {
-        font-size: 1.25rem !important;
-        line-height: 1.4;
-    }
-
-    .glass-panel {
-        padding: 1.25rem !important;
-        border-radius: var(--radius-md) !important;
-    }
-
-    .btn-primary {
-        min-height: 44px;
-        padding: 0.75rem 1.5rem;
-        font-size: 0.9rem;
+        font-size: 15px;
     }
 
     .mobile-hide,
@@ -521,17 +490,15 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
     z-index: 1999;
     display: none;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s;
 }
-
 
 .nav-overlay-backdrop.active {
     display: block;

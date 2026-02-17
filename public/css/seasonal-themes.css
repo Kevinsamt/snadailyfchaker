@@ -47,14 +47,7 @@
 
 /* Hide some lampions on mobile to reduce clutter */
 @media (max-width: 640px) {
-    .theme-imlek .lampion:nth-child(n+4) {
-        display: none !important;
-    }
-}
-
-/* Even fewer on very small screens */
-@media (max-width: 480px) {
-    .theme-imlek .lampion:nth-child(n+3) {
+    .theme-imlek .lampion:nth-child(n+5) {
         display: none !important;
     }
 }

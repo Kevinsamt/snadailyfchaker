@@ -71,16 +71,6 @@
             box-shadow: 0 0 15px var(--secondary-glow);
         }
 
-        @media (max-width: 768px) {
-            .track-hero {
-                padding: 5rem 1rem 3rem;
-            }
-
-            .track-container {
-                padding: 0 1rem 3rem;
-            }
-        }
-
         @media (max-width: 480px) {
             .timeline {
                 margin-left: 10px;
@@ -225,7 +215,7 @@
                         </div>
                         <h2 style="margin: 0.5rem 0; font-size: 1.25rem; font-weight: 800;">${data.summary.destination}</h2>
                         <p style="color:var(--text-muted); font-size: 0.85rem; font-weight: 500;">Dari: ${data.summary.origin}</p>
-                      `;
+                    `;
 
                     timeline.innerHTML = data.history.map((item, idx) => `
                         <div class="timeline-item ${idx === 0 ? 'active' : ''}">

@@ -73,32 +73,8 @@
             background: var(--admin-primary);
             color: #000;
             border-color: var(--admin-primary);
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
             transform: translateY(-1px);
-        }
-
-        @media (max-width: 480px) {
-            .admin-nav {
-                padding: 0.25rem 0;
-            }
-
-            .tab-btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.75rem;
-                border-radius: 10px;
-            }
-
-            .tab-btn i {
-                font-size: 0.95rem;
-            }
-
-            .admin-section {
-                padding: 1rem 0 3rem;
-            }
-
-            .glass-panel {
-                padding: 1.25rem !important;
-            }
         }
 
         .stat-card {
@@ -110,15 +86,13 @@
             backdrop-filter: blur(40px);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
-            overflow-x: auto;
+            overflow: hidden;
             margin-top: 1.5rem;
-            -webkit-overflow-scrolling: touch;
         }
 
         .admin-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
         }
 
         .admin-table th {
@@ -200,9 +174,8 @@
                         <span style="color: white; font-weight: 400;">Hub</span></a>
                 </div>
                 <button onclick="logout()" class="action-btn"
-                    style="color: var(--admin-error); border-color: rgba(239, 68, 68, 0.2); width: 32px; height: 32px; border-radius: 8px;"
-                    title="Logout">
-                    <i class="ri-logout-box-r-line" style="font-size: 1rem;"></i>
+                    style="color: var(--admin-error); border-color: rgba(239, 68, 68, 0.2);" title="Logout">
+                    <i class="ri-logout-box-r-line"></i>
                 </button>
             </div>
             <div class="tab-container" id="adminTabs">
@@ -583,8 +556,8 @@
                         document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
                             <tr class="animate-fade-in">
                                 <td>
-                                    <div style="font-weight: 700; color: white; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(r.user_name)}</div>
-                                    <div style="font-size: 0.6rem; color: var(--text-muted); font-family: monospace; opacity: 0.6;">#${r.id.toString().slice(-4)}</div>
+                                    <div style="font-weight: 700; color: white;">${escapeHTML(r.user_name)}</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted); font-family: monospace;">UUID: ${r.id}</div>
                                 </td>
                                 <td>
                                     <div style="display: flex; gap: 12px; align-items: center;">
@@ -615,9 +588,6 @@
                                     <div style="display: flex; gap: 8px;">
                                         <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary); background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.2);" title="Approve"><i class="ri-check-double-line"></i></button>
                                         <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error); background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2);" title="Reject"><i class="ri-close-circle-line"></i></button>
-                                        ${r.status === 'approved' ? `
-                                            <button onclick="window.open('print-entry.html?id=${r.id}', '_blank')" class="action-btn" style="color: white; background: rgba(255,255,255,0.05); border-color: var(--glass-border);" title="Print Label"><i class="ri-printer-line"></i></button>
-                                        ` : ''}
                                     </div>
                                 </td>
                             </tr>
@@ -863,7 +833,7 @@
                         const statusClass = r.status === 'approved' ? 'admin-secondary' : r.status === 'rejected' ? 'admin-error' : 'text-muted';
                         return `
                         <tr>
-                            <td><div style="font-weight: 700; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(r.user_name)}</div></td>
+                            <td><div style="font-weight: 700;">${escapeHTML(r.user_name)}</div></td>
                             <td>
                                 <div style="display: flex; gap: 10px; align-items: center;">
                                     <img src="${escapeHTML(r.fish_image_url) || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
@@ -891,9 +861,6 @@
                                         <button onclick="quickAction(${r.id}, 'pending')" class="action-btn" style="color: var(--text-dim);" title="Reset"><i class="ri-refresh-line"></i></button>
                                     `}
                                     <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--admin-error);" title="Delete"><i class="ri-delete-bin-4-line"></i></button>
-                                    ${r.status === 'approved' ? `
-                                        <button onclick="window.open('print-entry.html?id=${r.id}', '_blank')" class="action-btn" style="color: #ffd700;" title="Print Label"><i class="ri-printer-line"></i></button>
-                                    ` : ''}
                                 </div>
                             </td>
                         </tr>
