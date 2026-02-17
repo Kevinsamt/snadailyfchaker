@@ -786,41 +786,8 @@
                                 Pendaftaran ikan ini dibiayai oleh SnaDaily.</div>
                         </div>
                         <input type="hidden" id="registrationTier" value="Early">
-                        <input type="hidden" id="paymentAmount" value="40000">
                     </div>
 
-                    <!-- Direct QRIS Integration -->
-                    <div id="directPaymentArea"
-                        style="margin-top: 2rem; padding: 2rem; background: rgba(255,255,255,0.03); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05);">
-                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
-                            <i class="ri-qr-code-line" style="color: #00d4ff; font-size: 1.5rem;"></i>
-                            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700;">Instruksi Pembayaran</h3>
-                        </div>
-
-                        <div id="displayAmountDirect" class="amount-badge">Rp 40.000</div>
-
-                        <div class="qris-container">
-                            <img src="img/qris-pembayaran.jpg" class="qris-image" alt="QRIS SnaDaily"
-                                onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=PROSES-PEMBAYARAN-SNADAILY-CHECKER'">
-                            <p
-                                style="color: #000; font-size: 0.7rem; font-weight: 700; margin-top: 10px; text-transform: uppercase;">
-                                TERRA ARRIES PESADA
-                            </p>
-                        </div>
-
-                        <div class="input-box" style="margin-top: 2rem; margin-bottom: 0;">
-                            <label>Lampirkan Bukti Transfer</label>
-                            <div class="proof-upload" onclick="document.getElementById('paymentProofFile').click()">
-                                <i class="ri-upload-cloud-2-line" style="font-size: 1.5rem; color: var(--primary);"></i>
-                                <div id="proofFileName"
-                                    style="font-size: 0.8rem; margin-top: 5px; color: rgba(255,255,255,0.6);">
-                                    Upload Struk / Screenshot
-                                </div>
-                            </div>
-                            <input type="file" id="paymentProofFile" hidden accept="image/*"
-                                onchange="handleProofSelect(this)">
-                        </div>
-                    </div>
 
                     <div class="file-grid" style="margin-bottom: 2rem;">
                         <div class="input-box" style="margin-bottom: 0;">
@@ -941,8 +908,7 @@
                 document.getElementById('directPaymentArea').style.display = 'none';
 
                 // Set fixed values for registration
-                document.getElementById('registrationTier').value = 'Early (Spinwell)';
-                document.getElementById('paymentAmount').value = 0;
+                document.getElementById('registrationTier').value = 'Entry Gratis';
             }
 
             try {
@@ -1035,39 +1001,12 @@
             }
         }
 
-        let currentOrderId = null;
-
         function selectTier(tier, price, element) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const isFreeEntry = urlParams.get('claim') === 'free_entry';
-
             document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
             document.getElementById('registrationTier').value = tier;
-            document.getElementById('paymentAmount').value = isFreeEntry ? 0 : price;
-
-            // Manual QRIS Helper
-            const finalAmount = isFreeEntry ? 0 : price;
-            const paymentArea = document.getElementById('directPaymentArea');
-            const displayBadge = document.getElementById('displayAmountDirect');
-            const qrisImg = document.querySelector('.qris-image');
-
-            if (finalAmount > 0) {
-                paymentArea.style.display = 'block';
-                displayBadge.innerText = 'Rp ' + finalAmount.toLocaleString('id-ID');
-                qrisImg.src = 'img/qris-pembayaran.jpg'; // Revert to static image
-            } else {
-                paymentArea.style.display = 'none';
-            }
         }
 
-        async function handleProofSelect(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const fileName = file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name;
-            document.getElementById('proofFileName').innerText = fileName;
-            document.getElementById('proofFileName').style.color = 'var(--secondary)';
-        }
 
 
         function buildFormData() {
@@ -1078,7 +1017,6 @@
             formData.append('fishType', 'N/A');
             formData.append('contestClass', document.getElementById('contestClass').value);
             formData.append('registrationTier', tier);
-            formData.append('paymentAmount', document.getElementById('paymentAmount').value);
             formData.append('teamName', document.getElementById('teamName').value);
             formData.append('waNumber', document.getElementById('waNumber').value);
             formData.append('fullAddress', document.getElementById('fullAddress').value);
@@ -1132,23 +1070,10 @@
             e.preventDefault();
 
             const btn = document.getElementById('submitBtn');
-            const amount = parseInt(document.getElementById('paymentAmount').value);
-            const proofFile = document.getElementById('paymentProofFile').files[0];
-
-            if (amount > 0 && !proofFile) {
-                alert('Tolong upload bukti transfer dulu ya Cak!');
-                return;
-            }
-
             btn.disabled = true;
             btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> SEDANG MENGIRIM...';
 
-            const formData = buildFormData();
-            if (proofFile) {
-                formData.append('paymentProof', proofFile);
-            }
-
-            await sendRegistration(formData);
+            await sendRegistration(buildFormData());
         });
     </script>
 </body>

@@ -25,12 +25,6 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 
-// Midtrans Core Configuration
-const snap = new midtransClient.Snap({
-    isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
-    serverKey: process.env.MIDTRANS_SERVER_KEY,
-    clientKey: process.env.MIDTRANS_CLIENT_KEY
-});
 
 
 // Supabase Configuration
@@ -613,8 +607,7 @@ app.post('/api/register', (req, res) => {
 // Contest Registration (Now with File Upload)
 app.post('/api/contest/register', userAuthMiddleware, upload.fields([
     { name: 'fishPhoto', maxCount: 1 },
-    { name: 'fishVideo', maxCount: 1 },
-    { name: 'paymentProof', maxCount: 1 }
+    { name: 'fishVideo', maxCount: 1 }
 ]), async (req, res) => {
     try {
         const userId = req.user.id;
@@ -626,7 +619,6 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
             waNumber = null,
             fullAddress = null,
             contestClass = null,
-            registrationTier = null,
             spinPrize = null
         } = req.body;
 
@@ -651,12 +643,9 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         }
         // ---------------------------------------------
 
-        // Ensure numeric amount
-        const paymentAmount = req.body.paymentAmount ? parseInt(req.body.paymentAmount) : 0;
 
         let photoUrl = null;
         let videoUrl = null;
-        let proofUrl = null;
 
         // Upload Photo to Supabase
         if (req.files && req.files.fishPhoto) {
@@ -670,15 +659,10 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
             videoUrl = await uploadToSupabase(video.buffer, video.originalname, video.mimetype);
         }
 
-        // Upload Payment Proof
-        if (req.files && req.files.paymentProof) {
-            const proof = req.files.paymentProof[0];
-            proofUrl = await uploadToSupabase(proof.buffer, proof.originalname, proof.mimetype);
-        }
 
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
-            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, spin_prize) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, spinPrize]
         );
 
         res.json({ success: true, data: result.rows[0] });
@@ -1309,57 +1293,6 @@ app.get('/api/products', apiLimiter, async (req, res) => {
 
 
 
-// Midtrans: Create Transaction Token
-app.post('/api/payment/token', apiLimiter, async (req, res) => {
-    try {
-        const { productName, amount, customer } = req.body;
-
-        if (!process.env.MIDTRANS_SERVER_KEY) {
-            return res.status(500).json({ error: "MIDTRANS_SERVER_KEY belum diatur di environment variables!" });
-        }
-
-        // Basic unique order ID
-        const orderId = `ORDER-${Date.now()}`;
-
-        const parameter = {
-            transaction_details: {
-                order_id: orderId,
-                gross_amount: amount
-            },
-            item_details: [{
-                id: 'PROD-FISH',
-                price: amount,
-                quantity: 1,
-                name: productName
-            }],
-            customer_details: {
-                first_name: customer.name || 'Pelanggan',
-                email: customer.email,
-                phone: customer.phone,
-                billing_address: {
-                    address: customer.address,
-                    phone: customer.phone
-                },
-                shipping_address: {
-                    address: customer.address,
-                    phone: customer.phone
-                }
-            },
-            credit_card: {
-                secure: true
-            }
-        };
-
-        const transaction = await snap.createTransaction(parameter);
-        res.json({
-            token: transaction.token,
-            orderId: orderId
-        });
-    } catch (err) {
-        console.error("Midtrans Error:", err);
-        res.status(500).json({ error: err.message });
-    }
-});
 
 // Global Error Handler (Ensures JSON response instead of HTML)
 app.use((err, req, res, next) => {
