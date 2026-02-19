@@ -655,10 +655,15 @@
                                             ${reg.spin_prize ? `<span style="color: #ffd700;"><i class="ri-gift-line"></i> ${escapeHTML(reg.spin_prize)}</span>` : ''}
                                         </div>
                                     </div>
-                                    <div style="flex-shrink: 0;">
+                                    <div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
                                         ${canSpin ? `
                                             <button onclick="openWheel(${reg.id})" class="gift-box-btn hover-lift">
                                                 <i class="ri-gift-fill"></i> SPIN!
+                                            </button>
+                                        ` : ''}
+                                        ${reg.status === 'approved' ? `
+                                            <button onclick="printEntryCard(${reg.id})" class="btn-primary" style="padding: 6px 12px; font-size: 0.7rem; background: var(--primary); color: #000; border-radius: 8px; font-weight: 800; display: flex; align-items: center; gap: 4px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 212, 255, 0.3);">
+                                                <i class="ri-printer-line"></i> CETAK KARTU
                                             </button>
                                         ` : ''}
                                     </div>
@@ -892,6 +897,122 @@
                 }
             } catch (err) { alert('Gagal memperbarui profil'); }
         });
+
+        function printEntryCard(id) {
+            const token = localStorage.getItem('sna_user_token');
+            // Fetch the registration details to ensure we have the entry number if it was updated
+            fetch('/api/contest/my-registrations', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const reg = data.data.find(r => r.id == id);
+                        if (!reg) return alert('Data tidak ditemukan');
+
+                        const printWindow = window.open('', '_blank', 'width=800,height=600');
+                        printWindow.document.write(`
+                            <html>
+                            <head>
+                                <title>Cetak Kartu Entri - ${reg.entry_number || '-'}</title>
+                                <style>
+                                    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+                                    body { 
+                                        font-family: 'Montserrat', sans-serif; 
+                                        margin: 0; 
+                                        padding: 0; 
+                                        display: flex; 
+                                        align-items: center; 
+                                        justify-content: center; 
+                                        min-height: 100vh;
+                                        background: #f0f2f5;
+                                    }
+                                    .card {
+                                        width: 90mm;
+                                        height: 55mm;
+                                        background: white;
+                                        border: 2px solid #000;
+                                        padding: 5mm;
+                                        box-sizing: border-box;
+                                        display: flex;
+                                        flex-direction: column;
+                                        justify-content: center;
+                                        align-items: center;
+                                        text-align: center;
+                                        position: relative;
+                                    }
+                                    .header {
+                                        font-size: 8pt;
+                                        font-weight: 700;
+                                        color: #666;
+                                        text-transform: uppercase;
+                                        letter-spacing: 2px;
+                                        margin-bottom: 3mm;
+                                        border-bottom: 1px solid #eee;
+                                        width: 100%;
+                                        padding-bottom: 1mm;
+                                    }
+                                    .entry-number {
+                                        font-size: 36pt;
+                                        font-weight: 900;
+                                        color: #000;
+                                        margin: 2mm 0;
+                                        letter-spacing: -1px;
+                                    }
+                                    .fish-info {
+                                        margin-top: 2mm;
+                                    }
+                                    .fish-name {
+                                        font-size: 14pt;
+                                        font-weight: 800;
+                                        text-transform: uppercase;
+                                        color: #333;
+                                    }
+                                    .team-name {
+                                        font-size: 10pt;
+                                        font-weight: 600;
+                                        color: #777;
+                                        margin-top: 1mm;
+                                    }
+                                    .footer {
+                                        position: absolute;
+                                        bottom: 3mm;
+                                        font-size: 6pt;
+                                        font-weight: 700;
+                                        color: #aaa;
+                                        letter-spacing: 1px;
+                                    }
+                                    @media print {
+                                        body { background: none; }
+                                        .card { 
+                                            box-shadow: none; 
+                                            border: 1px solid #000;
+                                            page-break-inside: avoid;
+                                        }
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="card">
+                                    <div class="header">ENTRY CARD - ${reg.contest_name}</div>
+                                    <div class="entry-number">${reg.entry_number || '-'}</div>
+                                    <div class="fish-info">
+                                        <div class="fish-name">${reg.fish_name}</div>
+                                        <div class="team-name">${reg.team_name || 'NO TEAM'}</div>
+                                    </div>
+                                    <div class="footer">GENERATED BY SNADAILYFISHCHECKER</div>
+                                </div>
+                                <script>
+                                    window.onload = () => {
+                                        window.print();
+                                        setTimeout(() => window.close(), 500);
+                                    };
+                                <\/script>
+                            </body>
+                            </html>
+                        `);
+                        printWindow.document.close();
+                    }
+                });
+        }
 
     </script>
 </body>

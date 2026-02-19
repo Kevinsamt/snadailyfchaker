@@ -667,7 +667,7 @@
                                     <div style="display: flex; gap: 8px;">
                                         <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary); background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.2);" title="Approve"><i class="ri-check-double-line"></i></button>
                                         <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error); background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2);" title="Reject"><i class="ri-close-circle-line"></i></button>
-                                        <button onclick="printEntryCard(${r.id})" class="action-btn" style="color: white; background: rgba(255,255,255,0.1); " title="Print Card"><i class="ri-printer-line"></i></button>
+                                        <button onclick="printEntryCard(${r.id})" class="action-btn" style="color: #000; background: var(--admin-secondary); box-shadow: 0 0 10px var(--admin-secondary);" title="Print Card"><i class="ri-printer-line"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -942,7 +942,7 @@
                                     ` : `
                                         <button onclick="quickAction(${r.id}, 'pending')" class="action-btn" style="color: var(--text-dim);" title="Reset"><i class="ri-refresh-line"></i></button>
                                     `}
-                                    <button onclick="printEntryCard(${r.id})" class="action-btn" style="color: white; background: rgba(255,255,255,0.05);" title="Print Entry Card"><i class="ri-printer-line"></i></button>
+                                    <button onclick="printEntryCard(${r.id})" class="action-btn" style="color: #000; background: var(--admin-secondary); box-shadow: 0 0 10px var(--admin-secondary);" title="Print Entry Card"><i class="ri-printer-line"></i></button>
                                     <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--admin-error);" title="Delete"><i class="ri-delete-bin-4-line"></i></button>
                                 </div>
                             </td>
