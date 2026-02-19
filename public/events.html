@@ -132,27 +132,31 @@
     </div>
 
     <nav class="navbar glass">
-        <div class="container nav-container">
-            <a href="index.html" class="text-gradient"
-                style="font-size: 1.75rem; font-weight: 800; text-decoration: none; letter-spacing: -2px;">SnaDaily<span
-                    style="color: white; font-weight: 300;">Checker</span></a>
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <div class="brand-icon">
+                    <i class="ri-calendar-event-fill"></i>
+                </div>
+                <div>
+                    <div class="brand-text">SnaDaily<span>Events</span></div>
+                    <div class="brand-subtext">Premium Competition</div>
+                </div>
+            </a>
 
             <!-- Desktop Links -->
             <div class="desktop-nav-links">
                 <a href="index.html">Beranda</a>
                 <a href="events.html" class="active">Event Kontes</a>
                 <a href="track.html">Lacak Pesanan</a>
-                <a href="login.html" id="nav-login-link" class="nav-auth-btn">Login</a>
             </div>
 
-            <button class="hamburger-btn mobile-only" onclick="toggleMenu()"
-                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
+            <button class="hamburger-btn mobile-only">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
     </nav>
 
-    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
+    <div class="nav-overlay-backdrop" id="navBackdrop"></div>
     <div class="nav-overlay" id="navOverlay">
         <div class="nav-menu-header">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -162,7 +166,7 @@
                 </div>
                 <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">NAVIGASI</span>
             </div>
-            <button class="hamburger-btn" onclick="toggleMenu()">
+            <button class="hamburger-btn">
                 <i class="ri-close-line"></i>
             </button>
         </div>
@@ -183,7 +187,7 @@
         </div>
     </div>
 
-    <header class="event-hero">
+    <header class="event-hero" style="margin-top: 80px;">
         <div class="container">
             <h1 class="text-gradient animate-fade-in"
                 style="font-size: clamp(2.5rem, 8vw, 4rem); margin-bottom: 1rem; font-weight: 800; line-height: 1.1;">
@@ -389,6 +393,7 @@
             loginLink.href = userData.role === 'judge' ? 'judge.html' : 'dashboard.html';
         }
     </script>
+    <script src="js/navigation.js"></script>
 </body>
 
 </html>

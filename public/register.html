@@ -82,24 +82,25 @@
         <div class="bubble x3"></div>
     </div>
 
-    <nav class="navbar">
+    <nav class="navbar glass">
         <div class="nav-container">
-            <div class="nav-logo">
-                <div class="logo-icon">
-                    <i class="ri-shield-flash-fill"></i>
+            <a href="index.html" class="nav-brand">
+                <div class="brand-icon">
+                    <i class="ri-user-add-fill"></i>
                 </div>
-                <a href="index.html" class="text-gradient"
-                    style="text-decoration: none; font-size: 1.5rem; font-weight: 900; letter-spacing: -2px;">SnaDaily<span
-                        style="color: white; font-weight: 300;">Checker</span></a>
-            </div>
+                <div>
+                    <div class="brand-text">SnaDaily<span>Join</span></div>
+                    <div class="brand-subtext">Member Registration</div>
+                </div>
+            </a>
 
+            <!-- Desktop Links -->
             <div class="desktop-nav-links">
                 <a href="index.html">Beranda</a>
-                <a href="login.html" class="nav-auth-btn">Sudah Punya Akun?</a>
+                <a href="login.html">Login</a>
             </div>
 
-            <button class="hamburger-btn mobile-only"
-                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
+            <button class="hamburger-btn mobile-only">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
@@ -243,27 +244,6 @@
                 btn.disabled = false;
                 btn.innerHTML = 'DAFTAR SEKARANG <i class="ri-user-add-line"></i>';
             }
-        });
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('.navbar');
-            if (window.scrollY > 20) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-        });
-
-        function toggleMenu() {
-            const navOverlay = document.getElementById('navOverlay');
-            const navBackdrop = document.getElementById('navBackdrop');
-            navOverlay.classList.toggle('active');
-            navBackdrop.classList.toggle('active');
-        }
-
-        // Hamburger button event listener (fix for multiple elements)
-        document.querySelectorAll('.hamburger-btn').forEach(btn => {
-            btn.onclick = toggleMenu;
         });
     </script>
 </body>
