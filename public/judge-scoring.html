@@ -212,6 +212,12 @@
                     style="font-weight: 800; font-size: clamp(0.75rem, 3.5vw, 1rem); color: white; letter-spacing: 0px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 200px;">Memuat...</span>
             </div>
 
+            <div class="desktop-nav-links m-hide">
+                <a href="index.html"
+                    style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-decoration: none;">BERANDA
+                    UTAMA</a>
+            </div>
+
             <button class="hamburger-btn mobile-only"
                 style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
@@ -240,11 +246,7 @@
             <a href="judge.html" class="nav-menu-link">
                 <i class="ri-dashboard-3-line"></i> Judge Dashboard
             </a>
-            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
-                <a href="#" onclick="logout()" class="nav-menu-link" style="color: var(--error);">
-                    <i class="ri-logout-box-r-line"></i> Logout
-                </a>
-            </div>
+            <div id="userMenuLinks"></div>
         </div>
     </div>
 
@@ -663,11 +665,8 @@
             btn.onclick = toggleMenu;
         });
 
-        function logout() {
-            localStorage.removeItem('sna_user_token');
-            window.location.href = 'login.html';
-        }
     </script>
+    <script src="js/navigation.js"></script>
 </body>
 
 </html>
