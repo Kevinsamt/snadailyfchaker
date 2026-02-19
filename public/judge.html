@@ -219,6 +219,7 @@
 
         async function fetchAssignedEvents() {
             const token = localStorage.getItem('sna_user_token');
+            const listEl = document.getElementById('assignedEventsList');
             try {
                 const res = await fetch('/api/judge/events', {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -227,7 +228,7 @@
                 if (data.success) {
                     const list = data.data;
                     if (list.length === 0) {
-                        document.getElementById('assignedEventsList').innerHTML = `
+                        listEl.innerHTML = `
                             <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
                                 <div class="glass-panel" style="border-radius: 25px; max-width: 500px; margin: 0 auto;">
                                     <i class="ri-calendar-todo-line" style="font-size: 4rem; color: var(--text-muted); display: block; margin-bottom: 1.5rem;"></i>
@@ -237,11 +238,11 @@
                             </div>`;
                         return;
                     }
-                    document.getElementById('assignedEventsList').innerHTML = list.map(ev => `
+                    listEl.innerHTML = list.map(ev => `
                         <div class="event-card animate-fade-in">
                             <span class="status-badge">${ev.status}</span>
                             <div style="overflow: hidden;">
-                                <img src="${ev.image_url}" class="event-image">
+                                <img src="${ev.image_url || 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?q=80&w=600'}" class="event-image">
                             </div>
                             <div style="padding: 2rem;">
                                 <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.8rem; line-height: 1.2;">${ev.title}</h3>
@@ -261,10 +262,20 @@
                             </div>
                         </div>
                     `).join('');
+                } else {
+                    // Non-success response (e.g. 403 Forbidden) — clear loading spinner
+                    listEl.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
+                            <div class="glass-panel" style="border-radius: 25px; max-width: 500px; margin: 0 auto;">
+                                <i class="ri-shield-cross-line" style="font-size: 4rem; color: var(--text-muted); display: block; margin-bottom: 1.5rem;"></i>
+                                <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Belum Ada Tugas</h3>
+                                <p style="color: var(--text-muted);">Anda belum ditugaskan ke event apapun. Hubungi admin.</p>
+                            </div>
+                        </div>`;
                 }
             } catch (err) {
                 console.error(err);
-                document.getElementById('assignedEventsList').innerHTML = `
+                listEl.innerHTML = `
                     <p style="color: var(--error); grid-column: 1/-1; text-align: center; padding: 2rem;">
                         <i class="ri-error-warning-line"></i> Gagal memuat data. Silakan refresh halaman.
                     </p>`;
