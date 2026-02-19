@@ -1278,12 +1278,12 @@ app.get('/api/fish/:id', apiLimiter, async (req, res) => {
                 "message": "success",
                 "data": {
                     "id": "FISH-QQD8RG",
-                    "species": "Betta Splendens (Halfmoon)",
-                    "origin": "Thailand (Siam)",
+                    "species": "HMPK NEMOKOI",
+                    "origin": "Medan, Indonesia",
                     "weight": 0.05,
                     "method": "Line Breeding",
-                    "catchDate": "2023-10-15",
-                    "importDate": "2023-11-01",
+                    "catchDate": "2025-03-12",
+                    "importDate": "2025-03-12",
                     "timestamp": new Date().toISOString()
                 }
             });
