@@ -602,6 +602,44 @@
             border-color: var(--primary);
             background: rgba(255, 255, 255, 0.03);
         }
+
+        @media (max-width: 968px) {
+            .premium-card {
+                grid-template-columns: 1fr;
+            }
+
+            .info-panel {
+                padding: 2.5rem 1.5rem;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .info-panel h1 {
+                font-size: 2.5rem;
+            }
+
+            .info-panel p {
+                margin-bottom: 2rem;
+            }
+
+            .side-decoration {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-wrapper {
+                padding: 1rem 1rem 4rem 1rem;
+            }
+
+            .tier-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .file-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -738,8 +776,8 @@
                                 <optgroup label="Kelas C - Special Class">
                                     <option value="C1">C1 - FM Open</option>
                                     <option value="C2">C2 - Longfin VT</option>
-                                    <option value="C3">C3 - PK Dumbo</option>
-                                    <option value="C4">C4 - HMPK</option>
+                                    <option value="C3">C3 - Junior</option>
+                                    <option value="C4">C4 - Kids</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -939,16 +977,39 @@
 
     <script src="js/navigation.js"></script>
     <script>
-        // Check Authentication
-        if (!localStorage.getItem('sna_user_token')) {
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        function toggleMenu() {
+            const navOverlay = document.getElementById('navOverlay');
+            const navBackdrop = document.getElementById('navBackdrop');
+            navOverlay.classList.toggle('active');
+            navBackdrop.classList.toggle('active');
+        }
+
+        // Hamburger button event listener (fix for multiple elements)
+        document.querySelectorAll('.hamburger-btn').forEach(btn => {
+            btn.onclick = toggleMenu;
+        });
+
+        function logout() {
+            localStorage.removeItem('sna_user_token');
             window.location.href = 'login.html';
         }
 
+        // --- Core Logic ---
         document.addEventListener('DOMContentLoaded', async () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
             const userMenuLinks = document.getElementById('userMenuLinks');
 
-            if (userData) {
+            if (userData && userMenuLinks) {
                 userMenuLinks.innerHTML = `
                     <a href="dashboard.html" class="nav-menu-link">
                         <i class="ri-dashboard-line"></i> Dashboard
@@ -957,7 +1018,7 @@
                         <i class="ri-logout-box-r-line"></i> Logout
                     </a>
                 `;
-            } else {
+            } else if (userMenuLinks) {
                 userMenuLinks.innerHTML = `
                     <a href="login.html" class="nav-menu-link">
                         <i class="ri-user-line"></i> Login
@@ -973,13 +1034,17 @@
             const isFreeEntry = urlParams.get('claim') === 'free_entry';
 
             if (isFreeEntry) {
-                document.getElementById('freeEntryBadge').style.display = 'flex';
-                document.getElementById('standardTierGrid').style.display = 'none';
-                document.getElementById('freeEntryPrizeCard').style.display = 'block';
-                document.getElementById('directPaymentArea').style.display = 'none';
+                const badge = document.getElementById('freeEntryBadge');
+                const grid = document.getElementById('standardTierGrid');
+                const prize = document.getElementById('freeEntryPrizeCard');
+                const payArea = document.getElementById('directPaymentArea');
+                if (badge) badge.style.display = 'flex';
+                if (grid) grid.style.display = 'none';
+                if (prize) prize.style.display = 'block';
+                if (payArea) payArea.style.display = 'none';
 
-                // Set fixed values for registration
-                document.getElementById('registrationTier').value = 'Entry Gratis';
+                const regTier = document.getElementById('registrationTier');
+                if (regTier) regTier.value = 'Entry Gratis';
             }
 
             try {
@@ -987,14 +1052,17 @@
                 const data = await res.json();
                 if (data.success) {
                     const select = document.getElementById('eventName');
-                    select.innerHTML = '<option value="">Pilih Event Aktif...</option>' +
-                        data.data.filter(ev => ev.status !== 'past').map(ev =>
-                            `<option value="${ev.title}" ${selectedEvent === decodeURIComponent(ev.title) ? 'selected' : ''}>${ev.title}</option>`
-                        ).join('');
+                    if (select) {
+                        select.innerHTML = '<option value="">Pilih Event Aktif...</option>' +
+                            data.data.filter(ev => ev.status !== 'past').map(ev =>
+                                `<option value="${ev.title}" ${selectedEvent === decodeURIComponent(ev.title) ? 'selected' : ''}>${ev.title}</option>`
+                            ).join('');
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching events:', err);
-                document.getElementById('eventName').innerHTML = '<option value="">Gagal memuat event</option>';
+                const select = document.getElementById('eventName');
+                if (select) select.innerHTML = '<option value="">Gagal memuat event</option>';
             }
 
             updateTierAvailability();

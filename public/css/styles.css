@@ -576,6 +576,13 @@ body {
     .desktop-nav-links {
         display: none !important;
     }
+
+    /* Floating Header Style for Mobile */
+    .navbar.scrolled {
+        background: rgba(7, 11, 20, 0.85);
+        backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
 }
 
 /* Hamburger Menu Base */
@@ -597,23 +604,23 @@ body {
     transform: scale(1.1);
 }
 
-/* Nav Overlay */
+/* Nav Overlay - Premium Redesign */
 .nav-overlay {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 300px;
+    width: 320px;
     height: 100vh;
-    background: rgba(7, 11, 20, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-left: 1px solid var(--glass-border);
+    background: rgba(10, 15, 28, 0.75);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 2000;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
-    padding: 2rem;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    padding: 2.5rem 2rem;
+    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.6);
 }
 
 .nav-overlay.active {
@@ -653,19 +660,36 @@ body {
 }
 
 .nav-menu-link {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-muted);
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.nav-menu-link i {
+    font-size: 1.4rem;
+    color: var(--primary);
     transition: var(--transition);
 }
 
-.nav-menu-link:hover {
-    color: var(--primary);
-    transform: translateX(10px);
+.nav-menu-link:hover,
+.nav-menu-link.active {
+    color: #fff;
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.2);
+    transform: translateX(8px);
+}
+
+.nav-menu-link:hover i {
+    transform: scale(1.1) rotate(-8deg);
+    color: #fff;
 }
 
 .nav-menu-link i {

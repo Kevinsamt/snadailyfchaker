@@ -20,6 +20,30 @@
     <script src="js/theme-switcher.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
+        .navbar-admin {
+            background: rgba(7, 11, 28, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1500;
+            transition: var(--transition);
+        }
+
+        .navbar-admin.scrolled {
+            background: rgba(7, 11, 28, 0.85);
+            backdrop-filter: blur(30px);
+            padding: 0.75rem 0;
+        }
+
+        .admin-nav {
+            margin-top: 80px;
+        }
+
         :root {
             --admin-primary: #00d4ff;
             --admin-primary-glow: rgba(0, 212, 255, 0.4);
@@ -264,24 +288,63 @@
         <div class="bubble x3"></div>
     </div>
 
+    <nav class="navbar-admin">
+        <div class="container"
+            style="display: flex; justify-content: space-between; align-items: center; padding: 0 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div
+                    style="width: 32px; height: 32px; background: var(--admin-primary); border-radius: 8px; display: grid; place-items: center; color: #000;">
+                    <i class="ri-shield-flash-fill"></i>
+                </div>
+                <a href="admin.html" class="text-gradient"
+                    style="text-decoration: none; font-size: 1.25rem; font-weight: 800;">ADMIN<span
+                        style="font-weight: 300; color: white;">HUB</span></a>
+            </div>
+
+            <button class="hamburger-btn" onclick="toggleMenu()"
+                style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 8px;">
+                <i class="ri-menu-4-line"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
+    <div class="nav-overlay" id="navOverlay">
+        <div class="nav-menu-header">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div
+                    style="width: 32px; height: 32px; background: var(--admin-primary); border-radius: 8px; display: grid; place-items: center; color: #000;">
+                    <i class="ri-shield-user-line"></i>
+                </div>
+                <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">ADMIN MENU</span>
+            </div>
+            <button class="hamburger-btn" onclick="toggleMenu()">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="nav-menu-links">
+            <a href="index.html" class="nav-menu-link">
+                <i class="ri-home-4-line"></i> Beranda Utama
+            </a>
+            <a href="admin.html" class="nav-menu-link active">
+                <i class="ri-dashboard-3-line"></i> Admin Dashboard
+            </a>
+            <a href="dashboard.html" class="nav-menu-link">
+                <i class="ri-user-6-line"></i> User Dashboard
+            </a>
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                <a href="#" onclick="logout()" class="nav-menu-link" style="color: var(--admin-error);">
+                    <i class="ri-logout-box-r-line"></i> Logout
+                </a>
+            </div>
+        </div>
+        <div style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
+            <p style="font-size: 0.7rem; color: var(--text-muted); text-align: center;">Secure Administration Mode</p>
+        </div>
+    </div>
+
     <nav class="admin-nav">
         <div class="container" style="padding: 0.75rem 1.25rem; max-width: 1400px; margin: 0 auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div
-                        style="width: 38px; height: 38px; background: var(--admin-primary); border-radius: 10px; display: grid; place-items: center; color: #000; box-shadow: 0 0 15px var(--admin-primary-glow);">
-                        <i class="ri-shield-flash-fill" style="font-size: 1.25rem;"></i>
-                    </div>
-                    <a href="admin.html" class="text-gradient"
-                        style="text-decoration: none; font-size: 1.4rem; font-weight: 900; letter-spacing: -1.5px;">Admin<span
-                            style="color: white; font-weight: 300;">Hub</span></a>
-                </div>
-                <button onclick="logout()" class="action-btn"
-                    style="color: var(--admin-error); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); width: 42px; height: 42px;"
-                    title="Logout">
-                    <i class="ri-logout-box-r-line" style="font-size: 1.25rem;"></i>
-                </button>
-            </div>
             <div class="tab-container" id="adminTabs">
                 <button onclick="switchTab('overview')" class="tab-btn active"><i
                         class="ri-dashboard-3-line"></i>Beranda</button>
@@ -642,7 +705,24 @@
             if (tab === 'judges') fetchJudges();
         }
 
-        async function fetchStats() {
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.navbar-admin');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        function toggleMenu() {
+            const navOverlay = document.getElementById('navOverlay');
+            const navBackdrop = document.getElementById('navBackdrop');
+            navOverlay.classList.toggle('active');
+            navBackdrop.classList.toggle('active');
+        }
+
+        async function fetchDashboardStats() {
             const token = sessionStorage.getItem('sna_admin_token');
             try {
                 const res = await fetch('/api/admin/stats?t=' + Date.now(), {

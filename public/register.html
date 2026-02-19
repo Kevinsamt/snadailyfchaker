@@ -82,30 +82,40 @@
         <div class="bubble x3"></div>
     </div>
 
-    <nav class="navbar glass" style="position: absolute; top: 0; left: 0; width: 100%; border-bottom: none;">
-        <div class="container nav-container">
-            <a href="index.html" class="text-gradient"
-                style="font-size: 1.75rem; font-weight: 800; text-decoration: none; letter-spacing: -2px;">SnaDaily<span
-                    style="color: white; font-weight: 300;">Checker</span></a>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="logo-icon">
+                    <i class="ri-shield-flash-fill"></i>
+                </div>
+                <a href="index.html" class="text-gradient"
+                    style="text-decoration: none; font-size: 1.5rem; font-weight: 900; letter-spacing: -2px;">SnaDaily<span
+                        style="color: white; font-weight: 300;">Checker</span></a>
+            </div>
 
             <div class="desktop-nav-links">
                 <a href="index.html">Beranda</a>
                 <a href="login.html" class="nav-auth-btn">Sudah Punya Akun?</a>
             </div>
 
-            <button class="hamburger-btn mobile-only" onclick="toggleMenu()"
+            <button class="hamburger-btn mobile-only"
                 style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
     </nav>
 
-    <!-- Nav Overlay -->
     <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
-    <div class="nav-overlay" id="navOverlay" style="text-align: left;">
+    <div class="nav-overlay" id="navOverlay">
         <div class="nav-menu-header">
-            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
-            <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div
+                    style="width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: grid; place-items: center; color: #000;">
+                    <i class="ri-shield-flash-fill"></i>
+                </div>
+                <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">NAVIGASI</span>
+            </div>
+            <button class="hamburger-btn" onclick="toggleMenu()">
                 <i class="ri-close-line"></i>
             </button>
         </div>
@@ -119,13 +129,16 @@
             <a href="track.html" class="nav-menu-link">
                 <i class="ri-truck-line"></i> Lacak Pesanan
             </a>
-            <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
+            <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 0.5rem 0;"></div>
             <a href="login.html" class="nav-menu-link">
                 <i class="ri-user-line"></i> Login
             </a>
             <a href="register.html" class="nav-menu-link active" style="color: var(--secondary);">
                 <i class="ri-user-add-line"></i> Daftar Akun
             </a>
+        </div>
+        <div style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
+            <p style="font-size: 0.7rem; color: var(--text-muted); text-align: center;">Powered by SecureCheck™ 2026</p>
         </div>
     </div>
 
@@ -230,6 +243,27 @@
                 btn.disabled = false;
                 btn.innerHTML = 'DAFTAR SEKARANG <i class="ri-user-add-line"></i>';
             }
+        });
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        function toggleMenu() {
+            const navOverlay = document.getElementById('navOverlay');
+            const navBackdrop = document.getElementById('navBackdrop');
+            navOverlay.classList.toggle('active');
+            navBackdrop.classList.toggle('active');
+        }
+
+        // Hamburger button event listener (fix for multiple elements)
+        document.querySelectorAll('.hamburger-btn').forEach(btn => {
+            btn.onclick = toggleMenu;
         });
     </script>
 </body>
