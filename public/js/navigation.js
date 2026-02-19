@@ -107,20 +107,33 @@ function updateNavigationMenu() {
     }
 
     // Handle Desktop Logout Button Injection
-    if (desktopContainer && (userData || adminToken)) {
-        // Only add if not already present
-        if (!document.getElementById('desktopLogoutBtn')) {
-            const logoutBtn = document.createElement('a');
-            logoutBtn.id = 'desktopLogoutBtn';
-            logoutBtn.href = '#';
-            logoutBtn.innerHTML = '<i class="ri-logout-box-r-line"></i> Logout';
-            logoutBtn.style.color = 'var(--error)';
-            logoutBtn.style.fontWeight = '700';
-            logoutBtn.onclick = (e) => {
-                e.preventDefault();
-                logout();
-            };
-            desktopContainer.appendChild(logoutBtn);
+    if (desktopContainer) {
+        const loginBtn = document.getElementById('nav-login-link');
+
+        if (userData || adminToken) {
+            // User is logged in: Hide Login, Show Logout
+            if (loginBtn) loginBtn.style.display = 'none';
+
+            // Only add logout if not already present
+            if (!document.getElementById('desktopLogoutBtn')) {
+                const logoutBtn = document.createElement('a');
+                logoutBtn.id = 'desktopLogoutBtn';
+                logoutBtn.href = '#';
+                logoutBtn.innerHTML = '<i class="ri-logout-box-r-line"></i> Logout';
+                logoutBtn.style.color = 'var(--error)';
+                logoutBtn.style.fontWeight = '700';
+                logoutBtn.onclick = (e) => {
+                    e.preventDefault();
+                    logout();
+                };
+                desktopContainer.appendChild(logoutBtn);
+            }
+        } else {
+            // User is logged out: Show Login, Remove Logout
+            if (loginBtn) loginBtn.style.display = 'block'; // or 'inline-block' depending on CSS
+
+            const logoutBtn = document.getElementById('desktopLogoutBtn');
+            if (logoutBtn) logoutBtn.remove();
         }
     }
 }
