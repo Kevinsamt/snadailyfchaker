@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnaDaily - Pendaftaran Kontes Premium</title>
+    <title>SnaDaily - Event Registration</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/seasonal-themes.css">
@@ -1203,6 +1203,13 @@
             const btn = document.getElementById('finalSubmitBtn');
             const submitBtn = document.getElementById('submitBtn');
             const token = localStorage.getItem('sna_user_token');
+
+            if (!token) {
+                alert('Silakan LOGIN terlebih dahulu untuk menyelesaikan pendaftaran!');
+                window.location.href = 'login.html';
+                return;
+            }
+
             const tier = document.getElementById('registrationTier').value;
 
             try {

@@ -322,7 +322,7 @@
                                 <div style="margin-top: auto;">
                                     ${ev.status === 'past' ?
                             '<button class="btn-primary" style="width: 100%; opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--glass-border); box-shadow: none;">EVENT SELESAI</button>' :
-                            `<a href="contest-entry.html?event=${encodeURIComponent(ev.title)}" class="btn-primary hover-glow" style="width: 100%; border-radius: 100px;">DAFTAR SEKARANG</a>`
+                            `<button onclick="handleRegistration('${encodeURIComponent(ev.title)}')" class="btn-primary hover-glow" style="width: 100%; border-radius: 100px;">DAFTAR SEKARANG</button>`
                         }
                                 </div>
                             </div>
@@ -367,6 +367,18 @@
                 }
             } catch (err) {
                 console.error('Error fetching registrations:', err);
+            }
+        }
+
+        function handleRegistration(encodedTitle) {
+            const token = localStorage.getItem('sna_user_token');
+            if (token) {
+                // User logged in, go directly to form
+                window.location.href = `contest-entry.html?event=${encodedTitle}`;
+            } else {
+                // User not logged in, go to login with returnUrl
+                const returnUrl = encodeURIComponent(`contest-entry.html?event=${encodedTitle}`);
+                window.location.href = `login.html?returnUrl=${returnUrl}`;
             }
         }
 

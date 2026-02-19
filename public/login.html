@@ -234,6 +234,9 @@
                 const data = await res.json();
 
                 if (data.success || data.token) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnUrl = urlParams.get('returnUrl');
+
                     if (data.role === 'admin') {
                         sessionStorage.setItem('sna_admin_token', data.token);
                         window.location.href = 'admin.html';
@@ -252,7 +255,11 @@
                             fullName: data.user.fullName,
                             role: data.role
                         }));
-                        window.location.href = 'dashboard.html';
+                        if (returnUrl) {
+                            window.location.href = decodeURIComponent(returnUrl);
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
                     }
                 } else {
                     errorMsg.innerText = data.error || data.message || 'Username atau password salah!';
