@@ -637,6 +637,11 @@ const initCustomer = () => {
         return;
     }
 
+    if (!resultCard) {
+        console.log("initCustomer: resultCard NOT FOUND - Likely handled by inline script");
+        return;
+    }
+
     const showResult = (data) => {
         resultCard.style.display = 'block';
         resultCard.classList.add('animate-fade-in');
