@@ -95,16 +95,18 @@
 
 <body>
     <nav class="navbar glass">
-        <div class="nav-container">
-            <a href="judge.html" class="nav-brand">
-                <div class="brand-icon">
-                    <i class="ri-star-fill"></i>
+        <div class="container nav-container">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div
+                    style="width: 40px; height: 40px; background: var(--secondary); border-radius: 12px; display: grid; place-items: center; color: #000; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);">
+                    <i class="ri-star-fill" style="font-size: 1.4rem;"></i>
                 </div>
                 <div>
-                    <div class="brand-text">Judge<span>Panel</span></div>
-                    <div class="brand-subtext">Official Validator</div>
+                    <a href="judge.html" class="text-gradient"
+                        style="font-size: 1.5rem; font-weight: 900; text-decoration: none; letter-spacing: -1px;">Judge<span
+                            style="color: white; font-weight: 400;">Panel</span></a>
                 </div>
-            </a>
+            </div>
 
             <div class="desktop-nav-links m-hide">
                 <a href="index.html"
@@ -112,13 +114,14 @@
                     UTAMA</a>
             </div>
 
-            <button class="hamburger-btn mobile-only">
+            <button class="hamburger-btn mobile-only"
+                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
     </nav>
 
-    <div class="nav-overlay-backdrop" id="navBackdrop"></div>
+    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
     <div class="nav-overlay" id="navOverlay">
         <div class="nav-menu-header">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -128,7 +131,7 @@
                 </div>
                 <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">JUDGE MENU</span>
             </div>
-            <button class="hamburger-btn">
+            <button class="hamburger-btn" onclick="toggleMenu()">
                 <i class="ri-close-line"></i>
             </button>
         </div>

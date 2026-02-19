@@ -45,13 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 4. Close menu on backdrop click
-    const backdrop = document.getElementById('navBackdrop');
-    if (backdrop) {
-        backdrop.onclick = toggleMenu;
-    }
-
-    // 5. Close menu on escape key
+    // 4. Close menu on escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             const overlay = document.getElementById('navOverlay');

@@ -422,24 +422,15 @@
 </head>
 
 <body>
-    <nav class="navbar glass">
-        <div class="nav-container">
-            <a href="index.html" class="nav-brand">
-                <div class="brand-icon">
-                    <i class="ri-error-warning-fill"></i>
-                </div>
-                <div>
-                    <div class="brand-text">SnaDaily<span>Loss</span></div>
-                    <div class="brand-subtext">Page Not Found</div>
-                </div>
-            </a>
+    <nav class="navbar">
+        <div class="container nav-container"
+            style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+            <a href="index.html" class="text-gradient"
+                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -2px; background: linear-gradient(45deg, #fff, var(--water-light)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">SnaDaily<span
+                    style="color: white; font-weight: 300;">Checker</span></a>
 
-            <!-- Desktop Links -->
-            <div class="desktop-nav-links">
-                <a href="index.html">Pulang ke Beranda</a>
-            </div>
-
-            <button class="hamburger-btn mobile-only">
+            <button class="hamburger-btn mobile-only"
+                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); color: white; cursor: pointer; transition: 0.3s;">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
@@ -599,9 +590,28 @@
                 nav.classList.remove('scrolled');
             }
         });
-    </script>
-    <script src="js/navigation.js"></script>
-    <script>
+
+        function toggleMenu() {
+            const navOverlay = document.getElementById('navOverlay');
+            const navBackdrop = document.getElementById('navBackdrop');
+            const isActive = navOverlay.style.right === '0px';
+
+            if (isActive) {
+                navOverlay.style.right = '-100%';
+                navBackdrop.style.opacity = '0';
+                navBackdrop.style.pointerEvents = 'none';
+            } else {
+                navOverlay.style.right = '0px';
+                navBackdrop.style.opacity = '1';
+                navBackdrop.style.pointerEvents = 'auto';
+            }
+        }
+
+        // Hamburger button event listener
+        document.querySelectorAll('.hamburger-btn').forEach(btn => {
+            btn.onclick = toggleMenu;
+        });
+
         // Mouse Parallax Effect
         document.addEventListener('mousemove', (e) => {
             const x = (window.innerWidth / 2 - e.pageX) / 60;

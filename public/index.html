@@ -174,16 +174,10 @@
 
     <!-- Navigation -->
     <nav class="navbar glass">
-        <div class="nav-container">
-            <a href="index.html" class="nav-brand">
-                <div class="brand-icon">
-                    <i class="ri-shield-flash-fill"></i>
-                </div>
-                <div>
-                    <div class="brand-text">SnaDaily<span>Checker</span></div>
-                    <div class="brand-subtext">Premium Verification</div>
-                </div>
-            </a>
+        <div class="container nav-container">
+            <a href="index.html" class="text-gradient"
+                style="font-size: 1.75rem; font-weight: 800; text-decoration: none; letter-spacing: -2px;">SnaDaily<span
+                    style="color: white; font-weight: 300;">Checker</span></a>
 
             <!-- Desktop Links -->
             <div class="desktop-nav-links">
@@ -192,14 +186,15 @@
                 <a href="login.html" id="nav-login-link" class="nav-auth-btn">Login</a>
             </div>
 
-            <button class="hamburger-btn mobile-only">
+            <button class="hamburger-btn mobile-only"
+                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
     </nav>
 
     <!-- Nav Overlay -->
-    <div class="nav-overlay-backdrop" id="navBackdrop"></div>
+    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
     <div class="nav-overlay" id="navOverlay">
         <div class="nav-menu-header">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -209,7 +204,7 @@
                 </div>
                 <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">NAVIGASI</span>
             </div>
-            <button class="hamburger-btn">
+            <button class="hamburger-btn" onclick="toggleMenu()">
                 <i class="ri-close-line"></i>
             </button>
         </div>
@@ -399,7 +394,6 @@
             }
         });
     </script>
-    <script src="js/navigation.js"></script>
 </body>
 
 </html>

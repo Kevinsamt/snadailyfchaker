@@ -82,25 +82,26 @@
         <div class="bubble x3"></div>
     </div>
 
-    <nav class="navbar glass">
+    <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="nav-brand">
-                <div class="brand-icon">
-                    <i class="ri-lock-2-fill"></i>
+            <div class="nav-logo">
+                <div class="logo-icon">
+                    <i class="ri-shield-flash-fill"></i>
                 </div>
-                <div>
-                    <div class="brand-text">SnaDaily<span>Auth</span></div>
-                    <div class="brand-subtext">Secure Entrance</div>
-                </div>
-            </a>
-
-            <!-- Desktop Links -->
-            <div class="desktop-nav-links">
-                <a href="index.html">Beranda</a>
-                <a href="register.html">Daftar Akun</a>
+                <a href="index.html" class="text-gradient"
+                    style="text-decoration: none; font-size: 1.5rem; font-weight: 900; letter-spacing: -2px;">SnaDaily<span
+                        style="color: white; font-weight: 300;">Checker</span></a>
             </div>
 
-            <button class="hamburger-btn mobile-only">
+            <div class="desktop-nav-links">
+                <a href="index.html">Beranda</a>
+                <a href="register.html" class="nav-auth-btn"
+                    style="background: rgba(0, 250, 154, 0.1); color: var(--secondary) !important; border-color: var(--secondary-glow);">Daftar
+                    Akun</a>
+            </div>
+
+            <button class="hamburger-btn mobile-only"
+                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
@@ -234,9 +235,6 @@
                 const data = await res.json();
 
                 if (data.success || data.token) {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const returnUrl = urlParams.get('returnUrl');
-
                     if (data.role === 'admin') {
                         sessionStorage.setItem('sna_admin_token', data.token);
                         window.location.href = 'admin.html';
@@ -255,25 +253,42 @@
                             fullName: data.user.fullName,
                             role: data.role
                         }));
-                        if (returnUrl) {
-                            window.location.href = decodeURIComponent(returnUrl);
-                        } else {
-                            window.location.href = 'dashboard.html';
-                        }
+                        window.location.href = 'dashboard.html';
                     }
                 } else {
                     errorMsg.innerText = data.error || data.message || 'Username atau password salah!';
                     errorMsg.style.display = 'block';
                     btn.disabled = false;
-                    btn.innerHTML = 'MASUK panel <i class="ri-arrow-right-line"></i>';
+                    btn.innerHTML = 'MASUK PANEL <i class="ri-arrow-right-line"></i>';
                 }
             } catch (err) {
                 console.error("Login attempt failed:", err);
                 errorMsg.innerText = 'Gagal terhubung ke server.';
                 errorMsg.style.display = 'block';
                 btn.disabled = false;
-                btn.innerHTML = 'MASUK panel <i class="ri-arrow-right-line"></i>';
+                btn.innerHTML = 'MASUK PANEL <i class="ri-arrow-right-line"></i>';
             }
+        });
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        function toggleMenu() {
+            const navOverlay = document.getElementById('navOverlay');
+            const navBackdrop = document.getElementById('navBackdrop');
+            navOverlay.classList.toggle('active');
+            navBackdrop.classList.toggle('active');
+        }
+
+        // Hamburger button event listener (fix for multiple elements)
+        document.querySelectorAll('.hamburger-btn').forEach(btn => {
+            btn.onclick = toggleMenu;
         });
     </script>
 </body>

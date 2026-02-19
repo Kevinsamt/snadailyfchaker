@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnaDaily - Event Registration</title>
+    <title>SnaDaily - Pendaftaran Kontes Premium</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/seasonal-themes.css">
@@ -652,16 +652,10 @@
 
     <!-- Premium Navbar -->
     <nav class="navbar glass">
-        <div class="nav-container">
-            <a href="index.html" class="nav-brand">
-                <div class="brand-icon">
-                    <i class="ri-edit-box-fill"></i>
-                </div>
-                <div>
-                    <div class="brand-text">SnaDaily<span>Contest</span></div>
-                    <div class="brand-subtext">Entry Registration</div>
-                </div>
-            </a>
+        <div class="container nav-container">
+            <a href="index.html" class="text-gradient"
+                style="font-size: 1.75rem; font-weight: 800; text-decoration: none; letter-spacing: -2px;">SnaDaily<span
+                    style="color: white; font-weight: 300;">Checker</span></a>
 
             <!-- Desktop Links -->
             <div class="desktop-nav-links">
@@ -671,7 +665,8 @@
                 <a href="dashboard.html" id="nav-login-link" class="nav-auth-btn">Dashboard</a>
             </div>
 
-            <button class="hamburger-btn mobile-only">
+            <button class="hamburger-btn mobile-only" onclick="toggleMenu()"
+                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
                 <i class="ri-menu-4-line"></i>
             </button>
         </div>
@@ -1203,13 +1198,6 @@
             const btn = document.getElementById('finalSubmitBtn');
             const submitBtn = document.getElementById('submitBtn');
             const token = localStorage.getItem('sna_user_token');
-
-            if (!token) {
-                alert('Silakan LOGIN terlebih dahulu untuk menyelesaikan pendaftaran!');
-                window.location.href = 'login.html';
-                return;
-            }
-
             const tier = document.getElementById('registrationTier').value;
 
             try {
@@ -1265,7 +1253,6 @@
             await sendRegistration(formData);
         });
     </script>
-    <script src="js/navigation.js"></script>
 </body>
 
 </html>
