@@ -1274,6 +1274,7 @@ app.get('/api/fish/:id', apiLimiter, async (req, res) => {
         if (id === 'FISH-QQD8RG') {
             console.log("Serving Mock Data for FISH-QQD8RG");
             return res.json({
+                "success": true, // FIXED: Frontend expects success: true
                 "message": "success",
                 "data": {
                     "id": "FISH-QQD8RG",
@@ -1298,6 +1299,7 @@ app.get('/api/fish/:id', apiLimiter, async (req, res) => {
         }
 
         res.json({
+            "success": true, // FIXED: match frontend
             "message": "success",
             "data": result.rows[0]
         });
