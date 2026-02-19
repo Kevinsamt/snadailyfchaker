@@ -346,10 +346,10 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>User</th>
-                                <th>Ikan & Detail</th>
+                                <th>No. Entri</th>
+                                <th>Nama Peserta</th>
+                                <th>Tim</th>
                                 <th>Event</th>
-                                <th>Info Tambahan</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -511,8 +511,9 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>User</th>
-                                <th>Ikan & Team</th>
+                                <th>No. Entri</th>
+                                <th>Nama Peserta</th>
+                                <th>Tim</th>
                                 <th>Event</th>
                                 <th>Payment</th>
                                 <th>Skor Juri</th>
@@ -658,39 +659,15 @@
                     if (s.recentPending && s.recentPending.length > 0) {
                         document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
                             <tr class="animate-fade-in">
-                                <td>
-                                    <div style="font-weight: 700; color: white;">${escapeHTML(r.user_name)}</div>
-                                    <div style="font-size: 0.7rem; color: var(--text-muted); font-family: monospace;">UUID: ${r.id}</div>
-                                </td>
-                                <td>
-                                    <div style="display: flex; gap: 12px; align-items: center;">
-                                        <div style="position: relative; width: 45px; height: 45px; flex-shrink: 0;">
-                                            <img src="${escapeHTML(r.fish_image_url) || 'https://via.placeholder.com/45'}" style="width: 100%; height: 100%; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
-                                            <div onclick="window.open('${escapeHTML(r.fish_image_url)}', '_blank')" style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; display: grid; place-items: center; cursor: pointer; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
-                                                <i class="ri-external-link-line" style="color: white; font-size: 0.8rem;"></i>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div style="font-weight: 700; color: white;">${escapeHTML(r.fish_name)}</div>
-                                            <div style="font-size: 0.75rem; color: var(--admin-primary); font-weight: 600;">${escapeHTML(r.fish_type)}</div>
-                                            <div style="font-size: 0.75rem; color: var(--text-dim);">${escapeHTML(r.team_name) || 'Independent'}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</div>
-                                    <div style="font-size: 0.75rem; color: var(--admin-secondary); font-weight: 800;">${r.registration_tier}</div>
-                                </td>
-                                <td>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">WA: <span style="color: white;">${escapeHTML(r.wa_number) || '-'}</span></div>
-                                    <div style="margin-top: 4px;">
-                                        ${r.video_url ? `<a href="${escapeHTML(r.video_url)}" target="_blank" style="color: var(--admin-primary); font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px;"><i class="ri-play-circle-line"></i> Play Video</a>` : '<span style="color: var(--text-dim); font-size: 0.75rem;">No Video</span>'}
-                                    </div>
-                                </td>
+                                <td style="font-family: monospace; font-weight: 800; color: var(--admin-primary);">${escapeHTML(r.entry_number || '-')}</td>
+                                <td style="font-weight: 700;">${escapeHTML(r.user_name)}</td>
+                                <td>${escapeHTML(r.team_name || '-')}</td>
+                                <td style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
                                         <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary); background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.2);" title="Approve"><i class="ri-check-double-line"></i></button>
                                         <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error); background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2);" title="Reject"><i class="ri-close-circle-line"></i></button>
+                                        <button onclick="printEntryCard(${r.id})" class="action-btn" style="color: white; background: rgba(255,255,255,0.1); " title="Print Card"><i class="ri-printer-line"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -936,18 +913,9 @@
                         const statusClass = r.status === 'approved' ? 'admin-secondary' : r.status === 'rejected' ? 'admin-error' : 'text-muted';
                         return `
                         <tr>
+                            <td style="font-family: monospace; font-weight: 800; color: var(--admin-primary);">${escapeHTML(r.entry_number || '-')}</td>
                             <td><div style="font-weight: 700;">${escapeHTML(r.user_name)}</div></td>
-                            <td>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <img src="${escapeHTML(r.fish_image_url) || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
-                                    <div>
-                                        <div style="font-weight: 700;">${escapeHTML(r.fish_name)}</div>
-                                        <div style="font-size: 0.7rem; color: var(--text-dim);">${escapeHTML(r.wa_number || '-')} | ${escapeHTML(r.team_name || '-')}</div>
-                                        <div style="font-size: 0.75rem; color: var(--admin-primary); font-weight: 800;">${escapeHTML(r.registration_tier)} | ${escapeHTML(r.contest_class)}</div>
-                                        ${r.video_url ? `<a href="${r.video_url}" target="_blank" style="font-size: 0.7rem; color: var(--admin-secondary); text-decoration: none;"><i class="ri-vidicon-line"></i> Lihat Video</a>` : ''}
-                                    </div>
-                                </div>
-                            </td>
+                            <td><div style="font-size: 0.85rem; color: var(--text-dim);">${escapeHTML(r.team_name || '-')}</div></td>
                              <td><div style="font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</div></td>
                              <td>
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -974,6 +942,7 @@
                                     ` : `
                                         <button onclick="quickAction(${r.id}, 'pending')" class="action-btn" style="color: var(--text-dim);" title="Reset"><i class="ri-refresh-line"></i></button>
                                     `}
+                                    <button onclick="printEntryCard(${r.id})" class="action-btn" style="color: white; background: rgba(255,255,255,0.05);" title="Print Entry Card"><i class="ri-printer-line"></i></button>
                                     <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--admin-error);" title="Delete"><i class="ri-delete-bin-4-line"></i></button>
                                 </div>
                             </td>
@@ -992,6 +961,122 @@
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) fetchRegistrations();
+        }
+
+        function printEntryCard(id) {
+            const token = sessionStorage.getItem('sna_admin_token');
+            fetch('/api/admin/registrations', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const reg = data.data.find(r => r.id == id);
+                        if (!reg) return alert('Data tidak ditemukan');
+
+                        const printWindow = window.open('', '_blank', 'width=800,height=600');
+                        printWindow.document.write(`
+                            <html>
+                            <head>
+                                <title>Cetak Kartu Entri - ${reg.entry_number}</title>
+                                <style>
+                                    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+                                    body { 
+                                        font-family: 'Montserrat', sans-serif; 
+                                        margin: 0; 
+                                        padding: 0; 
+                                        display: flex; 
+                                        align-items: center; 
+                                        justify-content: center; 
+                                        min-height: 100vh;
+                                        background: #f0f2f5;
+                                    }
+                                    .card {
+                                        width: 90mm;
+                                        height: 55mm;
+                                        background: white;
+                                        border: 2px solid #000;
+                                        padding: 5mm;
+                                        box-sizing: border-box;
+                                        display: flex;
+                                        flex-direction: column;
+                                        justify-content: center;
+                                        align-items: center;
+                                        text-align: center;
+                                        position: relative;
+                                        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                                    }
+                                    .header {
+                                        font-size: 8pt;
+                                        font-weight: 700;
+                                        color: #666;
+                                        text-transform: uppercase;
+                                        letter-spacing: 2px;
+                                        margin-bottom: 3mm;
+                                        border-bottom: 1px solid #eee;
+                                        width: 100%;
+                                        padding-bottom: 1mm;
+                                    }
+                                    .entry-number {
+                                        font-size: 36pt;
+                                        font-weight: 900;
+                                        color: #000;
+                                        margin: 2mm 0;
+                                        letter-spacing: -1px;
+                                    }
+                                    .fish-info {
+                                        margin-top: 2mm;
+                                    }
+                                    .fish-name {
+                                        font-size: 14pt;
+                                        font-weight: 800;
+                                        text-transform: uppercase;
+                                        color: #333;
+                                    }
+                                    .team-name {
+                                        font-size: 10pt;
+                                        font-weight: 600;
+                                        color: #777;
+                                        margin-top: 1mm;
+                                    }
+                                    .footer {
+                                        position: absolute;
+                                        bottom: 3mm;
+                                        font-size: 6pt;
+                                        font-weight: 700;
+                                        color: #aaa;
+                                        letter-spacing: 1px;
+                                    }
+                                    @media print {
+                                        body { background: none; }
+                                        .card { 
+                                            box-shadow: none; 
+                                            border: 1px solid #000;
+                                            page-break-inside: avoid;
+                                        }
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="card">
+                                    <div class="header">ENTRY CARD - ${reg.contest_name}</div>
+                                    <div class="entry-number">${reg.entry_number || '-'}</div>
+                                    <div class="fish-info">
+                                        <div class="fish-name">${reg.fish_name}</div>
+                                        <div class="team-name">${reg.team_name || 'NO TEAM'}</div>
+                                    </div>
+                                    <div class="footer">GENERATED BY SNADAILYFISHCHECKER</div>
+                                </div>
+                                <script>
+                                    window.onload = () => {
+                                        window.print();
+                                        setTimeout(() => window.close(), 500);
+                                    };
+                                <\/script>
+                            </body>
+                            </html>
+                        `);
+                        printWindow.document.close();
+                    }
+                });
         }
     </script>
 </body>

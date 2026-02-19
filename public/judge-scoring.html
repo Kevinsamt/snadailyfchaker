@@ -284,12 +284,15 @@
 
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
                         <div style="flex: 1;">
+                            <div
+                                style="font-family: monospace; font-size: 0.85rem; font-weight: 900; color: var(--primary); margin-bottom: 0.4rem; padding: 4px 12px; background: rgba(0,212,255,0.1); border-radius: 10px; display: inline-block;">
+                                ${escapeHTML(entry.entry_number || '-')}</div>
                             <h3 id="fishTitle"
                                 style="font-weight: 900; font-size: 1.6rem; margin-bottom: 0rem; letter-spacing: -0.5px; line-height: 1.2;">
-                                Nama Ikan</h3>
+                                ${escapeHTML(entry.fish_name)}</h3>
                             <p id="fishType"
                                 style="color: var(--primary); font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
-                                Jenis Ikan</p>
+                                ${escapeHTML(entry.fish_type)}</p>
                         </div>
                         <div style="text-align: right; min-width: 80px;">
                             <div
@@ -451,7 +454,7 @@
                 <div class="entry-card-mini animate-fade-in ${entry.id == document.getElementById('selectedEntryId').value ? 'active' : ''}" 
                     onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})"
                     style="${entry.score ? 'border-left: 4px solid var(--secondary);' : ''}">
-                    <img src="${escapeHTML(entry.fish_image_url)}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover;">
+                    <div style="font-family: monospace; font-weight: 900; color: var(--primary); font-size: 0.85rem; padding: 4px 8px; background: rgba(0,212,255,0.1); border-radius: 8px; min-width: 90px; text-align: center;">${escapeHTML(entry.entry_number || '-')}</div>
                     <div style="flex: 1;">
                         <div style="font-weight: 800; font-size: 1rem;">${escapeHTML(entry.fish_name)}</div>
                         <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(entry.team_name || entry.contestant_name)} • ${escapeHTML(entry.fish_type)}</div>

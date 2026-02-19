@@ -34,8 +34,12 @@ const app = express();
 // Supabase Configuration
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase = null;
+if (SUPABASE_URL && SUPABASE_KEY) {
+    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+} else {
+    console.warn("⚠️ WARNING: Supabase configuration is missing. File uploads will fail.");
+}
 
 // Multer Config (Memory Storage for Serverless)
 const upload = multer({
@@ -447,6 +451,23 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS has_spun BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS prize_redeemed BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS payment_proof_url TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS entry_number TEXT");
+
+            // One-time migration for existing entries without numbers
+            const entriesWithoutNumbers = await pool.query("SELECT id, contest_name, contest_class FROM contest_registrations WHERE entry_number IS NULL ORDER BY created_at ASC");
+            for (const row of entriesWithoutNumbers.rows) {
+                const classCode = (row.contest_class || 'A1').toUpperCase();
+                const prefix = classCode.charAt(0);
+
+                const countResult = await pool.query(
+                    "SELECT COUNT(*) FROM contest_registrations WHERE contest_name = $1 AND contest_class = $2 AND entry_number IS NOT NULL",
+                    [row.contest_name, row.contest_class]
+                );
+                const nextNum = parseInt(countResult.rows[0].count) + 1;
+                const entryNum = `${prefix}-${classCode}-${nextNum.toString().padStart(4, '0')}`;
+
+                await pool.query("UPDATE contest_registrations SET entry_number = $1 WHERE id = $2", [entryNum, row.id]);
+            }
         } catch (migErr) {
             console.log("Migration columns check done.");
         }
@@ -707,9 +728,20 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         }
 
 
+        // Generate Entry Number (Format: A-A1-0001)
+        const classCode = (contestClass || 'A1').toUpperCase();
+        const prefix = classCode.charAt(0); // A, B, or C
+
+        const countResult = await pool.query(
+            "SELECT COUNT(*) FROM contest_registrations WHERE contest_name = $1 AND contest_class = $2",
+            [contestName, contestClass]
+        );
+        const nextNum = parseInt(countResult.rows[0].count) + 1;
+        const entryNumber = `${prefix}-${classCode}-${nextNum.toString().padStart(4, '0')}`;
+
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
-            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url, entry_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
+            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl, entryNumber]
         );
 
         res.json({ success: true, data: result.rows[0] });

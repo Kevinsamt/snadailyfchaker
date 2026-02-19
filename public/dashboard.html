@@ -645,6 +645,7 @@
                                     </div>
                                     <div style="flex: 1; min-width: 0;">
                                         <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 0.25rem;">
+                                            <span style="font-family: monospace; font-weight: 900; color: var(--primary); font-size: 0.7rem; padding: 2px 8px; background: rgba(0,212,255,0.1); border-radius: 4px; border: 1px solid rgba(0,212,255,0.2);">${escapeHTML(reg.entry_number || '-')}</span>
                                             <span class="badge badge-primary" style="font-size: 0.6rem;">${escapeHTML(reg.contest_name)}</span>
                                             <span class="badge ${statusClass}">${escapeHTML(reg.status).toUpperCase()}</span>
                                         </div>
