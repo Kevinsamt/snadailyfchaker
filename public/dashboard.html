@@ -681,12 +681,12 @@
                                     </div>
                                     <div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
                                         ${canSpin ? `
-                                            <button onclick="openWheel(${reg.id})" class="gift-box-btn hover-lift">
+                                            <button onclick="openWheel('${reg.id}')" class="gift-box-btn hover-lift">
                                                 <i class="ri-gift-fill"></i> SPIN!
                                             </button>
                                         ` : ''}
                                         ${reg.status === 'approved' ? `
-                                            <button onclick="printEntryCard(${reg.id})" class="btn-primary" style="padding: 6px 12px; font-size: 0.7rem; background: var(--primary); color: #000; border-radius: 8px; font-weight: 800; display: flex; align-items: center; gap: 4px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 212, 255, 0.3);">
+                                            <button onclick="printEntryCard('${reg.id}')" class="btn-primary" style="padding: 6px 12px; font-size: 0.7rem; background: var(--primary); color: #000; border-radius: 8px; font-weight: 800; display: flex; align-items: center; gap: 4px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 212, 255, 0.3);">
                                                 <i class="ri-printer-line"></i> CETAK KARTU
                                             </button>
                                         ` : ''}
@@ -715,7 +715,7 @@
                                     ${reg.prize_redeemed ? `
                                         <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">DIKLAIM</span>
                                     ` : `
-                                        <button onclick="claimSpecificPrize(${reg.id}, '${escapeHTML(reg.spin_prize)}', '${escapeHTML(reg.fish_name)}')" class="btn-primary hover-lift" style="padding: 8px 16px; font-size: 0.75rem; background: #25D366; color: white; border: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
+                                        <button onclick="claimSpecificPrize('${reg.id}', '${escapeHTML(reg.spin_prize)}', '${escapeHTML(reg.fish_name)}')" class="btn-primary hover-lift" style="padding: 8px 16px; font-size: 0.75rem; background: #25D366; color: white; border: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
                                             <i class="ri-whatsapp-line"></i> KLAIM
                                         </button>
                                     `}
@@ -738,16 +738,39 @@
         let currentPrize = "";
 
         function openWheel(regId) {
-            currentRegId = regId;
-            initWheel();
+            try {
+                currentRegId = regId;
+                if (typeof initWheel === 'function') {
+                    initWheel();
+                } else {
+                    console.error("initWheel is not defined");
+                    alert("Gagal memuat roda keberuntungan. Silakan refresh halaman.");
+                    return;
+                }
 
-            // Result UI initially shows "Spinning..."
-            document.getElementById('prizeDescription').innerText = 'Menghitung keberuntungan Cak...';
-            document.getElementById('savePrizeBtn').style.display = 'none'; // No longer need save button
-            document.getElementById('postSaveActions').style.display = 'none';
+                // Result UI initially shows "Spinning..."
+                document.getElementById('prizeDescription').innerText = 'Menghitung keberuntungan Cak...';
+                const saveBtn = document.getElementById('savePrizeBtn');
+                const postActions = document.getElementById('postSaveActions');
+                if (saveBtn) saveBtn.style.display = 'none';
+                if (postActions) postActions.style.display = 'none';
 
-            document.getElementById('wheelOverlay').style.display = 'flex';
-            document.getElementById('prizeResultOverlay').style.display = 'none';
+                const wheelOverlay = document.getElementById('wheelOverlay');
+                const resultOverlay = document.getElementById('prizeResultOverlay');
+
+                if (wheelOverlay) {
+                    wheelOverlay.style.display = 'flex';
+                    // Force redraw to ensure display flex applies
+                    void wheelOverlay.offsetWidth;
+                } else {
+                    console.error("Wheel overlay element missing");
+                }
+
+                if (resultOverlay) resultOverlay.style.display = 'none';
+            } catch (e) {
+                console.error("Error opening wheel:", e);
+                alert("Terjadi kesalahan teknis. Silakan coba refresh halaman.");
+            }
         }
 
         // Navbar scroll effect
@@ -772,7 +795,7 @@
             btn.onclick = toggleMenu;
         });
 
-        async function initDashboard() {
+        async function initWheel() {
             const wheel = document.getElementById('wheel');
             const bulbContainer = document.getElementById('bulbContainer');
             wheel.innerHTML = '';
