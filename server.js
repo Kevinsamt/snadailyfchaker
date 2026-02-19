@@ -1271,21 +1271,55 @@ app.get('/api/fish/:id', apiLimiter, async (req, res) => {
         const id = req.params.id;
 
         // --- MOCK DATA FALLBACK (For testing without DB) ---
-        if (id === 'FISH-QQD8RG') {
-            console.log("Serving Mock Data for FISH-QQD8RG");
+        const mockData = {
+            'FISH-QQD8RG': {
+                id: "FISH-QQD8RG",
+                species: "HMPK NEMOKOI",
+                origin: "Medan, Indonesia",
+                weight: 0.05,
+                method: "Line Breeding",
+                catchDate: "2025-03-12",
+                importDate: "2025-03-12",
+                timestamp: new Date().toISOString()
+            },
+            'FISH-DO90GA': {
+                id: "FISH-DO90GA",
+                species: "Vail Tail",
+                origin: "Germany",
+                weight: 0.06,
+                method: "Import Quality",
+                catchDate: "2025-03-10",
+                importDate: "2025-03-12",
+                timestamp: new Date().toISOString()
+            },
+            'FISH-D5DSAL': {
+                id: "FISH-D5DSAL",
+                species: "RED DRAGON SNOW",
+                origin: "Medan, Indonesia",
+                weight: 0.04,
+                method: "Local Farm",
+                catchDate: "2026-12-12", // Future date form screenshot? Kept as is.
+                importDate: "2026-12-12",
+                timestamp: new Date().toISOString()
+            },
+            'FISH-UI4I6D': {
+                id: "FISH-UI4I6D",
+                species: "Betta Bluerim",
+                origin: "Medan, Indonesia",
+                weight: 0.05,
+                method: "Import Thailand Line",
+                catchDate: "2025-03-01",
+                importDate: "2025-03-05",
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        if (mockData[id]) {
+            console.log(`Serving Mock Data for ${id}`);
             return res.json({
-                "success": true, // FIXED: Frontend expects success: true
+                "success": true,
                 "message": "success",
-                "data": {
-                    "id": "FISH-QQD8RG",
-                    "species": "HMPK NEMOKOI",
-                    "origin": "Medan, Indonesia",
-                    "weight": 0.05,
-                    "method": "Line Breeding",
-                    "catchDate": "2025-03-12",
-                    "importDate": "2025-03-12",
-                    "timestamp": new Date().toISOString()
-                }
+                "data": mockData[id]
             });
         }
         // ---------------------------------------------------
