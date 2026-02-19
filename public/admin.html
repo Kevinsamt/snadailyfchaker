@@ -337,271 +337,301 @@
                         <div
                             style="width: 4px; height: 24px; background: var(--admin-secondary); border-radius: 10px; box-shadow: 0 0 10px var(--admin-secondary);">
                         </div>
-                        <h2 style="font-size: 1.5rem; font-weight: 800;">Pendaftaran <span
-                                class="text-gradient">Terkini</span></h2>
-                    </div>
-                </div>
-
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>No. Entri</th>
-                                <th>Nama Peserta</th>
-                                <th>Tim</th>
-                                <th>Event</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pendingTableBody">
-                            <!-- Injected by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section: Fish Data -->
-        <div id="section-fish" class="admin-section">
-            <div class="admin-grid">
-                <div>
-                    <div class="glass-panel animate-fade-in">
-                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                            <div
-                                style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px; box-shadow: 0 0 10px var(--admin-primary);">
-                            </div>
-                            <h2 style="font-size: 1.5rem; font-weight: 800;">Input Data <span
-                                    class="text-gradient">Ikan</span></h2>
-                        </div>
-                        <form id="fishForm">
-                            <input type="hidden" id="editId">
-                            <div class="input-group">
-                                <label class="input-label">Spesies Ikan</label>
-                                <input type="text" id="species" class="glass-input" placeholder="Contoh: Tuna Bluefin"
-                                    required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Asal (Origin)</label>
-                                <input type="text" id="origin" class="glass-input"
-                                    placeholder="Contoh: Maluku, Indonesia" required>
-                            </div>
-                            <div class="input-group" id="hatchDateContainer">
-                                <label class="input-label">Tanggal Menetas</label>
-                                <input type="date" id="catchDate" class="glass-input">
-                            </div>
-                            <div class="input-group" id="importDateContainer" style="display: none;">
-                                <label class="input-label">Tanggal Import / Karantina</label>
-                                <input type="text" id="importDate" class="glass-input"
-                                    placeholder="Contoh: 12 Jan 2024">
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <div class="input-group">
-                                    <label class="input-label">Berat (kg)</label>
-                                    <input type="number" step="0.1" id="weight" class="glass-input" placeholder="0.0"
-                                        required>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div
+                                    style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px; box-shadow: 0 0 10px var(--admin-primary);">
                                 </div>
-                                <div class="input-group">
-                                    <label class="input-label">Metode</label>
-                                    <select id="method" class="glass-input" style="background-color: #0f172a;">
-                                        <option>Ternak sendiri</option>
-                                        <option>Import dari luar negri</option>
-                                        <option>Import dari luar pulau</option>
-                                    </select>
-                                </div>
+                                <h2 style="font-size: 1.5rem; font-weight: 800;">Pendaftaran <span
+                                        class="text-gradient">Terkini</span></h2>
                             </div>
-                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-                                <i class="ri-save-3-line" style="margin-right: 8px;"></i> Simpan Data Ikan
+                            <button onclick="printBatchCards('pendingTableBody')" class="btn-primary"
+                                style="padding: 10px 20px; font-size: 0.85rem; background: var(--admin-secondary); color: #000; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(255,191,36,0.3);">
+                                <i class="ri-printer-line"></i> CETAK PILIHAN
                             </button>
-                        </form>
+                        </div>
+
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"><input type="checkbox" id="selectAllPending"
+                                                onclick="toggleSelectAll('pendingTableBody', this.checked)"></th>
+                                        <th>No. Entri</th>
+                                        <th>Nama Peserta</th>
+                                        <th>Tim</th>
+                                        <th>Event</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingTableBody">
+                                    <!-- Injected by JS -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <div class="glass-panel animate-fade-in" style="height: 100%;">
+                <!-- Section: Fish Data -->
+                <div id="section-fish" class="admin-section">
+                    <div class="admin-grid">
+                        <div>
+                            <div class="glass-panel animate-fade-in">
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                                    <div
+                                        style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px; box-shadow: 0 0 10px var(--admin-primary);">
+                                    </div>
+                                    <h2 style="font-size: 1.5rem; font-weight: 800;">Input Data <span
+                                            class="text-gradient">Ikan</span></h2>
+                                </div>
+                                <form id="fishForm">
+                                    <input type="hidden" id="editId">
+                                    <div class="input-group">
+                                        <label class="input-label">Spesies Ikan</label>
+                                        <input type="text" id="species" class="glass-input"
+                                            placeholder="Contoh: Tuna Bluefin" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Asal (Origin)</label>
+                                        <input type="text" id="origin" class="glass-input"
+                                            placeholder="Contoh: Maluku, Indonesia" required>
+                                    </div>
+                                    <div class="input-group" id="hatchDateContainer">
+                                        <label class="input-label">Tanggal Menetas</label>
+                                        <input type="date" id="catchDate" class="glass-input">
+                                    </div>
+                                    <div class="input-group" id="importDateContainer" style="display: none;">
+                                        <label class="input-label">Tanggal Import / Karantina</label>
+                                        <input type="text" id="importDate" class="glass-input"
+                                            placeholder="Contoh: 12 Jan 2024">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                        <div class="input-group">
+                                            <label class="input-label">Berat (kg)</label>
+                                            <input type="number" step="0.1" id="weight" class="glass-input"
+                                                placeholder="0.0" required>
+                                        </div>
+                                        <div class="input-group">
+                                            <label class="input-label">Metode</label>
+                                            <select id="method" class="glass-input" style="background-color: #0f172a;">
+                                                <option>Ternak sendiri</option>
+                                                <option>Import dari luar negri</option>
+                                                <option>Import dari luar pulau</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                                        <i class="ri-save-3-line" style="margin-right: 8px;"></i> Simpan Data Ikan
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="glass-panel animate-fade-in" style="height: 100%;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <div
+                                            style="width: 4px; height: 24px; background: var(--admin-secondary); border-radius: 10px;">
+                                        </div>
+                                        <h2 style="font-size: 1.5rem; font-weight: 800;">Riwayat <span
+                                                class="text-gradient">Data</span></h2>
+                                    </div>
+                                    <input type="text" id="searchInput" class="glass-input" placeholder="Cari ikan..."
+                                        style="width: 180px; padding: 0.5rem 1rem; margin-bottom: 0;">
+                                </div>
+                                <div id="historyList" style="max-height: 600px; overflow-y: auto;">
+                                    <!-- Injected by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Events Management -->
+                <div id="section-events" class="admin-section">
+                    <div class="admin-grid">
+                        <div>
+                            <div class="glass-panel animate-fade-in">
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                                    <div
+                                        style="width: 4px; height: 24px; background: var(--admin-warning); border-radius: 10px;">
+                                    </div>
+                                    <h2 style="font-size: 1.5rem; font-weight: 800;">Kelola <span
+                                            class="text-gradient">Event</span></h2>
+                                </div>
+                                <form id="eventForm">
+                                    <input type="hidden" id="eventId">
+                                    <div class="input-group">
+                                        <label class="input-label">Judul Event</label>
+                                        <input type="text" id="eventTitle" class="glass-input"
+                                            placeholder="Nama kontes..." required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Lokasi</label>
+                                        <input type="text" id="eventLocation" class="glass-input" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Tanggal Pelaksanaan</label>
+                                        <input type="date" id="eventDate" class="glass-input" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">URL Banner</label>
+                                        <input type="url" id="eventImage" class="glass-input" placeholder="https://..."
+                                            required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Deskripsi</label>
+                                        <textarea id="eventDesc" class="glass-input"
+                                            style="height: 100px; resize: none;" required></textarea>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Status</label>
+                                        <select id="eventStatus" class="glass-input" style="background-color: #0f172a;">
+                                            <option value="upcoming">Upcoming (Segera)</option>
+                                            <option value="active">Active (Berlangsung)</option>
+                                            <option value="past">Past (Selesai)</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn-primary"
+                                        style="width: 100%; margin-top: 1rem;">Simpan
+                                        Event</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="glass-panel animate-fade-in">
+                                <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Daftar Event</h2>
+                                <div id="eventList" style="max-height: 600px; overflow-y: auto;">
+                                    <!-- Injected by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Registration Management -->
+                <div id="section-registrations" class="admin-section">
+                    <div class="glass-panel animate-fade-in">
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                             <div style="display: flex; align-items: center; gap: 1rem;">
                                 <div
-                                    style="width: 4px; height: 24px; background: var(--admin-secondary); border-radius: 10px;">
+                                    style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px; box-shadow: 0 0 10px var(--admin-primary);">
                                 </div>
-                                <h2 style="font-size: 1.5rem; font-weight: 800;">Riwayat <span
-                                        class="text-gradient">Data</span></h2>
+                                <h2 style="font-size: 1.5rem; font-weight: 800;">Manajemen <span
+                                        class="text-gradient">Pendaftaran</span></h2>
                             </div>
-                            <input type="text" id="searchInput" class="glass-input" placeholder="Cari ikan..."
-                                style="width: 180px; padding: 0.5rem 1rem; margin-bottom: 0;">
+                            <button onclick="printBatchCards('regTableBody')" class="btn-primary"
+                                style="padding: 10px 20px; font-size: 0.85rem; background: var(--admin-primary); color: #000; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,212,255,0.3);">
+                                <i class="ri-printer-line"></i> CETAK PILIHAN
+                            </button>
                         </div>
-                        <div id="historyList" style="max-height: 600px; overflow-y: auto;">
-                            <!-- Injected by JS -->
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"><input type="checkbox" id="selectAllReg"
+                                                onclick="toggleSelectAll('regTableBody', this.checked)"></th>
+                                        <th>No. Entri</th>
+                                        <th>Nama Peserta</th>
+                                        <th>Tim</th>
+                                        <th>Event</th>
+                                        <th>Payment</th>
+                                        <th>Skor Juri</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="regTableBody">
+                                    <!-- Injected by JS -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Section: Events Management -->
-        <div id="section-events" class="admin-section">
-            <div class="admin-grid">
-                <div>
+                <!-- Section: Judges Management -->
+                <div id="section-judges" class="admin-section">
+                    <div class="admin-grid">
+                        <div>
+                            <div class="glass-panel animate-fade-in">
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                                    <div
+                                        style="width: 4px; height: 24px; background: var(--admin-secondary); border-radius: 10px;">
+                                    </div>
+                                    <h2 style="font-size: 1.5rem; font-weight: 800;">Akun <span
+                                            class="text-gradient">Juri
+                                            Baru</span></h2>
+                                </div>
+                                <form id="judgeForm">
+                                    <div class="input-group">
+                                        <label class="input-label">Nama Lengkap</label>
+                                        <input type="text" id="judgeFullName" class="glass-input" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Username</label>
+                                        <input type="text" id="judgeUsername" class="glass-input" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Password</label>
+                                        <input type="password" id="judgePassword" class="glass-input" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">WhatsApp</label>
+                                        <input type="tel" id="judgePhone" class="glass-input" placeholder="08..."
+                                            required>
+                                    </div>
+                                    <button type="submit" class="btn-primary"
+                                        style="width: 100%; margin-top: 1rem;">Buat Akun
+                                        Juri</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="glass-panel animate-fade-in">
+                                <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Active Judges</h2>
+                                <div id="judgeList" style="max-height: 500px; overflow-y: auto;">
+                                    <!-- Injected by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Users Management -->
+                <div id="section-users" class="admin-section">
                     <div class="glass-panel animate-fade-in">
                         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
                             <div
-                                style="width: 4px; height: 24px; background: var(--admin-warning); border-radius: 10px;">
+                                style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px;">
                             </div>
                             <h2 style="font-size: 1.5rem; font-weight: 800;">Kelola <span
-                                    class="text-gradient">Event</span></h2>
+                                    class="text-gradient">Users</span>
+                            </h2>
                         </div>
-                        <form id="eventForm">
-                            <input type="hidden" id="eventId">
-                            <div class="input-group">
-                                <label class="input-label">Judul Event</label>
-                                <input type="text" id="eventTitle" class="glass-input" placeholder="Nama kontes..."
-                                    required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Lokasi</label>
-                                <input type="text" id="eventLocation" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Tanggal Pelaksanaan</label>
-                                <input type="date" id="eventDate" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">URL Banner</label>
-                                <input type="url" id="eventImage" class="glass-input" placeholder="https://..."
-                                    required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Deskripsi</label>
-                                <textarea id="eventDesc" class="glass-input" style="height: 100px; resize: none;"
-                                    required></textarea>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Status</label>
-                                <select id="eventStatus" class="glass-input" style="background-color: #0f172a;">
-                                    <option value="upcoming">Upcoming (Segera)</option>
-                                    <option value="active">Active (Berlangsung)</option>
-                                    <option value="past">Past (Selesai)</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Simpan
-                                Event</button>
-                        </form>
-                    </div>
-                </div>
-                <div>
-                    <div class="glass-panel animate-fade-in">
-                        <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Daftar Event</h2>
-                        <div id="eventList" style="max-height: 600px; overflow-y: auto;">
-                            <!-- Injected by JS -->
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Password (Hash)</th>
+                                        <th>Nama Lengkap</th>
+                                        <th>WhatsApp</th>
+                                        <th>Role</th>
+                                        <th>Joined</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody">
+                                    <!-- Injected by JS -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Section: Registration Management -->
-        <div id="section-registrations" class="admin-section">
-            <div class="glass-panel animate-fade-in">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                    <div style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px;"></div>
-                    <h2 style="font-size: 1.5rem; font-weight: 800;">Seluruh <span
-                            class="text-gradient">Registrasi</span></h2>
-                </div>
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>No. Entri</th>
-                                <th>Nama Peserta</th>
-                                <th>Tim</th>
-                                <th>Event</th>
-                                <th>Payment</th>
-                                <th>Skor Juri</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="regTableBody">
-                            <!-- Injected by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section: Judges Management -->
-        <div id="section-judges" class="admin-section">
-            <div class="admin-grid">
-                <div>
-                    <div class="glass-panel animate-fade-in">
-                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                            <div
-                                style="width: 4px; height: 24px; background: var(--admin-secondary); border-radius: 10px;">
-                            </div>
-                            <h2 style="font-size: 1.5rem; font-weight: 800;">Akun <span class="text-gradient">Juri
-                                    Baru</span></h2>
-                        </div>
-                        <form id="judgeForm">
-                            <div class="input-group">
-                                <label class="input-label">Nama Lengkap</label>
-                                <input type="text" id="judgeFullName" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Username</label>
-                                <input type="text" id="judgeUsername" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Password</label>
-                                <input type="password" id="judgePassword" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">WhatsApp</label>
-                                <input type="tel" id="judgePhone" class="glass-input" placeholder="08..." required>
-                            </div>
-                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Buat Akun
-                                Juri</button>
-                        </form>
-                    </div>
-                </div>
-                <div>
-                    <div class="glass-panel animate-fade-in">
-                        <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Active Judges</h2>
-                        <div id="judgeList" style="max-height: 500px; overflow-y: auto;">
-                            <!-- Injected by JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section: Users Management -->
-        <div id="section-users" class="admin-section">
-            <div class="glass-panel animate-fade-in">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                    <div style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px;"></div>
-                    <h2 style="font-size: 1.5rem; font-weight: 800;">Kelola <span class="text-gradient">Users</span>
-                    </h2>
-                </div>
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Password (Hash)</th>
-                                <th>Nama Lengkap</th>
-                                <th>WhatsApp</th>
-                                <th>Role</th>
-                                <th>Joined</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTableBody">
-                            <!-- Injected by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </main>
 
     <script src="js/app.js"></script>
@@ -659,6 +689,7 @@
                     if (s.recentPending && s.recentPending.length > 0) {
                         document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
                             <tr class="animate-fade-in">
+                                <td><input type="checkbox" class="row-check" value="${r.id}"></td>
                                 <td style="font-family: monospace; font-weight: 800; color: var(--admin-primary);">${escapeHTML(r.entry_number || '-')}</td>
                                 <td style="font-weight: 700;">${escapeHTML(r.user_name)}</td>
                                 <td>${escapeHTML(r.team_name || '-')}</td>
@@ -913,6 +944,7 @@
                         const statusClass = r.status === 'approved' ? 'admin-secondary' : r.status === 'rejected' ? 'admin-error' : 'text-muted';
                         return `
                         <tr>
+                            <td><input type="checkbox" class="row-check" value="${r.id}"></td>
                             <td style="font-family: monospace; font-weight: 800; color: var(--admin-primary);">${escapeHTML(r.entry_number || '-')}</td>
                             <td><div style="font-weight: 700;">${escapeHTML(r.user_name)}</div></td>
                             <td><div style="font-size: 0.85rem; color: var(--text-dim);">${escapeHTML(r.team_name || '-')}</div></td>
@@ -976,7 +1008,7 @@
                         printWindow.document.write(`
                             <html>
                             <head>
-                                <title>Cetak Kartu Entri - ${reg.entry_number}</title>
+                                <title>Cetak Kartu Entri - ${reg.entry_number || '-'}</title>
                                 <style>
                                     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
                                     body { 
@@ -1002,7 +1034,6 @@
                                         align-items: center;
                                         text-align: center;
                                         position: relative;
-                                        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
                                     }
                                     .header {
                                         font-size: 8pt;
@@ -1021,21 +1052,6 @@
                                         color: #000;
                                         margin: 2mm 0;
                                         letter-spacing: -1px;
-                                    }
-                                    .fish-info {
-                                        margin-top: 2mm;
-                                    }
-                                    .fish-name {
-                                        font-size: 14pt;
-                                        font-weight: 800;
-                                        text-transform: uppercase;
-                                        color: #333;
-                                    }
-                                    .team-name {
-                                        font-size: 10pt;
-                                        font-weight: 600;
-                                        color: #777;
-                                        margin-top: 1mm;
                                     }
                                     .footer {
                                         position: absolute;
@@ -1074,7 +1090,107 @@
                     }
                 });
         }
+
+        function toggleSelectAll(tbodyId, checked) {
+            const tbody = document.getElementById(tbodyId);
+            const checkboxes = tbody.querySelectorAll('.row-check');
+            checkboxes.forEach(cb => cb.checked = checked);
+        }
+
+        function printBatchCards(tbodyId) {
+            const tbody = document.getElementById(tbodyId);
+            const checkedIds = Array.from(tbody.querySelectorAll('.row-check:checked')).map(cb => cb.value);
+            if (checkedIds.length === 0) return alert('Pilih kartu yang mau dicetak dulu Cak!');
+
+            const token = sessionStorage.getItem('sna_admin_token');
+            fetch('/api/admin/registrations', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const regs = data.data.filter(r => checkedIds.includes(r.id.toString()));
+                        if (regs.length === 0) return alert('Data tidak ditemukan');
+
+                        const printWindow = window.open('', '_blank');
+                        printWindow.document.write(`
+                            <html>
+                            <head>
+                                <title>Cetak Batch Kartu Entri</title>
+                                <style>
+                                    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+                                    @page { size: A4; margin: 10mm; }
+                                    body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background: #fff; }
+                                    .grid { 
+                                        display: grid; 
+                                        grid-template-columns: repeat(2, 1fr); 
+                                        gap: 5mm; 
+                                        padding: 5mm; 
+                                    }
+                                    .card {
+                                        width: 90mm;
+                                        height: 55mm;
+                                        border: 1px solid #000;
+                                        padding: 5mm;
+                                        box-sizing: border-box;
+                                        display: flex;
+                                        flex-direction: column;
+                                        justify-content: center;
+                                        align-items: center;
+                                        text-align: center;
+                                        position: relative;
+                                        page-break-inside: avoid;
+                                    }
+                                    .header {
+                                        font-size: 7pt;
+                                        font-weight: 700;
+                                        color: #666;
+                                        text-transform: uppercase;
+                                        letter-spacing: 1px;
+                                        margin-bottom: 2mm;
+                                        border-bottom: 0.5px solid #eee;
+                                        width: 100%;
+                                        padding-bottom: 1mm;
+                                    }
+                                    .entry-number {
+                                        font-size: 32pt;
+                                        font-weight: 900;
+                                        color: #000;
+                                        margin: 1mm 0;
+                                    }
+                                    .footer {
+                                        position: absolute;
+                                        bottom: 2mm;
+                                        font-size: 5pt;
+                                        font-weight: 700;
+                                        color: #aaa;
+                                        letter-spacing: 0.5px;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="grid">
+                                    ${regs.map(reg => `
+                                        <div class="card">
+                                            <div class="header">ENTRY CARD - ${reg.contest_name}</div>
+                                            <div class="entry-number">${reg.entry_number || '-'}</div>
+                                            <div class="footer">GENERATED BY SNADAILYFISHCHECKER</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <script>
+                                    window.onload = () => {
+                                        window.print();
+                                        setTimeout(() => window.close(), 500);
+                                    };
+                                <\/script>
+                            </body>
+                            </html>
+                        `);
+                        printWindow.document.close();
+                    }
+                });
+        }
     </script>
 </body>
 
 </html>
+```

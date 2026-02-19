@@ -450,10 +450,19 @@
 
                 <!-- Contests Section -->
                 <div id="sectionContests" class="tab-section active animate-fade-in">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-                        <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;"></div>
-                        <h2 style="font-size: 1.5rem; font-weight: 800;">Riwayat <span
-                                class="text-gradient">Kontes</span></h2>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div
+                                style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px; box-shadow: 0 0 10px var(--primary);">
+                            </div>
+                            <h2 style="font-size: 1.5rem; font-weight: 800;">Riwayat <span
+                                    class="text-gradient">Kontes</span></h2>
+                        </div>
+                        <button onclick="printBatchCards()" class="btn-primary"
+                            style="padding: 10px 20px; font-size: 0.85rem; background: var(--primary); color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,212,255,0.3);">
+                            <i class="ri-printer-line"></i> CETAK PILIHAN
+                        </button>
                     </div>
                     <div id="registrationList" class="grid" style="grid-template-columns: 1fr; gap: 1rem;">
                         <div style="text-align: center; padding: 5rem; color: var(--text-muted);">
@@ -638,8 +647,11 @@
                             const statusClass = `badge-${reg.status.toLowerCase()}`;
 
                             return `
-                                <div class="reg-card-premium animate-fade-in" style="animation-delay: ${idx * 0.1}s;">
-                                    <div style="position: relative;">
+                                <div class="reg-card-premium animate-fade-in" style="animation-delay: ${idx * 0.1}s; display: flex; align-items: center; gap: 1.5rem;">
+                                    <div style="flex-shrink: 0;">
+                                        <input type="checkbox" class="row-check" value="${reg.id}" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
+                                    </div>
+                                    <div style="position: relative; flex-shrink: 0;">
                                         <img src="${escapeHTML(reg.fish_image_url) || 'https://via.placeholder.com/100'}" class="fish-thumb" onclick="window.open('${escapeHTML(reg.fish_image_url)}', '_blank')">
                                         ${isDiamond ? '<div style="position: absolute; top: -8px; right: -8px; background: #ffd700; color: #000; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);"><i class="ri-vip-diamond-fill"></i></div>' : ''}
                                     </div>
@@ -1010,6 +1022,97 @@
                 });
         }
 
+        function printBatchCards() {
+            const checkedIds = Array.from(document.querySelectorAll('.row-check:checked')).map(cb => cb.value);
+            if (checkedIds.length === 0) return alert('Pilih kartu yang mau dicetak dulu Cak!');
+
+            const token = localStorage.getItem('sna_user_token');
+            fetch('/api/contest/my-registrations', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const regs = data.data.filter(r => checkedIds.includes(r.id.toString()));
+                        if (regs.length === 0) return alert('Data tidak ditemukan');
+
+                        const printWindow = window.open('', '_blank');
+                        printWindow.document.write(`
+                            <html>
+                            <head>
+                                <title>Cetak Batch Kartu Entri</title>
+                                <style>
+                                    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+                                    @page { size: A4; margin: 10mm; }
+                                    body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background: #fff; }
+                                    .grid { 
+                                        display: grid; 
+                                        grid-template-columns: repeat(2, 1fr); 
+                                        gap: 5mm; 
+                                        padding: 5mm; 
+                                    }
+                                    .card {
+                                        width: 90mm;
+                                        height: 55mm;
+                                        border: 1px solid #000;
+                                        padding: 5mm;
+                                        box-sizing: border-box;
+                                        display: flex;
+                                        flex-direction: column;
+                                        justify-content: center;
+                                        align-items: center;
+                                        text-align: center;
+                                        position: relative;
+                                        page-break-inside: avoid;
+                                    }
+                                    .header {
+                                        font-size: 7pt;
+                                        font-weight: 700;
+                                        color: #666;
+                                        text-transform: uppercase;
+                                        letter-spacing: 1px;
+                                        margin-bottom: 2mm;
+                                        border-bottom: 0.5px solid #eee;
+                                        width: 100%;
+                                        padding-bottom: 1mm;
+                                    }
+                                    .entry-number {
+                                        font-size: 32pt;
+                                        font-weight: 900;
+                                        color: #000;
+                                        margin: 1mm 0;
+                                    }
+                                    .footer {
+                                        position: absolute;
+                                        bottom: 2mm;
+                                        font-size: 5pt;
+                                        font-weight: 700;
+                                        color: #aaa;
+                                        letter-spacing: 0.5px;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="grid">
+                                    ${regs.map(reg => `
+                                        <div class="card">
+                                            <div class="header">ENTRY CARD - ${reg.contest_name}</div>
+                                            <div class="entry-number">${reg.entry_number || '-'}</div>
+                                            <div class="footer">GENERATED BY SNADAILYFISHCHECKER</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <script>
+                                    window.onload = () => {
+                                        window.print();
+                                        setTimeout(() => window.close(), 500);
+                                    };
+                                <\/script>
+                            </body>
+                            </html>
+                        `);
+                        printWindow.document.close();
+                    }
+                });
+        }
     </script>
 </body>
 
