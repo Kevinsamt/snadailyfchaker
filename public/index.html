@@ -384,13 +384,15 @@
             if (e.key === 'Enter') checkAuthenticity();
         });
 
-        // Update Desktop Nav Auth Link
-        const loginLink = document.getElementById('nav-login-link');
-        const userData = JSON.parse(localStorage.getItem('sna_user_data'));
-        if (userData && loginLink) {
-            loginLink.innerText = 'Dashboard';
-            loginLink.href = userData.role === 'judge' ? 'judge.html' : 'dashboard.html';
-        }
+        // Update Desktop Nav Auth Link via Global navigation.js check
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginLink = document.getElementById('nav-login-link');
+            const userData = JSON.parse(localStorage.getItem('sna_user_data'));
+            if (userData && loginLink) {
+                loginLink.innerText = 'Dashboard';
+                loginLink.href = userData.role === 'judge' ? 'judge.html' : 'dashboard.html';
+            }
+        });
     </script>
 </body>
 

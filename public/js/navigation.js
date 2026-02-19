@@ -20,14 +20,40 @@ function toggleMenu() {
     }
 }
 
-// Close menu on escape key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        const overlay = document.getElementById('navOverlay');
-        if (overlay && overlay.classList.contains('active')) {
+// Global Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialize Navigation Menu (User data / Links)
+    updateNavigationMenu();
+
+    // 2. Auto-attach Toggle Function to all Hamburger Buttons
+    document.querySelectorAll('.hamburger-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            e.preventDefault();
             toggleMenu();
+        };
+    });
+
+    // 3. Navbar Scroll Effect
+    window.addEventListener('scroll', () => {
+        const nav = document.querySelector('.navbar');
+        if (nav) {
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
         }
-    }
+    });
+
+    // 4. Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const overlay = document.getElementById('navOverlay');
+            if (overlay && overlay.classList.contains('active')) {
+                toggleMenu();
+            }
+        }
+    });
 });
 
 /**
@@ -52,7 +78,7 @@ function updateNavigationMenu() {
         }
 
         userMenuLinks.innerHTML = `
-            <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
+            <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 0.5rem 0;"></div>
             <a href="${dashboardLink}" class="nav-menu-link">
                 <i class="${dashboardIcon}"></i> ${dashboardText}
             </a>
@@ -62,7 +88,7 @@ function updateNavigationMenu() {
         `;
     } else {
         userMenuLinks.innerHTML = `
-            <div style="height: 1px; background: var(--glass-border); margin: 0.5rem 0;"></div>
+            <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 0.5rem 0;"></div>
             <a href="login.html" class="nav-menu-link">
                 <i class="ri-user-line"></i> Login
             </a>
@@ -78,6 +104,3 @@ function logout() {
     localStorage.removeItem('sna_user_data');
     window.location.href = 'login.html';
 }
-
-// Automatically update menu on load if container exists
-document.addEventListener('DOMContentLoaded', updateNavigationMenu);
