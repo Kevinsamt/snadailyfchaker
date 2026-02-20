@@ -254,6 +254,12 @@
             border-color: rgba(255, 255, 255, 0.05);
         }
 
+        .tier-card.upcoming .tier-price {
+            filter: blur(8px);
+            opacity: 0.1;
+            user-select: none;
+        }
+
         .tier-card .tier-name {
             font-size: 0.7rem;
             font-weight: 700;
@@ -602,44 +608,6 @@
             border-color: var(--primary);
             background: rgba(255, 255, 255, 0.03);
         }
-
-        @media (max-width: 968px) {
-            .premium-card {
-                grid-template-columns: 1fr;
-            }
-
-            .info-panel {
-                padding: 2.5rem 1.5rem;
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .info-panel h1 {
-                font-size: 2.5rem;
-            }
-
-            .info-panel p {
-                margin-bottom: 2rem;
-            }
-
-            .side-decoration {
-                display: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .main-wrapper {
-                padding: 1rem 1rem 4rem 1rem;
-            }
-
-            .tier-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .file-grid {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 
@@ -776,38 +744,52 @@
                                 <optgroup label="Kelas C - Special Class">
                                     <option value="C1">C1 - FM Open</option>
                                     <option value="C2">C2 - Longfin VT</option>
-                                    <option value="C3">C3 - Junior</option>
-                                    <option value="C4">C4 - Kids</option>
+                                    <option value="C3">C3 - PK Dumbo</option>
+                                    <option value="C4">C4 - HMPK</option>
                                 </optgroup>
                             </select>
                         </div>
                     </div>
 
                     <div class="input-box">
-                        <label>Pilih Tier Pendaftaran</label>
-                        <div class="tier-grid" id="standardTierGrid">
-                            <div class="tier-card" id="tierEarly" onclick="selectTier('Early', 40000, this)">
-                                <span class="tier-name">Early Bird</span>
-                                <span class="tier-price">40K</span>
+                        <!-- Dynamic Pricing Tiers (Standard) -->
+                        <div id="standardTierGrid" class="tier-grid" style="margin-bottom: 2rem;">
+                            <!-- Tier Early -->
+                            <div id="tierEarly" class="tier-card active"
+                                onclick="selectTier('Early', currentPrices.early, this)">
+                                <div class="tier-badge" style="background: rgba(0,212,255,0.1); color: var(--primary);">
+                                    EARLY BIRD</div>
+                                <div id="priceLabelEarly" class="tier-price">Rp 40.000</div>
+                                <div class="tier-desc">Batch Awal - Hemat 50%</div>
                             </div>
-                            <div class="tier-card" id="tierMid" onclick="selectTier('Mid', 60000, this)">
-                                <span class="tier-name">Mid Phase</span>
-                                <span class="tier-price">60K</span>
+
+                            <!-- Tier Mid -->
+                            <div id="tierMid" class="tier-card disabled"
+                                onclick="selectTier('Mid Phase', currentPrices.mid, this)">
+                                <div class="tier-badge" style="background: rgba(251,191,36,0.1); color: #fbbf24;">MID
+                                    PHASE</div>
+                                <div id="priceLabelMid" class="tier-price">Rp 60.000</div>
+                                <div id="phaseLabelMid" class="tier-desc">Phase Locked</div>
                             </div>
-                            <div class="tier-card" id="tierLast" onclick="selectTier('Last', 80000, this)">
-                                <span class="tier-name">Last Call</span>
-                                <span class="tier-price">80K</span>
+
+                            <!-- Tier Last -->
+                            <div id="tierLast" class="tier-card disabled"
+                                onclick="selectTier('Last Call', currentPrices.last, this)">
+                                <div class="tier-badge" style="background: rgba(239,68,68,0.1); color: #ef4444;">LAST
+                                    CALL</div>
+                                <div id="priceLabelLast" class="tier-price">Rp 80.000</div>
+                                <div id="phaseLabelLast" class="tier-desc">Phase Locked</div>
                             </div>
-                            <div class="tier-card diamond" id="tierDiamond"
-                                onclick="selectTier('Diamond', 100000, this)">
-                                <div
-                                    style="position: absolute; top: 8px; right: 12px; font-size: 1rem; color: #ffd700;">
-                                    <i class="ri-vip-diamond-fill"></i>
+
+                            <!-- Tier Diamond (Always Available) -->
+                            <div id="tierDiamond" class="tier-card"
+                                onclick="selectTier('Diamond', currentPrices.diamond, this)">
+                                <div class="tier-badge"
+                                    style="background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); animation: glow 2s infinite;">
+                                    <i class="ri-vip-diamond-fill"></i> DIAMOND
                                 </div>
-                                <span class="tier-name" style="color: #ffd700;">Diamond</span>
-                                <span class="tier-price">100K</span>
-                                <div style="font-size: 0.6rem; color: #ffd700; margin-top: 4px; font-weight: 700;">+
-                                    DIAMOND SPIN</div>
+                                <div id="priceLabelDiamond" class="tier-price" style="color: #ffd700;">Rp 100.000</div>
+                                <div class="tier-desc">Bonus 1x Diamond Spin</div>
                             </div>
                         </div>
 
@@ -977,39 +959,16 @@
 
     <script src="js/navigation.js"></script>
     <script>
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('.navbar');
-            if (window.scrollY > 20) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-        });
-
-        function toggleMenu() {
-            const navOverlay = document.getElementById('navOverlay');
-            const navBackdrop = document.getElementById('navBackdrop');
-            navOverlay.classList.toggle('active');
-            navBackdrop.classList.toggle('active');
-        }
-
-        // Hamburger button event listener (fix for multiple elements)
-        document.querySelectorAll('.hamburger-btn').forEach(btn => {
-            btn.onclick = toggleMenu;
-        });
-
-        function logout() {
-            localStorage.removeItem('sna_user_token');
+        // Check Authentication
+        if (!localStorage.getItem('sna_user_token')) {
             window.location.href = 'login.html';
         }
 
-        // --- Core Logic ---
         document.addEventListener('DOMContentLoaded', async () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
             const userMenuLinks = document.getElementById('userMenuLinks');
 
-            if (userData && userMenuLinks) {
+            if (userData) {
                 userMenuLinks.innerHTML = `
                     <a href="dashboard.html" class="nav-menu-link">
                         <i class="ri-dashboard-line"></i> Dashboard
@@ -1018,7 +977,7 @@
                         <i class="ri-logout-box-r-line"></i> Logout
                     </a>
                 `;
-            } else if (userMenuLinks) {
+            } else {
                 userMenuLinks.innerHTML = `
                     <a href="login.html" class="nav-menu-link">
                         <i class="ri-user-line"></i> Login
@@ -1034,17 +993,13 @@
             const isFreeEntry = urlParams.get('claim') === 'free_entry';
 
             if (isFreeEntry) {
-                const badge = document.getElementById('freeEntryBadge');
-                const grid = document.getElementById('standardTierGrid');
-                const prize = document.getElementById('freeEntryPrizeCard');
-                const payArea = document.getElementById('directPaymentArea');
-                if (badge) badge.style.display = 'flex';
-                if (grid) grid.style.display = 'none';
-                if (prize) prize.style.display = 'block';
-                if (payArea) payArea.style.display = 'none';
+                document.getElementById('freeEntryBadge').style.display = 'flex';
+                document.getElementById('standardTierGrid').style.display = 'none';
+                document.getElementById('freeEntryPrizeCard').style.display = 'block';
+                document.getElementById('directPaymentArea').style.display = 'none';
 
-                const regTier = document.getElementById('registrationTier');
-                if (regTier) regTier.value = 'Entry Gratis';
+                // Set fixed values for registration
+                document.getElementById('registrationTier').value = 'Entry Gratis';
             }
 
             try {
@@ -1052,40 +1007,114 @@
                 const data = await res.json();
                 if (data.success) {
                     const select = document.getElementById('eventName');
-                    if (select) {
-                        select.innerHTML = '<option value="">Pilih Event Aktif...</option>' +
-                            data.data.filter(ev => ev.status !== 'past').map(ev =>
-                                `<option value="${ev.title}" ${selectedEvent === decodeURIComponent(ev.title) ? 'selected' : ''}>${ev.title}</option>`
-                            ).join('');
+                    const events = data.data.filter(ev => ev.status !== 'past');
+                    select.innerHTML = '<option value="">Pilih Event Aktif...</option>' +
+                        events.map(ev =>
+                            `<option value="${ev.title}" ${selectedEvent === decodeURIComponent(ev.title) ? 'selected' : ''}>${ev.title}</option>`
+                        ).join('');
+
+                    // Listen for event change
+                    select.addEventListener('change', (e) => {
+                        const targetEvent = events.find(ev => ev.title === e.target.value);
+                        if (targetEvent) updateTierAvailability(targetEvent);
+                    });
+
+                    // Initial load if event pre-selected
+                    if (selectedEvent) {
+                        const targetEvent = events.find(ev => ev.title === decodeURIComponent(selectedEvent));
+                        if (targetEvent) updateTierAvailability(targetEvent);
                     }
                 }
             } catch (err) {
                 console.error('Error fetching events:', err);
-                const select = document.getElementById('eventName');
-                if (select) select.innerHTML = '<option value="">Gagal memuat event</option>';
+                document.getElementById('eventName').innerHTML = '<option value="">Gagal memuat event</option>';
             }
-
-            updateTierAvailability();
         });
 
-        function updateTierAvailability() {
+        let currentPrices = { early: 40000, mid: 60000, last: 80000, diamond: 100000 };
+
+        function updateTierAvailability(eventData) {
             const now = new Date();
-            // Early Bird: ends March 15, 2026
-            const earlyDeadline = new Date("2026-03-16T00:00:00");
-            // Mid Phase: March 16 - March 25, 2026
-            const midStart = new Date("2026-03-16T00:00:00");
-            const midDeadline = new Date("2026-03-26T00:00:00");
-            // Last Call: March 26 - April 4, 2026
-            const lastStart = new Date("2026-03-26T00:00:00");
-            const lastDeadline = new Date("2026-04-05T00:00:00");
-            // Diamond: ends April 4, 2026
-            const diamondDeadline = new Date("2026-04-05T00:00:00");
+
+            // Dynamic Pricing from Event Data
+            currentPrices = {
+                early: eventData.price_early || 40000,
+                mid: eventData.price_mid || 60000,
+                last: eventData.price_last || 80000,
+                diamond: eventData.price_diamond || 100000
+            };
+
+            // Update Price Labels
+            document.getElementById('priceLabelEarly').innerText = 'Rp ' + currentPrices.early.toLocaleString();
+            document.getElementById('priceLabelMid').innerText = 'Rp ' + currentPrices.mid.toLocaleString();
+            document.getElementById('priceLabelLast').innerText = 'Rp ' + currentPrices.last.toLocaleString();
+            document.getElementById('priceLabelDiamond').innerText = 'Rp ' + currentPrices.diamond.toLocaleString();
+
+            const eventDate = new Date(eventData.event_date);
+            const startDate = eventData.early_bird_start_date ? new Date(eventData.early_bird_start_date) : null;
+
+            // Closing Time: H-1 at 20:00 WIB
+            const closingTime = new Date(eventDate);
+            closingTime.setDate(closingTime.getDate() - 1);
+            closingTime.setHours(20, 0, 0, 0);
+
+            let midStart, lastStart, earlyDeadline, midDeadline;
+
+            if (startDate && startDate < closingTime) {
+                const totalDuration = closingTime.getTime() - startDate.getTime();
+                const phaseDuration = totalDuration / 3;
+
+                midStart = new Date(startDate.getTime() + phaseDuration);
+                lastStart = new Date(startDate.getTime() + (2 * phaseDuration));
+                earlyDeadline = midStart;
+                midDeadline = lastStart;
+            } else {
+                // Fallback to legacy fields if automated start date missing or invalid
+                midStart = eventData.mid_start_date ? new Date(eventData.mid_start_date) : null;
+                lastStart = eventData.last_start_date ? new Date(eventData.last_start_date) : null;
+                earlyDeadline = midStart || new Date("9999-12-31");
+                midDeadline = lastStart || new Date("9999-12-31");
+            }
+
+            const isRegistrationClosed = now >= closingTime;
+            const isRegistrationUpcoming = startDate && now < startDate;
+
+            if (isRegistrationUpcoming) {
+                const form = document.getElementById('entryForm');
+                if (form) {
+                    form.innerHTML = `
+                        <div style="text-align: center; padding: 4rem 2rem; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 24px;">
+                            <i class="ri-time-line" style="font-size: 4rem; color: #fbbf24; margin-bottom: 1.5rem; display: block;"></i>
+                            <h2 style="color: #fff; font-size: 1.75rem; font-weight: 800; margin-bottom: 1rem;">Pendaftaran Belum Dibuka</h2>
+                            <p style="color: rgba(255,255,255,0.7); line-height: 1.6;">Sabar dulu Cak, pendaftaran untuk event ini baru akan dibuka pada:<br><b style="color: #fbbf24;">${startDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB</b></p>
+                            <a href="events.html" class="btn-primary" style="display: inline-block; margin-top: 2rem; text-decoration: none; padding: 1rem 2rem; border-radius: 100px;">Lihat Event Lain</a>
+                        </div>
+                    `;
+                    return;
+                }
+            }
+
+            if (isRegistrationClosed) {
+                // Hide form or show closed message
+                const form = document.getElementById('entryForm');
+                if (form) {
+                    form.innerHTML = `
+                        <div style="text-align: center; padding: 4rem 2rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 24px;">
+                            <i class="ri-alarm-warning-line" style="font-size: 4rem; color: #ef4444; margin-bottom: 1.5rem; display: block;"></i>
+                            <h2 style="color: #fff; font-size: 1.75rem; font-weight: 800; margin-bottom: 1rem;">Pendaftaran Ditutup</h2>
+                            <p style="color: rgba(255,255,255,0.7); line-height: 1.6;">Maaf Cak, pendaftaran untuk event ini sudah ditutup pada:<br><b style="color: #ef4444;">${closingTime.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB</b></p>
+                            <a href="events.html" class="btn-primary" style="display: inline-block; margin-top: 2rem; text-decoration: none; padding: 1rem 2rem; border-radius: 100px;">Cari Event Lain</a>
+                        </div>
+                    `;
+                    return;
+                }
+            }
 
             const tiers = [
-                { id: 'tierEarly', deadline: earlyDeadline, name: 'Early', price: 40000, start: null },
-                { id: 'tierMid', deadline: midDeadline, name: 'Mid', price: 60000, start: midStart },
-                { id: 'tierLast', deadline: lastDeadline, name: 'Last', price: 80000, start: lastStart },
-                { id: 'tierDiamond', deadline: diamondDeadline, name: 'Diamond', price: 100000, start: null }
+                { id: 'tierEarly', deadline: earlyDeadline, name: 'Early', price: currentPrices.early, start: startDate },
+                { id: 'tierMid', deadline: midDeadline, name: 'Mid Phase', price: currentPrices.mid, start: midStart, labelId: 'phaseLabelMid' },
+                { id: 'tierLast', deadline: closingTime, name: 'Last Call', price: currentPrices.last, start: lastStart, labelId: 'phaseLabelLast' },
+                { id: 'tierDiamond', deadline: closingTime, name: 'Diamond', price: currentPrices.diamond, start: startDate }
             ];
 
             let firstAvailable = null;
@@ -1093,14 +1122,32 @@
             tiers.forEach(t => {
                 const el = document.getElementById(t.id);
                 if (!el) return;
-                const isStarted = t.start ? now >= t.start : true;
-                const isExpired = now >= t.deadline;
 
-                if (!isStarted || isExpired) {
-                    el.classList.add('disabled');
+                const isStarted = t.start ? now >= t.start : true;
+                const isExpired = t.deadline ? now >= t.deadline : false;
+
+                if (!isStarted) {
+                    el.classList.add('disabled', 'upcoming');
                     el.classList.remove('active');
+                    if (t.labelId) document.getElementById(t.labelId).innerText = "Coming Soon";
+
+                    // Robust masking: replace price text
+                    const priceEl = el.querySelector('.tier-price');
+                    if (priceEl) priceEl.innerText = "Rp ???";
+                } else if (isExpired) {
+                    el.classList.add('disabled');
+                    el.classList.remove('active', 'upcoming');
+                    if (t.labelId) document.getElementById(t.labelId).innerText = "Phase Ended";
+                    if (t.id === 'tierEarly') {
+                        const desc = el.querySelector('.tier-desc');
+                        if (desc) desc.innerText = "Sudah Berakhir";
+                    }
                 } else {
-                    el.classList.remove('disabled');
+                    el.classList.remove('disabled', 'upcoming');
+                    if (t.labelId) {
+                        const desc = t.name === 'Mid Phase' ? 'Phase Menengah' : 'Kesempatan Terakhir';
+                        document.getElementById(t.labelId).innerText = desc;
+                    }
                     if (!firstAvailable) firstAvailable = t;
                 }
             });
@@ -1177,7 +1224,7 @@
             const formData = new FormData();
             formData.append('contestName', document.getElementById('eventName').value);
             formData.append('fishName', document.getElementById('fishName').value);
-            formData.append('fishType', 'N/A');
+            formData.append('fishType', '-');
             formData.append('contestClass', document.getElementById('contestClass').value);
             formData.append('registrationTier', tier);
             formData.append('paymentAmount', document.getElementById('paymentAmount').value);
