@@ -1046,7 +1046,7 @@ app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) =>
             SELECT ej.id 
             FROM event_judges ej
             JOIN events e ON ej.event_id = e.id
-            JOIN contest_registrations r ON e.title = r.contest_name
+            JOIN contest_registrations r ON TRIM(LOWER(e.title)) = TRIM(LOWER(r.contest_name))
             WHERE r.id = $1 AND ej.judge_id = $2
         `, [entryId, req.user.id]);
 
