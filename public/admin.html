@@ -3,7 +3,7 @@
 
 <head>
     <script>
-        // Security Check v1.5 - Premium Enforcement
+        // Security Check
         if (!sessionStorage.getItem('sna_admin_token')) {
             window.location.href = 'login.html';
         }
@@ -14,1034 +14,129 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnaDaily | Admin Dashboard</title>
+    <title>SnaDailyCheker | Admin Dashboard</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/seasonal-themes.css">
-    <script src="js/theme-switcher.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <style>
-        .navbar-admin {
-            background: rgba(7, 11, 28, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 1rem 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1500;
-            transition: var(--transition);
-        }
-
-        .navbar-admin.scrolled {
-            background: rgba(7, 11, 28, 0.85);
-            backdrop-filter: blur(30px);
-            padding: 0.75rem 0;
-        }
-
-        .admin-nav {
-            margin-top: 80px;
-        }
-
-        :root {
-            --admin-primary: #00d4ff;
-            --admin-primary-glow: rgba(0, 212, 255, 0.4);
-            --admin-secondary: #10b981;
-            --admin-warning: #fbbf24;
-            --admin-error: #ef4444;
-        }
-
-        .theme-imlek {
-            --admin-primary: #FFD700;
-            --admin-primary-glow: rgba(255, 215, 0, 0.4);
-            --admin-secondary: #FF4D4D;
-        }
-
-        .admin-nav {
-            background: rgba(7, 11, 20, 0.95);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-bottom: 1px solid var(--glass-border);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            width: 100%;
-        }
-
-        .theme-imlek .admin-nav {
-            background: rgba(42, 5, 5, 0.95);
-        }
-
-        .tab-container {
-            display: flex;
-            gap: 0.5rem;
-            overflow-x: auto;
-            padding: 0.5rem 0;
-            scrollbar-width: none;
-        }
-
-        .tab-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .tab-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            color: var(--text-muted);
-            padding: 0.6rem 1.25rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tab-btn i {
-            font-size: 1.1rem;
-        }
-
-        .tab-btn.active {
-            background: var(--admin-primary);
-            color: #000;
-            border-color: var(--admin-primary);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .stat-card {
-            border-top: 4px solid var(--accent, var(--admin-primary));
-        }
-
-        .admin-table-container {
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(40px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            overflow-x: auto;
-            margin-top: 1.5rem;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .admin-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .admin-table th {
-            text-align: left;
-            padding: 1.25rem 1rem;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .admin-table td {
-            padding: 1.25rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            vertical-align: middle;
-        }
-
-        .admin-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .admin-section {
-            display: none;
-            padding: 2rem 0 5rem;
-        }
-
-        .admin-section.active {
-            display: block;
-        }
-
-        .action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            color: white;
-            transition: all 0.2s;
-        }
-
-        .glass-panel {
-            padding: 2rem;
-        }
-
-        .action-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 768px) {
-            .admin-nav .container {
-                padding: 0.5rem 1rem !important;
-            }
-
-            .admin-nav .text-gradient {
-                font-size: 1.1rem !important;
-                letter-spacing: -1px !important;
-            }
-
-            .admin-nav .text-gradient span {
-                font-size: 0.9rem !important;
-            }
-
-            .admin-grid {
-                gap: 1.25rem;
-            }
-
-            .glass-panel {
-                padding: 1.25rem !important;
-            }
-
-            .admin-section {
-                padding: 1rem 0 4rem;
-            }
-
-            .grid-4 {
-                grid-template-columns: 1fr 1fr;
-                gap: 0.75rem;
-            }
-
-            .stat-card {
-                padding: 1.25rem !important;
-            }
-
-            .stat-card div:last-child {
-                font-size: 1.75rem !important;
-            }
-
-            .tab-btn {
-                padding: 0.5rem 0.85rem;
-                font-size: 0.75rem;
-            }
-
-            .tab-btn i {
-                font-size: 0.95rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .admin-nav .container>div:first-child {
-                gap: 0.5rem !important;
-            }
-
-            .admin-nav .container>div:first-child>div:first-child {
-                width: 32px !important;
-                height: 32px !important;
-            }
-
-            .admin-nav .container>div:first-child>div:first-child i {
-                font-size: 1rem !important;
-            }
-
-            .admin-nav .text-gradient {
-                font-size: 1rem !important;
-                font-weight: 800 !important;
-            }
-
-            .admin-nav .text-gradient span {
-                font-size: 0.85rem !important;
-            }
-
-            .grid-4 {
-                grid-template-columns: 1fr;
-            }
-
-            .tab-btn {
-                padding: 0.45rem 0.75rem;
-                font-size: 0.7rem;
-            }
-
-            .tab-btn i {
-                font-size: 0.9rem;
-            }
-
-            .action-btn {
-                width: 36px !important;
-                height: 36px !important;
-            }
-
-            .action-btn i {
-                font-size: 1.1rem !important;
-            }
-        }
-    </style>
 </head>
 
 <body>
-    <div class="ocean-background">
-        <div class="bubble x1"></div>
-        <div class="bubble x2"></div>
-        <div class="bubble x3"></div>
-    </div>
 
-    <nav class="navbar-admin">
-        <div class="container"
-            style="display: flex; justify-content: space-between; align-items: center; padding: 0 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div
-                    style="width: 32px; height: 32px; background: var(--admin-primary); border-radius: 8px; display: grid; place-items: center; color: #000;">
-                    <i class="ri-shield-flash-fill"></i>
-                </div>
-                <a href="admin.html" class="text-gradient"
-                    style="text-decoration: none; font-size: 1.25rem; font-weight: 800;">ADMIN<span
-                        style="font-weight: 300; color: white;">HUB</span></a>
-            </div>
-
-            <!-- Redundant link removed as per user request -->
-
-            <button class="hamburger-btn" onclick="toggleMenu()"
-                style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 8px;">
-                <i class="ri-menu-4-line"></i>
+    <nav class="glass-panel"
+        style="border-radius: 0; padding: 1rem 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 1.5rem; font-weight: 700;">SnaDaily<span class="text-gradient">Cheker</span> Dashboard
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button onclick="window.backupData()" class="action-btn" title="Backup Data (Download)"
+                style="color: var(--primary); border-color: var(--primary);">
+                <i class="ri-download-cloud-line"></i>
             </button>
-        </div>
-    </nav>
+            <label for="restoreInput" class="action-btn" title="Restore Data (Upload)"
+                style="color: var(--secondary); border-color: var(--secondary); cursor: pointer; margin: 0;">
+                <i class="ri-upload-cloud-line"></i>
+            </label>
+            <input type="file" id="restoreInput" accept=".json" style="display: none;"
+                onchange="window.restoreData(this)">
 
-    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
-    <div class="nav-overlay" id="navOverlay">
-        <div class="nav-menu-header">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div
-                    style="width: 32px; height: 32px; background: var(--admin-primary); border-radius: 8px; display: grid; place-items: center; color: #000;">
-                    <i class="ri-shield-user-line"></i>
-                </div>
-                <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">ADMIN MENU</span>
-            </div>
-            <button class="hamburger-btn" onclick="toggleMenu()">
-                <i class="ri-close-line"></i>
-            </button>
-        </div>
-        <div class="nav-menu-links">
-            <a href="index.html" class="nav-menu-link">
-                <i class="ri-home-4-line"></i> Beranda Utama
-            </a>
-            <a href="admin.html" class="nav-menu-link active">
-                <i class="ri-dashboard-3-line"></i> Admin Dashboard
-            </a>
-            <a href="dashboard.html" class="nav-menu-link">
-                <i class="ri-user-6-line"></i> User Dashboard
-            </a>
-            <div id="userMenuLinks"></div>
-        </div>
-        <div style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
-            <p style="font-size: 0.7rem; color: var(--text-muted); text-align: center;">Secure Administration Mode</p>
-        </div>
-    </div>
-
-    <nav class="admin-nav">
-        <div class="container" style="padding: 0.75rem 1.25rem; max-width: 1400px; margin: 0 auto;">
-            <div class="tab-container" id="adminTabs">
-                <button onclick="switchTab('overview')" class="tab-btn active"><i
-                        class="ri-dashboard-3-line"></i>Beranda</button>
-                <button onclick="switchTab('fish')" class="tab-btn"><i class="ri-temp-cold-line"></i>Ikan</button>
-                <button onclick="switchTab('events')" class="tab-btn"><i
-                        class="ri-calendar-event-line"></i>Event</button>
-                <button onclick="switchTab('registrations')" class="tab-btn"><i
-                        class="ri-medal-2-line"></i>Registrasi</button>
-                <button onclick="switchTab('judges')" class="tab-btn"><i class="ri-team-line"></i>Juri</button>
-                <button onclick="switchTab('users')" class="tab-btn"><i class="ri-user-settings-line"></i>Users</button>
+            <span style="font-size: 0.9rem; color: var(--text-muted);">Admin Panel</span>
+            <div style="width: 35px; height: 35px; background: var(--gradient-main); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--primary); cursor: pointer;"
+                onclick="logout()" title="Logout">
+                <i class="ri-logout-box-r-line"></i>
             </div>
         </div>
     </nav>
 
-    <main class="container" style="padding-top: 140px;">
-        <!-- Dashboard Overview -->
-        <div id="section-overview" class="admin-section active animate-fade-in">
-            <div class="grid grid-4 mb-4">
-                <div class="glass-panel stat-card" style="--accent: var(--admin-primary);">
-                    <div
-                        style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">
-                        Total User</div>
-                    <div id="stat-users" style="font-size: 2.5rem; font-weight: 800; line-height: 1;">0</div>
-                </div>
-                <div class="glass-panel stat-card" style="--accent: var(--admin-secondary);">
-                    <div
-                        style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">
-                        Total Juri</div>
-                    <div id="stat-judges"
-                        style="font-size: 2.5rem; font-weight: 800; color: var(--admin-secondary); line-height: 1;">0
-                    </div>
-                </div>
-                <div class="glass-panel stat-card" style="--accent: var(--admin-warning);">
-                    <div
-                        style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">
-                        Total Event</div>
-                    <div id="stat-events"
-                        style="font-size: 2.5rem; font-weight: 800; color: var(--admin-warning); line-height: 1;">0
-                    </div>
-                </div>
-                <div class="glass-panel stat-card" style="--accent: var(--admin-error);">
-                    <div
-                        style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">
-                        Pending</div>
-                    <div id="stat-pending"
-                        style="font-size: 2.5rem; font-weight: 800; color: var(--admin-error); line-height: 1;">0</div>
-                </div>
-            </div>
+    <div class="container admin-grid">
 
-            <div class="glass-panel animate-fade-in" style="border-bottom: 1px solid var(--glass-border);">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-                    <div
-                        style="width: 4px; height: 24px; background: var(--admin-secondary); border-radius: 10px; box-shadow: 0 0 10px var(--admin-secondary);">
-                    </div>
-                    <h2 style="font-size: 1.5rem; font-weight: 800;">Pendaftaran <span
-                            class="text-gradient">Terkini</span></h2>
-                </div>
+        <!-- Input Section -->
+        <div>
+            <div class="glass-panel animate-fade-in" style="padding: 2rem;">
+                <h2
+                    style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
+                    <span>
+                        <i class="ri-file-add-line" style="color: var(--secondary);"></i>
+                        Input Data Ikan
+                    </span>
+                    <button onclick="window.debugFetch()"
+                        style="font-size: 0.8rem; padding: 4px 8px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer;">
+                        Debug: Cek Data
+                    </button>
+                </h2>
 
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>No. Entri</th>
-                                <th>Nama Peserta</th>
-                                <th>Tim</th>
-                                <th>Event</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pendingTableBody">
-                            <!-- Injected by JS -->
-                        </tbody>
-                    </table>
-                </div>
+                <form id="fishForm">
+                    <input type="hidden" id="editId">
+                    <div class="input-group">
+                        <label class="input-label">Spesies Ikan</label>
+                        <input type="text" id="species" class="glass-input" placeholder="Contoh: Tuna Bluefin" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Asal (Origin)</label>
+                        <input type="text" id="origin" class="glass-input" placeholder="Contoh: Maluku, Indonesia"
+                            required>
+                    </div>
+
+                    <div class="input-group" id="hatchDateContainer">
+                        <label class="input-label">Tanggal Menetas</label>
+                        <input type="date" id="catchDate" class="glass-input" required>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="input-group">
+                            <label class="input-label">Berat (kg)</label>
+                            <input type="number" step="0.1" id="weight" class="glass-input" placeholder="0.0" required>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Metode</label>
+                            <select id="method" class="glass-input" style="background-color: #0a0e17;">
+                                <option>Ternak sendiri</option>
+                                <option>Import dari luar negri</option>
+                                <option>Import dari luar pulau</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+
+                    <div class="input-group" id="importDateContainer" style="display: none; margin-top: 1rem;">
+                        <label class="input-label">Negara Asal Import</label>
+                        <input type="text" id="importDate" class="glass-input" placeholder="Contoh: Thailand">
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                        <i class="ri-qr-code-line" style="margin-right: 8px;"></i>
+                        Generate ID & Simpan
+                    </button>
+                </form>
             </div>
         </div>
 
-        <!-- Section: Fish Data -->
-        <div id="section-fish" class="admin-section">
-            <div class="admin-grid">
-                <div>
-                    <div class="glass-panel animate-fade-in">
-                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                            <div
-                                style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px; box-shadow: 0 0 10px var(--admin-primary);">
-                            </div>
-                            <h2 style="font-size: 1.5rem; font-weight: 800;">Input Data <span
-                                    class="text-gradient">Ikan</span></h2>
-                        </div>
-                        <form id="fishForm">
-                            <input type="hidden" id="editId">
-                            <div class="input-group">
-                                <label class="input-label">Spesies Ikan</label>
-                                <input type="text" id="species" class="glass-input" placeholder="Contoh: Tuna Bluefin"
-                                    required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Asal (Origin)</label>
-                                <input type="text" id="origin" class="glass-input"
-                                    placeholder="Contoh: Maluku, Indonesia" required>
-                            </div>
-                            <div class="input-group" id="hatchDateContainer">
-                                <label class="input-label">Tanggal Menetas</label>
-                                <input type="date" id="catchDate" class="glass-input">
-                            </div>
-                            <div class="input-group" id="importDateContainer" style="display: none;">
-                                <label class="input-label">Tanggal Import / Karantina</label>
-                                <input type="text" id="importDate" class="glass-input"
-                                    placeholder="Contoh: 12 Jan 2024">
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <div class="input-group">
-                                    <label class="input-label">Berat (kg)</label>
-                                    <input type="number" step="0.1" id="weight" class="glass-input" placeholder="0.0"
-                                        required>
-                                </div>
-                                <div class="input-group">
-                                    <label class="input-label">Metode</label>
-                                    <select id="method" class="glass-input" style="background-color: #0f172a;">
-                                        <option>Ternak sendiri</option>
-                                        <option>Import dari luar negri</option>
-                                        <option>Import dari luar pulau</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-                                <i class="ri-save-3-line" style="margin-right: 8px;"></i> Simpan Data Ikan
-                            </button>
-                        </form>
+        <!-- History/Preview Section -->
+        <div>
+            <div class="glass-panel animate-fade-in" style="padding: 2rem; height: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ri-history-line" style="color: var(--primary);"></i>
+                        Riwayat
+                    </div>
+                    <div class="input-group" style="margin-bottom: 0; width: 60%; position: relative;">
+                        <input type="text" id="searchInput" class="glass-input" placeholder="Cari..."
+                            style="padding: 0.5rem 1rem; padding-right: 2rem; border-color: var(--primary); font-size: 0.9rem;">
+                        <i class="ri-close-line" id="clearSearchBtn"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted); display: none;"></i>
                     </div>
                 </div>
 
-                <div>
-                    <div class="glass-panel animate-fade-in" style="height: 100%;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <div
-                                    style="width: 4px; height: 24px; background: var(--admin-secondary); border-radius: 10px;">
-                                </div>
-                                <h2 style="font-size: 1.5rem; font-weight: 800;">Riwayat <span
-                                        class="text-gradient">Data</span></h2>
-                            </div>
-                            <input type="text" id="searchInput" class="glass-input" placeholder="Cari ikan..."
-                                style="width: 180px; padding: 0.5rem 1rem; margin-bottom: 0;">
-                        </div>
-                        <div id="historyList" style="max-height: 600px; overflow-y: auto;">
-                            <!-- Injected by JS -->
-                        </div>
+                <div id="historyList" style="max-height: 500px; overflow-y: auto; padding-right: 0.5rem;">
+                    <!-- Items will be injected here by JS -->
+                    <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        Belum ada data yang diinput hari ini.
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Section: Events Management -->
-        <div id="section-events" class="admin-section">
-            <div class="admin-grid">
-                <div>
-                    <div class="glass-panel animate-fade-in">
-                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                            <div
-                                style="width: 4px; height: 24px; background: var(--admin-warning); border-radius: 10px;">
-                            </div>
-                            <h2 style="font-size: 1.5rem; font-weight: 800;">Kelola <span
-                                    class="text-gradient">Event</span></h2>
-                        </div>
-                        <form id="eventForm">
-                            <input type="hidden" id="eventId">
-                            <div class="input-group">
-                                <label class="input-label">Judul Event</label>
-                                <input type="text" id="eventTitle" class="glass-input" placeholder="Nama kontes..."
-                                    required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Lokasi</label>
-                                <input type="text" id="eventLocation" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Tanggal Pelaksanaan</label>
-                                <input type="date" id="eventDate" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">URL Banner</label>
-                                <input type="url" id="eventImage" class="glass-input" placeholder="https://..."
-                                    required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Deskripsi</label>
-                                <textarea id="eventDesc" class="glass-input" style="height: 100px; resize: none;"
-                                    required></textarea>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Status</label>
-                                <select id="eventStatus" class="glass-input" style="background-color: #0f172a;">
-                                    <option value="upcoming">Upcoming (Segera)</option>
-                                    <option value="active">Active (Berlangsung)</option>
-                                    <option value="past">Past (Selesai)</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Simpan
-                                Event</button>
-                        </form>
-                    </div>
-                </div>
-                <div>
-                    <div class="glass-panel animate-fade-in">
-                        <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Daftar Event</h2>
-                        <div id="eventList" style="max-height: 600px; overflow-y: auto;">
-                            <!-- Injected by JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="section-registrations" class="admin-section">
-            <div class="glass-panel animate-fade-in">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                    <div
-                        style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px; box-shadow: 0 0 10px var(--admin-primary);">
-                    </div>
-                    <h2 style="font-size: 1.5rem; font-weight: 800;">Manajemen <span
-                            class="text-gradient">Pendaftaran</span></h2>
-                </div>
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>No. Entri</th>
-                                <th>Nama Peserta</th>
-                                <th>Tim</th>
-                                <th>Event</th>
-                                <th>Payment</th>
-                                <th>Skor Juri</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="regTableBody">
-                            <!-- Injected by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section: Judges Management -->
-        <div id="section-judges" class="admin-section">
-            <div class="admin-grid">
-                <div>
-                    <div class="glass-panel animate-fade-in">
-                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                            <div
-                                style="width: 4px; height: 24px; background: var(--admin-secondary); border-radius: 10px;">
-                            </div>
-                            <h2 style="font-size: 1.5rem; font-weight: 800;">Akun <span class="text-gradient">Juri
-                                    Baru</span></h2>
-                        </div>
-                        <form id="judgeForm">
-                            <div class="input-group">
-                                <label class="input-label">Nama Lengkap</label>
-                                <input type="text" id="judgeFullName" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Username</label>
-                                <input type="text" id="judgeUsername" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Password</label>
-                                <input type="password" id="judgePassword" class="glass-input" required>
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">WhatsApp</label>
-                                <input type="tel" id="judgePhone" class="glass-input" placeholder="08..." required>
-                            </div>
-                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Buat Akun
-                                Juri</button>
-                        </form>
-                    </div>
-                </div>
-                <div>
-                    <div class="glass-panel animate-fade-in">
-                        <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Active Judges</h2>
-                        <div id="judgeList" style="max-height: 500px; overflow-y: auto;">
-                            <!-- Injected by JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section: Users Management -->
-        <div id="section-users" class="admin-section">
-            <div class="glass-panel animate-fade-in">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                    <div style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px;">
-                    </div>
-                    <h2 style="font-size: 1.5rem; font-weight: 800;">Kelola <span class="text-gradient">Users</span>
-                    </h2>
-                </div>
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Password (Hash)</th>
-                                <th>Nama Lengkap</th>
-                                <th>WhatsApp</th>
-                                <th>Role</th>
-                                <th>Joined</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTableBody">
-                            <!-- Injected by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <script src="js/app.js"></script>
-    <script>
-        let allEvents = [];
-        let allJudges = [];
-
-        const escapeHTML = (str) => {
-            if (!str) return '';
-            return str.toString()
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchStats();
-            initAdmin(); // Existing logic from app.js if any
-            fetchJudges();
-        });
-
-        function switchTab(tab) {
-            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`section-${tab}`).classList.add('active');
-
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            tabButtons.forEach(btn => {
-                if (btn.getAttribute('onclick').includes(`'${tab}'`)) btn.classList.add('active');
-            });
-
-            if (tab === 'overview') fetchStats();
-            if (tab === 'users') fetchUsers();
-            if (tab === 'events') fetchEvents();
-            if (tab === 'registrations') fetchRegistrations();
-            if (tab === 'judges') fetchJudges();
-        }
-
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('.navbar-admin');
-            if (window.scrollY > 20) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-        });
-
-        function toggleMenu() {
-            const navOverlay = document.getElementById('navOverlay');
-            const navBackdrop = document.getElementById('navBackdrop');
-            navOverlay.classList.toggle('active');
-            navBackdrop.classList.toggle('active');
-        }
-
-        async function fetchDashboardStats() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch('/api/admin/stats?t=' + Date.now(), {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    const s = data.data;
-                    document.getElementById('stat-users').innerText = s.users;
-                    document.getElementById('stat-judges').innerText = s.judges || 0;
-                    document.getElementById('stat-events').innerText = s.events;
-                    document.getElementById('stat-pending').innerText = s.pending;
-
-                    if (s.recentPending && s.recentPending.length > 0) {
-                        document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
-                            <tr class="animate-fade-in">
-                                <td style="font-family: monospace; font-weight: 800; color: var(--admin-primary);">${escapeHTML(r.entry_number || '-')}</td>
-                                <td style="font-weight: 700;">${escapeHTML(r.user_name)}</td>
-                                <td>${escapeHTML(r.team_name || '-')}</td>
-                                <td style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</td>
-                                <td>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary); background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.2);" title="Approve"><i class="ri-check-double-line"></i></button>
-                                        <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error); background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2);" title="Reject"><i class="ri-close-circle-line"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('');
-                    } else {
-                        document.getElementById('pendingTableBody').innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 4rem; color: var(--text-muted);"><i class="ri-checkbox-circle-line" style="font-size: 2.5rem; display: block; margin-bottom: 1rem; color: var(--admin-secondary);"></i>Semua bersih! Tidak ada pendaftaran pending.</td></tr>`;
-                    }
-                }
-            } catch (err) {
-                console.error('Fetch Stats Error:', err);
-            }
-        }
-
-        async function quickAction(id, status) {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/contest/status`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ id, status })
-                });
-                if (res.ok) {
-                    fetchStats();
-                    if (document.getElementById('section-registrations').classList.contains('active')) {
-                        fetchRegistrations();
-                    }
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function fetchJudges() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch('/api/admin/judges', { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await res.json();
-                if (data.success) {
-                    allJudges = data.data;
-                    const list = document.getElementById('judgeList');
-                    if (allJudges.length === 0) {
-                        list.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada juri terdaftar.</p>`;
-                        return;
-                    }
-                    list.innerHTML = data.data.map(j => `
-                        <div class="glass-panel" style="padding: 1rem; margin-bottom: 1rem; border-left: 3px solid var(--admin-secondary); display: flex; justify-content: space-between; align-items: center; border-radius: 12px;">
-                            <div>
-                                <div style="font-weight: 700; color: white;">${escapeHTML(j.full_name)}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted);">@${escapeHTML(j.username)} • ${escapeHTML(j.phone)}</div>
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <button onclick="deleteJudge(${j.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus Juri"><i class="ri-delete-bin-7-line"></i></button>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (err) {
-                console.error('Fetch Judges Error:', err);
-            }
-        }
-
-        async function deleteJudge(id) {
-            if (!confirm('Hapus akun juri ini?')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch(`/api/admin/judges/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) fetchJudges();
-            } catch (err) { console.error(err); }
-        }
-
-        document.getElementById('judgeForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const token = sessionStorage.getItem('sna_admin_token');
-            const payload = {
-                fullName: document.getElementById('judgeFullName').value,
-                username: document.getElementById('judgeUsername').value,
-                password: document.getElementById('judgePassword').value,
-                phone: document.getElementById('judgePhone').value
-            };
-            const res = await fetch('/api/admin/judges', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                alert('Juri dibuat!');
-                e.target.reset();
-                fetchJudges();
-            } else {
-                const err = await res.json();
-                alert('Gagal: ' + err.error);
-            }
-        });
-
-        async function fetchUsers() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('userTableBody').innerHTML = data.data.map(u => `
-                    <tr>
-                        <td style="font-weight: 600;">${escapeHTML(u.username)}</td>
-                        <td style="font-family: monospace; font-size: 0.7rem; color: var(--text-dim); max-width: 120px; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(u.password)}</td>
-                        <td style="color: var(--admin-primary); font-weight: 700;">${escapeHTML(u.full_name)}</td>
-                        <td>${escapeHTML(u.phone)}</td>
-                        <td><span style="background: rgba(0,212,255,0.1); color: var(--admin-primary); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 800;">${escapeHTML(u.role).toUpperCase()}</span></td>
-                        <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(u.created_at).toLocaleDateString()}</td>
-                        <td>
-                            <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus User"><i class="ri-user-unfollow-line"></i></button>
-                        </td>
-                    </tr>
-                `).join('');
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        async function deleteUser(id) {
-            if (!confirm('Hapus user?')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            const res = await fetch(`/api/admin/users/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) fetchUsers();
-        }
-
-        async function fetchEvents() {
-            try {
-                const res = await fetch('/api/events?t=' + Date.now());
-                const data = await res.json();
-                if (data.success) {
-                    allEvents = data.data;
-                    const list = document.getElementById('eventList');
-                    if (allEvents.length === 0) {
-                        list.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No events.</p>`;
-                        return;
-                    }
-                    list.innerHTML = allEvents.map((ev, index) => `
-                        <div class="glass-panel" style="margin-bottom: 1rem; padding: 1.25rem; display: flex; gap: 1rem; align-items: center; border-left: 4px solid var(--admin-warning); border-radius: 16px;">
-                            <img src="${escapeHTML(ev.image_url) || 'https://via.placeholder.com/60'}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 12px; border: 1px solid var(--glass-border);">
-                            <div style="flex: 1;">
-                                <div style="font-weight: 800; color: white; display: flex; align-items: center; gap: 10px;">
-                                    <span style="background: var(--admin-warning); color: #000; font-size: 0.75rem; padding: 2px 8px; border-radius: 6px; box-shadow: 0 0 10px var(--admin-warning);">${ev.registration_count || 0} Regs</span>
-                                    <span>${escapeHTML(ev.title)}</span>
-                                </div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">${escapeHTML(ev.event_date)} • ${escapeHTML(ev.location)}</div>
-                            </div>
-                            <div style="display: flex; gap: 6px;">
-                                <button onclick="openJudgeAssignment(${ev.id})" class="action-btn" style="color: var(--admin-warning); background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.2);" title="Assign Judge"><i class="ri-user-star-line"></i></button>
-                                <button onclick="editEventByIndex(${index})" class="action-btn" title="Edit"><i class="ri-edit-2-line"></i></button>
-                                <button onclick="deleteEvent(${ev.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus"><i class="ri-delete-bin-line"></i></button>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        async function openJudgeAssignment(eventId) {
-            if (allJudges.length === 0) await fetchJudges();
-            if (allJudges.length === 0) return alert('Buat juri dulu!');
-            const judgeId = prompt(`Pilih ID Juri:\n\n${allJudges.map(j => `${j.id}: ${j.full_name}`).join('\n')}`);
-            if (!judgeId) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            const res = await fetch(`/api/admin/events/${eventId}/assign-judge`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ judgeId })
-            });
-            if (res.ok) alert('Juri ditugaskan!');
-            else alert('Gagal tugaskan juri.');
-        }
-
-        function editEventByIndex(index) {
-            const ev = allEvents[index];
-            if (!ev) return;
-            document.getElementById('eventId').value = ev.id;
-            document.getElementById('eventTitle').value = ev.title;
-            document.getElementById('eventLocation').value = ev.location;
-            document.getElementById('eventDate').value = ev.event_date;
-            document.getElementById('eventImage').value = ev.image_url;
-            document.getElementById('eventDesc').value = ev.description;
-            document.getElementById('eventStatus').value = ev.status;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        document.getElementById('eventForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('eventId').value;
-            const payload = {
-                title: document.getElementById('eventTitle').value,
-                location: document.getElementById('eventLocation').value,
-                eventDate: document.getElementById('eventDate').value,
-                imageUrl: document.getElementById('eventImage').value,
-                description: document.getElementById('eventDesc').value,
-                status: document.getElementById('eventStatus').value
-            };
-            const token = sessionStorage.getItem('sna_admin_token');
-            const method = id ? 'PUT' : 'POST';
-            const url = id ? `/api/admin/events/${id}` : '/api/admin/events';
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                alert('Saved!');
-                e.target.reset();
-                document.getElementById('eventId').value = '';
-                fetchEvents();
-            }
-        });
-
-        async function deleteEvent(id) {
-            if (!confirm('Hapus?')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            const res = await fetch(`/api/admin/events/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) fetchEvents();
-        }
-
-        async function fetchRegistrations() {
-            const token = sessionStorage.getItem('sna_admin_token');
-            try {
-                const res = await fetch('/api/admin/registrations?t=' + Date.now(), {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    const body = document.getElementById('regTableBody');
-                    if (data.data.length === 0) {
-                        body.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 4rem; color: var(--text-muted);">No registrations.</td></tr>`;
-                        return;
-                    }
-                    body.innerHTML = data.data.map(r => {
-                        const score = r.score || 0;
-                        const statusClass = r.status === 'approved' ? 'admin-secondary' : r.status === 'rejected' ? 'admin-error' : 'text-muted';
-                        return `
-                        <tr>
-                            <td style="font-family: monospace; font-weight: 800; color: var(--admin-primary);">${escapeHTML(r.entry_number || '-')}</td>
-                            <td><div style="font-weight: 700;">${escapeHTML(r.user_name)}</div></td>
-                            <td><div style="font-size: 0.85rem; color: var(--text-dim);">${escapeHTML(r.team_name || '-')}</div></td>
-                             <td><div style="font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</div></td>
-                             <td>
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    ${r.payment_proof_url ? `
-                                        <a href="${r.payment_proof_url}" target="_blank" class="action-btn" style="width: auto; height: auto; padding: 4px 10px; font-size: 0.7rem; color: #fff; background: rgba(0,212,255,0.2); border-radius: 6px; text-decoration: none;">
-                                            <i class="ri-file-search-line"></i> BUKTI BAYAR
-                                        </a>
-                                    ` : '<span style="color: var(--text-dim); font-size: 0.7rem;">PROSES/GRATIS</span>'}
-                                    <div style="font-size: 0.8rem; font-weight: 800; color: white;">Rp ${r.payment_amount?.toLocaleString() || 0}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="font-size: 1rem; font-weight: 800; color: var(--admin-secondary);">${score}</div>
-                                <div style="font-size: 0.65rem; color: var(--text-dim);">B:${r.score_body} F:${r.score_form} C:${r.score_color}</div>
-                            </td>
-                            <td>
-                                <span style="background: rgba(255,255,255,0.05); color: var(--${statusClass}); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1);">${escapeHTML(r.status)}</span>
-                            </td>
-                            <td>
-                                <div style="display: flex; gap: 8px;">
-                                    ${r.status === 'pending' ? `
-                                        <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary);" title="Approve"><i class="ri-check-line"></i></button>
-                                        <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error);" title="Reject"><i class="ri-close-line"></i></button>
-                                    ` : `
-                                        <button onclick="quickAction(${r.id}, 'pending')" class="action-btn" style="color: var(--text-dim);" title="Reset"><i class="ri-refresh-line"></i></button>
-                                    `}
-                                    <button onclick="deleteRegistration(${r.id})" class="action-btn" style="color: var(--admin-error);" title="Delete"><i class="ri-delete-bin-4-line"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                        `;
-                    }).join('');
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        async function deleteRegistration(id) {
-            if (!confirm('Delete registration?')) return;
-            const token = sessionStorage.getItem('sna_admin_token');
-            const res = await fetch(`/api/admin/registrations/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) fetchRegistrations();
-        }
-
-    </script>
-    <script src="js/navigation.js"></script>
 </body>
 
 </html>
-```

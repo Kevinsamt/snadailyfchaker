@@ -8,140 +8,19 @@ const rateLimit = require('express-rate-limit');
 const midtransClient = require('midtrans-client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { createClient } = require('@supabase/supabase-js');
-const multer = require('multer');
-const { Readable } = require('stream');
 require('dotenv').config();
 
-// Trigger redeploy to pick up new env vars
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-    if (process.env.NODE_ENV === 'production') {
-        console.error("❌ FATAL: JWT_SECRET IS MISSING IN PRODUCTION!");
-        // We throw an accidental error instead of hard exit to allow middleware to catch it or logs to persist
-    } else {
-        console.warn("⚠️ WARNING: JWT_SECRET missing. Using insecure fallback for local development.");
-    }
-}
-const ACTUAL_SECRET = JWT_SECRET || 'snadaily_dev_insecure_secret';
+const JWT_SECRET = process.env.JWT_SECRET || 'betta_contest_secret_key_2026';
 
 
 const app = express();
 
-
-
-// Supabase Configuration
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-let supabase = null;
-if (SUPABASE_URL && SUPABASE_KEY) {
-    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-} else {
-    console.warn("⚠️ WARNING: Supabase configuration is missing. File uploads will fail.");
-}
-
-// Multer Config (Memory Storage for Serverless)
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+// Midtrans Core Configuration
+const snap = new midtransClient.Snap({
+    isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
+    serverKey: process.env.MIDTRANS_SERVER_KEY,
+    clientKey: process.env.MIDTRANS_CLIENT_KEY
 });
-
-// Helper: Upload Buffer to Supabase
-const uploadToSupabase = async (fileBuffer, fileName, mimeType) => {
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-        throw new Error("Konfigurasi Supabase belum lengkap! Pastikan SUPABASE_URL dan SUPABASE_ANON_KEY sudah diisi di Vercel.");
-    }
-
-    // Sanitize filename: remove special characters that might break S3/Supabase keys
-    const sanitizedName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-    const filePath = `entries/${Date.now()}_${sanitizedName}`;
-
-    try {
-        const { data, error } = await supabase.storage
-            .from('contest-files')
-            .upload(filePath, fileBuffer, {
-                contentType: mimeType,
-                upsert: true
-            });
-
-        if (error) throw error;
-
-        // Get Public URL
-        const { data: { publicUrl } } = supabase.storage
-            .from('contest-files')
-            .getPublicUrl(filePath);
-
-        console.log(`File uploaded to Supabase: ${publicUrl}`);
-        return publicUrl;
-    } catch (err) {
-        console.error('Supabase Storage Error Details:', err.message);
-        throw new Error('Gagal upload ke Supabase Storage: ' + err.message);
-    }
-};
-
-// ADMIN AUTHENTICATION MIDDLEWARE
-const adminAuthMiddleware = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && (authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader);
-
-    if (!token) return res.status(401).json({ error: 'Unauthorized Admin Access (Token missing)' });
-
-    jwt.verify(token, ACTUAL_SECRET, (err, decoded) => {
-        if (err || decoded.role !== 'admin') {
-            return res.status(403).json({ error: 'Forbidden: Invalid or expired admin token' });
-        }
-        req.user = decoded;
-        next();
-    });
-};
-
-// USER AUTHENTICATION MIDDLEWARE
-const userAuthMiddleware = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && (authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader);
-
-    if (!token) return res.status(401).json({ error: 'Sesi habis atau tidak valid. Silakan login kembali.' });
-
-    jwt.verify(token, ACTUAL_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ error: 'Sesi habis atau tidak valid.' });
-        req.user = user;
-        next();
-    });
-};
-
-// Aliases for compatibility
-const authMiddleware = adminAuthMiddleware;
-
-// Diagnostic: Check Supabase Connection
-app.get('/api/admin/debug-supabase', adminAuthMiddleware, async (req, res) => {
-    try {
-        const { data, error } = await supabase.storage.listBuckets();
-        if (error) throw error;
-
-        res.json({
-            success: true,
-            message: "Koneksi Supabase OKE!",
-            buckets: data.map(b => b.name),
-            config: {
-                hasUrl: !!SUPABASE_URL,
-                hasKey: !!SUPABASE_KEY
-            }
-        });
-    } catch (err) {
-        console.error('Debug Supabase Error:', err.message);
-        res.status(500).json({
-            success: false,
-            error: "Gagal koneksi ke Supabase API",
-            details: err.message,
-            diagnostics: {
-                hasUrl: !!SUPABASE_URL,
-                hasKey: !!SUPABASE_KEY
-            }
-        });
-    }
-});
-
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -157,84 +36,40 @@ const loginLimiter = rateLimit({
     message: { error: "Terlalu banyak mencoba login. Silakan tunggu 15 menit." }
 });
 
-// General API Rate Limiting (Stricter for Production)
+// General API Rate Limiting
 const apiLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: 30, // Reduced from 60 for better protection
-    message: { error: "Terlalu banyak permintaan. Silakan tunggu 1 menit." }
+    max: 60, // Limit each IP to 60 requests per minute
+    message: { error: "Terlalu banyak permintaan. Silakan tunggu sebentar." }
 });
 
-// Helper for Secure Error Responses (No info leakage)
-const sendSecureError = (res, status, userMsg, internalLog) => {
-    if (internalLog) console.error("[Security Log]:", internalLog);
-
-    // In production, we never leak internal errors to the client
-    res.status(status).json({
-        success: false,
-        error: userMsg || "Terjadi kesalahan internal pada sistem.",
-        timestamp: new Date().toISOString()
-    });
-};
-
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
+const allowedOrigins = [
     'https://snadailyfchaker.vercel.app',
     'https://snadigitaltech.com',
+    'https://www.snadigital.shop',
     'https://snadigital.shop',
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5500',
-    'http://localhost:8080',
-    'http://127.0.0.1:5500'
+    'http://localhost:3000'
 ];
 
 app.use(cors({
     origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl)
         if (!origin) return callback(null, true);
 
-        const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1');
-        const isAllowed = allowedOrigins.some(o => {
-            const cleanAllowed = o.trim().replace('https://', '').replace('http://', '');
-            const cleanOrigin = origin.replace('https://', '').replace('http://', '');
-            return cleanOrigin === cleanAllowed || cleanOrigin.endsWith('.' + cleanAllowed);
-        });
+        const isVercel = origin.endsWith('.vercel.app');
+        const isSna = origin.endsWith('snadigitaltech.com') || origin.endsWith('snadigital.shop');
+        const isLocal = origin.includes('localhost');
 
-        if (isLocal || isAllowed) {
+        if (isVercel || isSna || isLocal || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            console.warn("[Security Alert]: CORS blocked for origin:", origin);
-            callback(new Error('Akses ditolak oleh Firewall Keamanan (CORS). Silakan hubungi admin.'));
+            console.error("Blocked by CORS:", origin);
+            callback(new Error('Not allowed by CORS Security Firewall'));
         }
     }
 }));
 
-const sanitizeInput = (req, res, next) => {
-    const sanitize = (val) => {
-        if (typeof val !== 'string') return val;
-        // Advanced XSS prevention: remove tags and common attack patterns
-        return val
-            .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "") // Remove scripts
-            .replace(/<[^>]+>/g, "") // Remove all HTML tags
-            .replace(/javascript:/gi, "[blocked]")
-            .replace(/on\w+=/gi, "[blocked]")
-            .replace(/expression\(/gi, "[blocked]")
-            .trim();
-    };
-
-    if (req.body) {
-        for (let key in req.body) {
-            req.body[key] = sanitize(req.body[key]);
-        }
-    }
-    if (req.query) {
-        for (let key in req.query) {
-            req.query[key] = sanitize(req.query[key]);
-        }
-    }
-    next();
-};
-
 app.use(bodyParser.json());
-app.use(sanitizeInput);
 app.use('/api/login', loginLimiter);
 app.use('/api/', apiLimiter);
 
@@ -244,7 +79,7 @@ const KOMERCE_API_DELIVERY = process.env.KOMERCE_API_KEY_DELIVERY;
 const KOMERCE_ORIGIN_ID = process.env.KOMERCE_ORIGIN_ID || '1553'; // Kutalimbaru, Deli Serdang
 
 console.log("--- Shipping System Init ---");
-console.log("KOMERCE_API_KEY_COST:", KOMERCE_API_COST ? "LOADED" : "MISSING");
+console.log("KOMERCE_API_KEY_COST:", KOMERCE_API_COST ? "LOADED (Starts with " + KOMERCE_API_COST.substring(0, 4) + "...)" : "MISSING");
 console.log("KOMERCE_API_KEY_DELIVERY:", KOMERCE_API_DELIVERY ? "LOADED" : "MISSING");
 console.log("KOMERCE_ORIGIN_ID:", KOMERCE_ORIGIN_ID);
 console.log("----------------------------");
@@ -371,8 +206,6 @@ const pool = new Pool({
     }
 });
 
-// Initialize and Migrate Database (Triggered at the bottom for safety)
-
 // Initialize Table
 async function initDb() {
     try {
@@ -387,17 +220,6 @@ async function initDb() {
             timestamp TEXT
         )`);
 
-        // Products Table
-        await pool.query(`CREATE TABLE IF NOT EXISTS products (
-            id SERIAL PRIMARY KEY,
-            name TEXT,
-            price REAL,
-            image TEXT,
-            description TEXT,
-            category TEXT,
-            stock INTEGER DEFAULT 10
-        )`);
-
         // Users Table for Contest
         await pool.query(`CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -409,7 +231,7 @@ async function initDb() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Contest Registrations Table (Updated with Team, WA, Address, Video)
+        // Contest Registrations Table
         await pool.query(`CREATE TABLE IF NOT EXISTS contest_registrations (
             id SERIAL PRIMARY KEY,
             user_id INTEGER REFERENCES users(id),
@@ -417,96 +239,9 @@ async function initDb() {
             fish_name TEXT,
             fish_type TEXT,
             fish_image_url TEXT,
-            team_name TEXT,
-            wa_number TEXT,
-            full_address TEXT,
-            video_url TEXT,
-            contest_class TEXT,
-            registration_tier TEXT,
-            payment_amount INTEGER,
-            spin_prize TEXT,
             status TEXT DEFAULT 'pending',
-            score INTEGER,
-            score_body INTEGER DEFAULT 0,
-            score_form INTEGER DEFAULT 0,
-            score_color INTEGER DEFAULT 0,
-            judge_comment TEXT,
-            judged_by INTEGER REFERENCES users(id),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-
-        // Migration: Add columns if table already exists (for existing devs)
-        try {
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS team_name TEXT");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS wa_number TEXT");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS full_address TEXT");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS video_url TEXT");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS contest_class TEXT");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS registration_tier TEXT");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS payment_amount INTEGER");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS spin_prize TEXT");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_body INTEGER DEFAULT 0");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_form INTEGER DEFAULT 0");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_color INTEGER DEFAULT 0");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS has_spun BOOLEAN DEFAULT FALSE");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS prize_redeemed BOOLEAN DEFAULT FALSE");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS payment_proof_url TEXT");
-            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS entry_number TEXT");
-
-            // One-time migration for existing entries without numbers
-            const entriesWithoutNumbers = await pool.query("SELECT id, contest_name, contest_class FROM contest_registrations WHERE entry_number IS NULL ORDER BY created_at ASC");
-            for (const row of entriesWithoutNumbers.rows) {
-                const classCode = (row.contest_class || 'A1').toUpperCase();
-                const prefix = classCode.charAt(0);
-
-                const countResult = await pool.query(
-                    "SELECT COUNT(*) FROM contest_registrations WHERE contest_name = $1 AND contest_class = $2 AND entry_number IS NOT NULL",
-                    [row.contest_name, row.contest_class]
-                );
-                const nextNum = parseInt(countResult.rows[0].count) + 1;
-                const entryNum = `${prefix}-${classCode}-${nextNum.toString().padStart(4, '0')}`;
-
-                await pool.query("UPDATE contest_registrations SET entry_number = $1 WHERE id = $2", [entryNum, row.id]);
-            }
-        } catch (migErr) {
-            console.log("Migration columns check done.");
-        }
-
-        // Events Table
-        await pool.query(`CREATE TABLE IF NOT EXISTS events (
-            id SERIAL PRIMARY KEY,
-            title TEXT,
-            description TEXT,
-            image_url TEXT,
-            location TEXT,
-            event_date TEXT,
-            status TEXT DEFAULT 'upcoming',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`);
-
-        // Event Judges Assignment Table
-        await pool.query(`CREATE TABLE IF NOT EXISTS event_judges (
-            id SERIAL PRIMARY KEY,
-            event_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
-            judge_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-            UNIQUE(event_id, judge_id)
-        )`);
-
-        // Seed initial event if empty
-        const eventCount = await pool.query('SELECT COUNT(*) FROM events');
-        if (parseInt(eventCount.rows[0].count) === 0) {
-            await pool.query(
-                "INSERT INTO events (title, description, image_url, location, event_date, status) VALUES ($1, $2, $3, $4, $5, $6)",
-                [
-                    'Sumatera Betta Championship',
-                    'Kontest cupang skala nasional dengan juri internasional. Terbuka untuk kategori Halfmoon, Plakat, dan Crowntail.',
-                    'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?q=80&w=1412&auto=format&fit=crop',
-                    'Medan Mall',
-                    '2026-02-15',
-                    'active'
-                ]
-            );
-        }
 
         // Seed products if empty or contains old seafood data
         try {
@@ -540,37 +275,28 @@ async function initDb() {
     }
 }
 
-// ADMIN LOGIN ROUTE (Secure JWT-based)
-app.post('/api/admin/login', loginLimiter, async (req, res) => {
+// ADMIN LOGIN ROUTE
+app.post('/api/admin/login', loginLimiter, (req, res) => {
     const { username, password } = req.body;
+    const VALID_USER = 'bettatumedan';
+    const VALID_PASS = 'snadailybetta';
 
-    // Get from process.env with fallbacks for development only if absolutely necessary
-    const ADMIN_USER = process.env.ADMIN_USER || 'bettatumedan';
-    const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'snadailybetta';
-
-    // SECURITY: Warn if default credentials used in production (but allow for now)
-    if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_USER || !process.env.ADMIN_PASSWORD)) {
-        console.warn("⚠️ SECURITY WARNING: Using default admin credentials in production. Please set ADMIN_USER and ADMIN_PASSWORD in environment variables!");
-    }
-
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
-        const token = jwt.sign(
-            { username: ADMIN_USER, role: 'admin' },
-            ACTUAL_SECRET,
-            { expiresIn: '12h' }
-        );
-
-        res.json({
-            success: true,
-            token: token,
-            role: 'admin'
-        });
+    if (username === VALID_USER && password === VALID_PASS) {
+        res.json({ success: true, token: 'secure_server_token_' + Date.now() });
     } else {
-        res.status(401).json({ success: false, message: 'Invalid Admin Credentials' });
+        res.status(401).json({ success: false, message: 'Invalid Credentials' });
     }
 });
 
-
+// Admin Authentication Middleware (Keep existing)
+const adminAuthMiddleware = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('secure_server_token_')) {
+        next();
+    } else {
+        res.status(403).json({ error: 'Access denied. Admin login required.' });
+    }
+};
 
 // USER AUTHENTICATION & CONTEST ROUTES
 
@@ -578,16 +304,8 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, password, fullName, phone } = req.body;
-
-        // SECURITY: Password Strength Validation
-        if (!password || password.length < 8) {
-            return res.status(400).json({ error: 'Password minimal 8 karakter!' });
-        }
-        if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-            return res.status(400).json({ error: 'Password harus mengandung huruf dan angka!' });
-        }
-
         const hashedPassword = await bcrypt.hash(password, 10);
+
         const result = await pool.query(
             'INSERT INTO users (username, password, full_name, phone) VALUES ($1, $2, $3, $4) RETURNING id, username, full_name',
             [username, hashedPassword, fullName, phone]
@@ -596,262 +314,73 @@ app.post('/api/auth/register', async (req, res) => {
         res.json({ success: true, data: result.rows[0] });
     } catch (err) {
         if (err.code === '23505') {
-            return res.status(400).json({ error: 'Username sudah digunakan.' });
+            return res.status(400).json({ error: 'Username sudah digunakan' });
         }
-        sendSecureError(res, 500, "Gagal mendaftarkan akun.", err.message);
+        res.status(400).json({ error: err.message });
     }
 });
 
-// User Login (Standard User)
+// User Login
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        const result = await pool.query(
-            'SELECT id, username, password, full_name, role FROM users WHERE username = $1',
-            [username]
-        );
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
 
         if (result.rows.length === 0) {
-            return res.status(401).json({ error: 'Username atau password salah!' });
+            return res.status(401).json({ error: 'Username atau password salah' });
         }
 
         const user = result.rows[0];
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(401).json({ error: 'Username atau password salah!' });
+            return res.status(401).json({ error: 'Username atau password salah' });
         }
 
         const token = jwt.sign(
             { id: user.id, username: user.username, role: user.role },
-            ACTUAL_SECRET,
+            JWT_SECRET,
             { expiresIn: '24h' }
         );
 
         res.json({
             success: true,
             token,
-            role: user.role,
-            user: {
-                username: user.username,
-                fullName: user.full_name
-            }
+            user: { id: user.id, username: user.username, fullName: user.full_name }
         });
     } catch (err) {
-        sendSecureError(res, 500, "Gagal memproses login.", err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 
-// Alias for backwards compatibility (Optional but helpful during transition)
-app.post('/api/login', (req, res) => {
-    // Check if it's admin or user based on request body (old behavior)
-    // For now, redirect to /api/auth/login as default
-    res.status(307).redirect('/api/auth/login');
-});
+// User Authentication Middleware (JWT)
+const userAuthMiddleware = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-app.post('/api/register', (req, res) => {
-    res.status(307).redirect('/api/auth/register');
-});
+    if (!token) return res.status(401).json({ error: 'Token missing' });
 
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: 'Invalid or expired token' });
+        req.user = user;
+        next();
+    });
+};
 
-// Contest Registration (Now with File Upload)
-app.post('/api/contest/register', userAuthMiddleware, upload.fields([
-    { name: 'fishPhoto', maxCount: 1 },
-    { name: 'fishVideo', maxCount: 1 },
-    { name: 'paymentProof', maxCount: 1 }
-]), async (req, res) => {
+// Contest Registration
+app.post('/api/contest/register', userAuthMiddleware, async (req, res) => {
     try {
+        const { contestName, fishName, fishType, fishImageUrl } = req.body;
         const userId = req.user.id;
-        const {
-            contestName,
-            fishName,
-            fishType = 'N/A',
-            teamName = null,
-            waNumber = null,
-            fullAddress = null,
-            contestClass = null,
-            registrationTier = null,
-            spinPrize = null
-        } = req.body;
-
-        // --- Server-side Tier Deadline Validation ---
-        const now = new Date();
-        const tierDeadlines = {
-            'Early': new Date("2026-03-16T00:00:00"),
-            'Mid': new Date("2026-03-26T00:00:00"),
-            'Last': new Date("2026-04-05T00:00:00"),
-            'Diamond': new Date("2026-04-05T00:00:00")
-        };
-        const tierStarts = {
-            'Mid': new Date("2026-03-16T00:00:00"),
-            'Last': new Date("2026-03-26T00:00:00")
-        };
-
-        if (tierDeadlines[registrationTier] && now >= tierDeadlines[registrationTier]) {
-            return res.status(403).json({ error: `Pendaftaran tier ${registrationTier} sudah berakhir.` });
-        }
-        if (tierStarts[registrationTier] && now < tierStarts[registrationTier]) {
-            return res.status(403).json({ error: `Pendaftaran tier ${registrationTier} belum dibuka.` });
-        }
-        // Ensure numeric amount
-        const paymentAmount = req.body.paymentAmount ? parseInt(req.body.paymentAmount) : 0;
-
-
-        let photoUrl = null;
-        let videoUrl = null;
-        let proofUrl = null;
-
-        // Upload Photo to Supabase with MIME check
-        if (req.files && req.files.fishPhoto) {
-            const photo = req.files.fishPhoto[0];
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-            if (!allowedTypes.includes(photo.mimetype)) {
-                return res.status(400).json({ success: false, error: "Format foto tidak didukung. Gunakan JPG/PNG/WebP." });
-            }
-            photoUrl = await uploadToSupabase(photo.buffer, photo.originalname, photo.mimetype);
-        }
-
-        // Upload Video to Supabase with MIME check
-        if (req.files && req.files.fishVideo) {
-            const video = req.files.fishVideo[0];
-            const allowedTypes = ['video/mp4', 'video/quicktime', 'video/webm'];
-            if (!allowedTypes.includes(video.mimetype)) {
-                return res.status(400).json({ success: false, error: "Format video tidak didukung. Gunakan MP4/MOV/WebM." });
-            }
-            videoUrl = await uploadToSupabase(video.buffer, video.originalname, video.mimetype);
-        }
-
-        // Upload Payment Proof
-        if (req.files && req.files.paymentProof) {
-            const proof = req.files.paymentProof[0];
-            proofUrl = await uploadToSupabase(proof.buffer, proof.originalname, proof.mimetype);
-        }
-
-
-        // Generate Entry Number (Format: A-A1-0001)
-        const classCode = (contestClass || 'A1').toUpperCase();
-        const prefix = classCode.charAt(0); // A, B, or C
-
-        const countResult = await pool.query(
-            "SELECT COUNT(*) FROM contest_registrations WHERE contest_name = $1 AND contest_class = $2",
-            [contestName, contestClass]
-        );
-        const nextNum = parseInt(countResult.rows[0].count) + 1;
-        const entryNumber = `${prefix}-${classCode}-${nextNum.toString().padStart(4, '0')}`;
 
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url, entry_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
-            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl, entryNumber]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [userId, contestName, fishName, fishType, fishImageUrl]
         );
 
         res.json({ success: true, data: result.rows[0] });
     } catch (err) {
-        console.error("Registration Error (Serving Mock Success):", err.message);
-        // MOCK: Simulate a successful registration for demo purposes
-        const { contestName, fishName, fishType, contestClass, registrationTier } = req.body;
-        const mockEntryNumber = `${(contestClass || 'A1').charAt(0)}-${(contestClass || 'A1').toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-        return res.json({
-            success: true,
-            message: "Pendaftaran berhasil! (Demo Mode - Data akan diproses setelah database aktif)",
-            data: {
-                id: Math.floor(Math.random() * 10000),
-                contest_name: contestName,
-                fish_name: fishName,
-                fish_type: fishType || 'N/A',
-                contest_class: contestClass,
-                registration_tier: registrationTier,
-                entry_number: mockEntryNumber,
-                status: 'pending',
-                created_at: new Date().toISOString()
-            }
-        });
-    }
-});
-
-// --- SECURE SPIN WHEEL LOGIC (SERVER-SIDE) ---
-const SPIN_PRIZES = ["PINK AURORA", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis"];
-
-app.post('/api/contest/start-spin/:id', userAuthMiddleware, async (req, res) => {
-    try {
-        const registrationId = req.params.id;
-        const userId = req.user.id;
-
-        // 1. Verify eligibility
-        const check = await pool.query(
-            "SELECT status, registration_tier, has_spun, spin_prize FROM contest_registrations WHERE id = $1 AND user_id = $2",
-            [registrationId, userId]
-        );
-
-        if (check.rows.length === 0) {
-            return res.status(404).json({ error: 'Pendaftaran tidak ditemukan.' });
-        }
-
-        const reg = check.rows[0];
-        if (reg.status !== 'approved') {
-            return res.status(403).json({ error: 'Tunggu pendaftaran disetujui admin dulu ya Cak!' });
-        }
-        if (reg.registration_tier !== 'Diamond') {
-            return res.status(403).json({ error: 'Hanya pendaftaran Diamond yang bisa spin.' });
-        }
-        if (reg.has_spun) {
-            return res.status(403).json({ error: 'Cak sudah melakukan spin untuk pendaftaran ini.' });
-        }
-
-        // 2. Calculate Prize (Weighted Probability)
-        const rand = Math.random() * 100;
-        let targetPrize = "";
-
-        // Check if user already has PINK AURORA (Global check)
-        const auroraCheck = await pool.query(
-            "SELECT id FROM contest_registrations WHERE user_id = $1 AND spin_prize = 'PINK AURORA'",
-            [userId]
-        );
-        const hasPinkAurora = auroraCheck.rows.length > 0;
-
-        if (rand < 1 && !hasPinkAurora) {
-            targetPrize = "PINK AURORA"; // 1%
-        } else if (rand < 50) {
-            targetPrize = "Ikan Random"; // 49%
-        } else {
-            targetPrize = "+1 Entry Gratis"; // 50%
-        }
-
-        // 3. Save to Database immediately to prevent race conditions
-        await pool.query(
-            "UPDATE contest_registrations SET spin_prize = $1, has_spun = TRUE WHERE id = $2",
-            [targetPrize, registrationId]
-        );
-
-        res.json({
-            success: true,
-            prize: targetPrize,
-            message: "Spin berhasil dihitung!"
-        });
-
-    } catch (err) {
-        console.error("Spin Logic Error:", err);
-        res.status(500).json({ error: "Gagal memproses spin." });
-    }
-});
-
-// Redeem Spin Prize (Mark as Used)
-app.post('/api/contest/registrations/:id/redeem', userAuthMiddleware, async (req, res) => {
-    try {
-        const registrationId = req.params.id;
-
-        // Mark as redeemed
-        const result = await pool.query(
-            "UPDATE contest_registrations SET prize_redeemed = TRUE WHERE id = $1 AND user_id = $2 RETURNING prize_redeemed",
-            [registrationId, req.user.id]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Registrasi tidak ditemukan.' });
-        }
-
-        res.json({ success: true, message: 'Hadiah berhasil ditandai sebagai sudah diklaim.' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(400).json({ error: err.message });
     }
 });
 
@@ -864,543 +393,7 @@ app.get('/api/contest/my-registrations', userAuthMiddleware, async (req, res) =>
         );
         res.json({ success: true, data: result.rows });
     } catch (err) {
-        console.warn("My Registrations DB Failed, serving mock data.");
-        res.json({
-            success: true, data: [
-                {
-                    id: 1,
-                    contest_name: 'Sumatera Betta Championship',
-                    fish_name: 'Super Red 01',
-                    fish_type: 'Halfmoon',
-                    status: 'approved',
-                    fish_image_url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80&w=600',
-                    registration_tier: 'Diamond',
-                    has_spun: false
-                },
-                {
-                    id: 2,
-                    contest_name: 'Jakarta Grand Show',
-                    fish_name: 'Blue Rim 02',
-                    fish_type: 'Plakat',
-                    status: 'pending',
-                    fish_image_url: 'https://images.unsplash.com/photo-1534032049383-a4e99f57245d?auto=format&fit=crop&q=80&w=600',
-                    registration_tier: 'Regular',
-                    has_spun: false
-                }
-            ]
-        });
-    }
-});
-
-// Get User Profile
-app.get('/api/user/profile', userAuthMiddleware, async (req, res) => {
-    try {
-        const result = await pool.query('SELECT username, full_name, phone, role FROM users WHERE id = $1', [req.user.id]);
-        if (result.rows.length > 0) {
-            res.json({ success: true, data: result.rows[0] });
-        } else {
-            res.status(404).json({ error: 'User not found' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Update User Profile
-app.post('/api/user/profile', userAuthMiddleware, async (req, res) => {
-    try {
-        const { fullName, phone } = req.body;
-        const result = await pool.query(
-            'UPDATE users SET full_name = $1, phone = $2 WHERE id = $3 RETURNING username, full_name, phone, role',
-            [fullName, phone, req.user.id]
-        );
-        res.json({ success: true, data: result.rows[0] });
-    } catch (err) {
         res.status(400).json({ error: err.message });
-    }
-});
-
-// --- ADMIN SPECIFIC ROUTES ---
-
-// Create Judge Account
-app.post('/api/admin/judges', adminAuthMiddleware, async (req, res) => {
-    try {
-        const { username, password, fullName, phone } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const result = await pool.query(
-            "INSERT INTO users (username, password, full_name, phone, role) VALUES ($1, $2, $3, $4, 'judge') RETURNING id, username, full_name, role",
-            [username, hashedPassword, fullName, phone]
-        );
-
-        res.json({ success: true, data: result.rows[0] });
-    } catch (err) {
-        if (err.code === '23505') {
-            return res.status(400).json({ error: 'Username sudah digunakan' });
-        }
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Get All Judges
-app.get('/api/admin/judges', adminAuthMiddleware, async (req, res) => {
-    try {
-        const result = await pool.query("SELECT id, username, full_name, phone FROM users WHERE role = 'judge' ORDER BY created_at DESC");
-        res.json({ success: true, data: result.rows });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Assign Judge to Event
-app.post('/api/admin/events/:id/assign-judge', adminAuthMiddleware, async (req, res) => {
-    try {
-        const eventId = req.params.id;
-        const { judgeId } = req.body;
-
-        await pool.query(
-            "INSERT INTO event_judges (event_id, judge_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-            [eventId, judgeId]
-        );
-
-        res.json({ success: true, message: 'Juri berhasil ditugaskan' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Delete Judge Account
-app.delete('/api/admin/judges/:id', adminAuthMiddleware, async (req, res) => {
-    try {
-        const judgeId = req.params.id;
-
-        // Remove assignments first (though ON DELETE CASCADE should handle it, explicit is better if schema is strict)
-        await pool.query("DELETE FROM event_judges WHERE judge_id = $1", [judgeId]);
-
-        // Delete the user
-        const result = await pool.query("DELETE FROM users WHERE id = $1 AND role = 'judge' RETURNING id", [judgeId]);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Juri tidak ditemukan atau bukan role juri' });
-        }
-
-        res.json({ success: true, message: 'Akun juri berhasil dihapus' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// --- JUDGE SPECIFIC ROUTES ---
-
-// Get Assigned Events for Judge
-app.get('/api/judge/events', userAuthMiddleware, async (req, res) => {
-    try {
-        if (req.user.role !== 'judge') return res.status(403).json({ error: 'Judge access required' });
-
-        const result = await pool.query(`
-            SELECT e.* 
-            FROM events e
-            JOIN event_judges ej ON e.id = ej.event_id
-            WHERE ej.judge_id = $1
-            ORDER BY e.event_date ASC
-        `, [req.user.id]);
-
-        res.json({ success: true, data: result.rows });
-    } catch (err) {
-        console.warn("Judge events DB failed, serving mock data.");
-        res.json({
-            success: true, data: [
-                { id: 1, title: 'Sumatera Betta Championship', description: 'Kontest cupang skala nasional', location: 'Medan Mall', event_date: '2026-04-15', status: 'active' }
-            ]
-        });
-    }
-});
-
-// Get Contest Entries for Judging
-app.get('/api/judge/events/:id/entries', userAuthMiddleware, async (req, res) => {
-    try {
-        if (req.user.role !== 'judge') return res.status(403).json({ error: 'Judge access required' });
-
-        const eventId = req.params.id;
-
-        // Security Check: Verify assignment
-        const assignment = await pool.query("SELECT id FROM event_judges WHERE event_id = $1 AND judge_id = $2", [eventId, req.user.id]);
-        if (assignment.rows.length === 0) {
-            return res.status(403).json({ error: 'Anda tidak ditugaskan untuk event ini.' });
-        }
-
-        const result = await pool.query(`
-            SELECT r.*, u.full_name as contestant_name
-            FROM contest_registrations r
-            JOIN users u ON r.user_id = u.id
-            JOIN events e ON r.contest_name = e.title
-            WHERE e.id = $1 AND r.status = 'approved'
-            ORDER BY r.created_at ASC
-        `, [eventId]);
-
-        res.json({ success: true, data: result.rows });
-    } catch (err) {
-        console.warn("Judge entries DB failed, serving mock data.");
-        res.json({
-            success: true, data: [
-                { id: 1, fish_name: 'Super Red 01', fish_type: 'Halfmoon', contestant_name: 'Peserta Demo', fish_image_url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80&w=600', entry_number: 'A-A1-0001', score: null, status: 'approved' }
-            ]
-        });
-    }
-});
-
-// Submit Score for Entry
-app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) => {
-    try {
-        if (req.user.role !== 'judge') return res.status(403).json({ error: 'Judge access required' });
-
-        const entryId = req.params.id;
-        const { score_body, score_form, score_color, comment } = req.body;
-
-        // Security Check: Verify if this judge is assigned to the event of this entry
-        const assignmentCheck = await pool.query(`
-            SELECT ej.id 
-            FROM event_judges ej
-            JOIN events e ON ej.event_id = e.id
-            JOIN contest_registrations r ON e.title = r.contest_name
-            WHERE r.id = $1 AND ej.judge_id = $2
-        `, [entryId, req.user.id]);
-
-        if (assignmentCheck.rows.length === 0) {
-            return res.status(403).json({ error: 'Anda tidak ditugaskan untuk menilai kontes ini.' });
-        }
-
-        // Calculate average score
-        const totalScore = Math.round((parseInt(score_body) + parseInt(score_form) + parseInt(score_color)) / 3);
-
-        await pool.query(
-            "UPDATE contest_registrations SET score = $1, score_body = $2, score_form = $3, score_color = $4, judge_comment = $5, judged_by = $6 WHERE id = $7",
-            [totalScore, score_body, score_form, score_color, comment, req.user.id, entryId]
-        );
-
-        res.json({ success: true, message: 'Penilaian berhasil disimpan.', totalScore });
-    } catch (err) {
-        sendSecureError(res, 500, "Gagal menyimpan penilaian.", err.message);
-    }
-});
-
-// Get Dashboard Stats
-app.get('/api/admin/stats', adminAuthMiddleware, async (req, res) => {
-    try {
-        const usersCount = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'user'");
-        const judgesCount = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'judge'");
-        const eventsCount = await pool.query('SELECT COUNT(*) FROM events');
-        const registrationsCount = await pool.query("SELECT COUNT(*) FROM contest_registrations WHERE status != 'rejected'");
-        const pendingCount = await pool.query("SELECT COUNT(*) FROM contest_registrations WHERE status = 'pending'");
-
-        const pendingList = await pool.query(`
-            SELECT r.*, u.full_name as user_name 
-            FROM contest_registrations r
-            JOIN users u ON r.user_id = u.id
-            WHERE r.status = 'pending'
-            ORDER BY r.created_at DESC
-        `);
-
-        res.json({
-            success: true,
-            data: {
-                users: usersCount.rows[0].count,
-                judges: judgesCount.rows[0].count,
-                events: eventsCount.rows[0].count,
-                registrations: registrationsCount.rows[0].count,
-                pending: pendingCount.rows[0].count,
-                recentPending: pendingList.rows
-            }
-        });
-    } catch (err) {
-        console.warn("Admin Stats DB Failed, serving mock stats.");
-        res.json({
-            success: true,
-            data: {
-                users: 120,
-                judges: 5,
-                events: 2,
-                registrations: 45,
-                pending: 3,
-                recentPending: [
-                    { id: 101, user_name: 'Budi Santoso', fish_name: 'Blue Rim 01', fish_type: 'Plakat', contest_class: 'A1', created_at: new Date().toISOString() },
-                    { id: 102, user_name: 'Siti Aminah', fish_name: 'Red Dragon', fish_type: 'Halfmoon', contest_class: 'B2', created_at: new Date(Date.now() - 86400000).toISOString() }
-                ]
-            }
-        });
-    }
-});
-
-// Update Contest Registration Status (Quick Action)
-app.post('/api/admin/contest/status', adminAuthMiddleware, async (req, res) => {
-    try {
-        const { id, status } = req.body; // status: 'approved' or 'rejected'
-        if (!['approved', 'rejected'].includes(status)) {
-            return res.status(400).json({ error: 'Invalid status' });
-        }
-        await pool.query('UPDATE contest_registrations SET status = $1 WHERE id = $2', [status, id]);
-        res.json({ success: true, message: `Registration ${status}` });
-    } catch (err) {
-        console.warn("Update Status DB Failed. Returning success for demo.");
-        res.json({ success: true, message: `Registration ${req.body.status} (Mock Success)` });
-    }
-});
-
-// List All Registrations
-app.get('/api/admin/registrations', adminAuthMiddleware, async (req, res) => {
-    try {
-        const result = await pool.query(`
-            SELECT r.*, u.full_name as user_name 
-            FROM contest_registrations r
-            JOIN users u ON r.user_id = u.id
-            ORDER BY r.created_at DESC
-        `);
-        res.json({ success: true, data: result.rows });
-    } catch (err) {
-        console.warn("List Registrations DB Failed, serving mock list.");
-        res.json({
-            success: true,
-            data: [
-                { id: 101, user_name: 'Budi Santoso', fish_name: 'Blue Rim 01', fish_type: 'Plakat', contest_class: 'A1', status: 'pending', created_at: new Date().toISOString() },
-                { id: 102, user_name: 'Siti Aminah', fish_name: 'Red Dragon', fish_type: 'Halfmoon', contest_class: 'B2', status: 'approved', created_at: new Date(Date.now() - 86400000).toISOString() },
-                { id: 103, user_name: 'Kevin', fish_name: 'Black Samurai', fish_type: 'Plakat', contest_class: 'A2', status: 'rejected', created_at: new Date(Date.now() - 172800000).toISOString() }
-            ]
-        });
-    }
-});
-
-// Delete Registration
-app.delete('/api/admin/registrations/:id', adminAuthMiddleware, async (req, res) => {
-    try {
-        const id = req.params.id;
-
-        // 1. Get URLs first before deleting record
-        const record = await pool.query('SELECT fish_image_url, video_url FROM contest_registrations WHERE id = $1', [id]);
-
-        if (record.rows.length > 0) {
-            const { fish_image_url, video_url } = record.rows[0];
-            const filesToDelete = [];
-
-            // Helper to extract path from Supabase Public URL
-            // Format: https://.../contest-files/entries/filename
-            const extractPath = (url) => {
-                if (!url) return null;
-                const parts = url.split('contest-files/');
-                return parts.length > 1 ? parts[1] : null;
-            };
-
-            const photoPath = extractPath(fish_image_url);
-            const videoPath = extractPath(video_url);
-
-            if (photoPath) filesToDelete.push(photoPath);
-            if (videoPath) filesToDelete.push(videoPath);
-
-            // 2. Delete from Supabase Storage if files exist
-            if (filesToDelete.length > 0) {
-                const { error: storageError } = await supabase.storage
-                    .from('contest-files')
-                    .remove(filesToDelete);
-
-                if (storageError) {
-                    console.error('Warning: Failed to delete some files from Supabase:', storageError.message);
-                    // We continue with DB deletion even if storage deletion fails
-                } else {
-                    console.log('Successfully deleted related files from Supabase Storage:', filesToDelete);
-                }
-            }
-        }
-
-        // 3. Delete record from database
-        await pool.query('DELETE FROM contest_registrations WHERE id = $1', [id]);
-        res.json({ success: true, message: 'Registration and associated files deleted' });
-    } catch (err) {
-        console.error('Delete Registration Error:', err.message);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// List All Users
-app.get('/api/admin/users', adminAuthMiddleware, async (req, res) => {
-    try {
-        const result = await pool.query('SELECT id, username, password, full_name, phone, role, created_at FROM users ORDER BY created_at DESC');
-        res.json({ success: true, data: result.rows });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Delete User
-app.delete('/api/admin/users/:id', adminAuthMiddleware, async (req, res) => {
-    try {
-        const userId = req.params.id;
-        // Optional: Delete associate registrations first or let DB handle if cascading (though we didn't specify cascade)
-        await pool.query('DELETE FROM contest_registrations WHERE user_id = $1', [userId]);
-        await pool.query('DELETE FROM users WHERE id = $1', [userId]);
-        res.json({ success: true, message: 'User and registrations deleted' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// --- MOCK DATA SYSTEM (FULL FALLBACK) ---
-const MOCK_EVENTS = [
-    {
-        id: 1,
-        title: 'Sumatera Betta Championship',
-        description: 'Kontest cupang skala nasional dengan juri internasional. Terbuka untuk kategori Halfmoon, Plakat, dan Crowntail.',
-        image_url: 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?q=80&w=1412&auto=format&fit=crop',
-        location: 'Medan Mall',
-        event_date: '2026-02-15',
-        status: 'active',
-        registration_count: 12
-    },
-    {
-        id: 2,
-        title: 'Jakarta Grand Show',
-        description: 'Pameran dan kontes ikan hias terbesar di Jakarta. Jangan lewatkan!',
-        image_url: 'https://images.unsplash.com/photo-1534032049383-a4e99f57245d?auto=format&fit=crop&q=80&w=600',
-        location: 'JCC Senayan',
-        event_date: '2026-03-20',
-        status: 'upcoming',
-        registration_count: 5
-    }
-];
-
-const MOCK_PRODUCTS = [
-    { id: 1, name: 'Super Red Betta (Halfmoon)', price: 150000, image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80&w=600', description: 'Ikan cupang Halfmoon warna merah menyala.', category: 'Betta' },
-    { id: 2, name: 'Channa Maru Yellow Sentarum', price: 450000, image: 'https://preview.redd.it/channa-marulioides-yellow-sentarum-v0-ea3u435k3e0d1.jpeg?auto=webp&s=ed73562baea8fa9c6ac92292f76326075908b871', description: 'Channa Maru YS size 20cm, mental preman.', category: 'Channa' },
-    { id: 3, name: 'Goldfish Oranda Panda', price: 85000, image: 'https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?auto=format&fit=crop&q=80&w=600', description: 'Koki Oranda unik.', category: 'Goldfish' }
-];
-
-// --- MOCK IMPLEMENTATION IN ROUTES ---
-
-// Login Endpoint Mock Logic (Intercepts SQL error)
-app.post('/api/auth/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        // Mock User Login
-        if (username === 'user' && password === 'user123') {
-            const token = jwt.sign(
-                { id: 999, username: 'user', role: 'user' },
-                ACTUAL_SECRET,
-                { expiresIn: '24h' }
-            );
-            return res.json({
-                success: true,
-                token,
-                role: 'user',
-                user: { username: 'user', fullName: 'Demo User' }
-            });
-        }
-
-        // Try DB, fallback on error
-        const result = await pool.query(
-            'SELECT id, username, password, full_name, role FROM users WHERE username = $1',
-            [username]
-        );
-        // ... (existing logic) ...
-        if (result.rows.length === 0) return res.status(401).json({ error: 'Username atau password salah!' });
-        const user = result.rows[0];
-        const isMatch = await bcrypt.compare(password, user.password);
-
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Username atau password salah!' });
-        }
-
-        const token = jwt.sign(
-            { id: user.id, username: user.username, role: user.role },
-            ACTUAL_SECRET,
-            { expiresIn: '24h' }
-        );
-
-        res.json({
-            success: true,
-            token,
-            role: user.role,
-            user: {
-                username: user.username,
-                fullName: user.full_name
-            }
-        });
-
-    } catch (err) {
-        console.warn("DB Auth Failed, utilizing fallback logic if applicable or returning error.");
-        if (req.body.username === 'demo') { // Emergency backdoor for demo
-            const token = jwt.sign({ id: 888, username: 'demo', role: 'user' }, ACTUAL_SECRET, { expiresIn: '24h' });
-            return res.json({ success: true, token, role: 'user', user: { username: 'demo', fullName: 'Emergency Demo User' } });
-        }
-        sendSecureError(res, 500, "Gagal memproses login (DB Error). Gunakan user:demo password:any.", err.message);
-    }
-});
-
-// Events Mock Fallback
-app.get('/api/events', async (req, res) => {
-    try {
-        const sql = `
-            SELECT e.*, COUNT(r.id) as registration_count 
-            FROM events e 
-            LEFT JOIN contest_registrations r ON e.title = r.contest_name AND r.status != 'rejected'
-            GROUP BY e.id 
-            ORDER BY e.event_date ASC
-        `;
-        const result = await pool.query(sql);
-        res.json({ success: true, data: result.rows });
-    } catch (err) {
-        console.error("Fetch Events API Error (Serving Mock):", err.message);
-        res.json({ success: true, data: MOCK_EVENTS });
-    }
-});
-
-// Products Mock Fallback
-app.get('/api/products', apiLimiter, async (req, res) => {
-    try {
-        const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
-        res.json({
-            "message": "success",
-            "data": result.rows
-        });
-    } catch (err) {
-        console.error("Fetch Products API Error (Serving Mock):", err.message);
-        res.json({ "message": "success", "data": MOCK_PRODUCTS });
-    }
-});
-
-// Create Event
-app.post('/api/admin/events', adminAuthMiddleware, async (req, res) => {
-    try {
-        const { title, description, imageUrl, location, eventDate, status } = req.body;
-        const result = await pool.query(
-            'INSERT INTO events (title, description, image_url, location, event_date, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [title, description, imageUrl, location, eventDate, status || 'upcoming']
-        );
-        res.json({ success: true, data: result.rows[0] });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Update Event
-app.put('/api/admin/events/:id', adminAuthMiddleware, async (req, res) => {
-    try {
-        const { title, description, imageUrl, location, eventDate, status } = req.body;
-        const result = await pool.query(
-            'UPDATE events SET title=$1, description=$2, image_url=$3, location=$4, event_date=$5, status=$6 WHERE id=$7 RETURNING *',
-            [title, description, imageUrl, location, eventDate, status, req.params.id]
-        );
-        res.json({ success: true, data: result.rows[0] });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Delete Event
-app.delete('/api/admin/events/:id', adminAuthMiddleware, async (req, res) => {
-    try {
-        await pool.query('DELETE FROM events WHERE id = $1', [req.params.id]);
-        res.json({ success: true, message: 'Event deleted' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
     }
 });
 
@@ -1434,92 +427,30 @@ app.get('/api/fish', authMiddleware, async (req, res) => {
             "data": result.rows
         });
     } catch (err) {
-        sendSecureError(res, 500, "Gagal mengambil data ikan.", err.message);
+        console.error("GET Error:", err);
+        res.status(400).json({ "error": err.message });
     }
 });
 
 // Get single fish by ID
 app.get('/api/fish/:id', apiLimiter, async (req, res) => {
     try {
-        const id = req.params.id;
-
-        // --- MOCK DATA FALLBACK (For testing without DB) ---
-        const mockData = {
-            'FISH-QQD8RG': {
-                id: "FISH-QQD8RG",
-                species: "HMPK NEMOKOI",
-                origin: "Medan, Indonesia",
-                weight: 0.05,
-                method: "Line Breeding",
-                catchDate: "2025-03-12",
-                importDate: "2025-03-12",
-                timestamp: new Date().toISOString()
-            },
-            'FISH-DO90GA': {
-                id: "FISH-DO90GA",
-                species: "Vail Tail",
-                origin: "Germany",
-                weight: 0.06,
-                method: "Import Quality",
-                catchDate: "2025-03-10",
-                importDate: "2025-03-12",
-                timestamp: new Date().toISOString()
-            },
-            'FISH-D5DSAL': {
-                id: "FISH-D5DSAL",
-                species: "RED DRAGON SNOW",
-                origin: "Medan, Indonesia",
-                weight: 0.04,
-                method: "Local Farm",
-                catchDate: "2026-12-12", // Future date form screenshot? Kept as is.
-                importDate: "2026-12-12",
-                timestamp: new Date().toISOString()
-            },
-            'FISH-UI4I6D': {
-                id: "FISH-UI4I6D",
-                species: "Betta Bluerim",
-                origin: "Medan, Indonesia",
-                weight: 0.05,
-                method: "Import Thailand Line",
-                catchDate: "2025-03-01",
-                importDate: "2025-03-05",
-                timestamp: new Date().toISOString()
-            }
-        };
-
-        if (mockData[id]) {
-            console.log(`Serving Mock Data for ${id}`);
-            return res.json({
-                "success": true,
-                "message": "success",
-                "data": mockData[id]
-            });
-        }
-        // ---------------------------------------------------
-
         const sql = "SELECT * FROM fish WHERE id = $1";
-        const result = await pool.query(sql, [id]);
+        const result = await pool.query(sql, [req.params.id]);
 
         if (result.rows.length === 0) {
-            res.status(404).json({ "error": "Data tidak ditemukan" });
+            res.status(404).json({ "error": "Not found" });
             return;
         }
 
         res.json({
-            "success": true, // FIXED: match frontend
             "message": "success",
             "data": result.rows[0]
         });
     } catch (err) {
-        console.error("API Fish Error:", err.message);
-        // Fallback for demo if DB is down but user wants to see UI
-        if (req.params.id === 'FISH-QQD8RG') {
-            // Should be handled above, but just in case
-        }
-        res.status(400).json({ "error": "Gagal mengambil data: " + err.message });
+        res.status(400).json({ "error": err.message });
     }
 });
-
 
 // Create new fish (ADMIN ONLY)
 app.post('/api/fish', authMiddleware, async (req, res) => {
@@ -1606,8 +537,57 @@ app.get('/api/products', apiLimiter, async (req, res) => {
     }
 });
 
+// Midtrans: Create Transaction Token
+app.post('/api/payment/token', apiLimiter, async (req, res) => {
+    try {
+        const { productName, amount, customer } = req.body;
 
+        if (!process.env.MIDTRANS_SERVER_KEY) {
+            return res.status(500).json({ error: "MIDTRANS_SERVER_KEY belum diatur di environment variables!" });
+        }
 
+        // Basic unique order ID
+        const orderId = `ORDER-${Date.now()}`;
+
+        const parameter = {
+            transaction_details: {
+                order_id: orderId,
+                gross_amount: amount
+            },
+            item_details: [{
+                id: 'PROD-FISH',
+                price: amount,
+                quantity: 1,
+                name: productName
+            }],
+            customer_details: {
+                first_name: customer.name || 'Pelanggan',
+                email: customer.email,
+                phone: customer.phone,
+                billing_address: {
+                    address: customer.address,
+                    phone: customer.phone
+                },
+                shipping_address: {
+                    address: customer.address,
+                    phone: customer.phone
+                }
+            },
+            credit_card: {
+                secure: true
+            }
+        };
+
+        const transaction = await snap.createTransaction(parameter);
+        res.json({
+            token: transaction.token,
+            orderId: orderId
+        });
+    } catch (err) {
+        console.error("Midtrans Error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Global Error Handler (Ensures JSON response instead of HTML)
 app.use((err, req, res, next) => {
