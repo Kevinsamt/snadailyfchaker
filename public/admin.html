@@ -1480,6 +1480,12 @@
                 <div class="glass-panel" style="padding: 12px; display: flex; align-items: center; gap: 12px; border-left: 3px solid ${isGC ? '#FFD700' : isBOD ? '#C0C0C0' : isWinnerClass ? 'var(--admin-secondary)' : 'rgba(255,255,255,0.1)'};">
                     <img src="${entry.fish_image_url}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover;">
                     <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                            <span style="font-family: monospace; font-size: 0.7rem; font-weight: 900; color: var(--admin-primary); background: rgba(0,212,255,0.1); padding: 2px 6px; border-radius: 4px;">${escapeHTML(entry.entry_number || '-')}</span>
+                            ${isGC ? '<span style="color: #FFD700; font-size: 0.75rem;"><i class="ri-vip-crown-fill"></i> GC</span>' : ''}
+                            ${isBOD ? '<span style="color: #C0C0C0; font-size: 0.75rem;"><i class="ri-medal-fill"></i> BOD</span>' : ''}
+                            ${isWinnerClass ? `<span style="color: var(--admin-secondary); font-size: 0.75rem;"><i class="ri-trophy-fill"></i> Juara ${isWinnerClass}</span>` : ''}
+                        </div>
                         <div style="font-size: 0.85rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(entry.fish_name)}</div>
                         <div style="font-size: 0.7rem; color: var(--text-muted);">${escapeHTML(entry.contestant_name)} • Score: <span style="color: var(--admin-secondary); font-weight: 800;">${entry.score || 0}</span></div>
                     </div>
@@ -1595,7 +1601,8 @@
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem;">
                     <i class="ri-trophy-fill" style="color: var(--admin-secondary); font-size: 2rem;"></i>
                     <h3 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; margin: 0;">Championship
-                        <span class="text-gradient">Results</span></h3>
+                        <span class="text-gradient">Results</span>
+                    </h3>
                 </div>
                 <p style="color: var(--text-muted); font-size: 0.95rem;">Kelola pemenang Class, Best of Division, hingga
                     Grand Champion.</p>
