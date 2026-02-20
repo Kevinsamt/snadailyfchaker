@@ -651,9 +651,13 @@
                     alert('Penilaian berhasil disimpan!');
                     fetchEntries();
                     cancelScoring();
+                } else {
+                    const error = await res.json();
+                    alert('Gagal: ' + (error.error || 'Terjadi kesalahan saat menyimpan nilai'));
                 }
             } catch (err) {
-                alert('Gagal menyimpan nilai');
+                console.error(err);
+                alert('Gagal menyimpan nilai. Periksa koneksi internet Anda.');
             }
         });
         // Navbar scroll effect

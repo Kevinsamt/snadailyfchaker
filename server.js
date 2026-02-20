@@ -1041,16 +1041,21 @@ app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) =>
         const entryId = req.params.id;
         const { score_body, score_form, score_color, comment } = req.body;
 
+        console.log(`[Judge Debug] Attempting to save score. EntryID: ${entryId}, JudgeID: ${req.user.id}`);
+
         // Security Check: Verify if this judge is assigned to the event of this entry
         const assignmentCheck = await pool.query(`
-            SELECT ej.id 
+            SELECT ej.id, e.title, r.contest_name
             FROM event_judges ej
             JOIN events e ON ej.event_id = e.id
-            JOIN contest_registrations r ON TRIM(LOWER(e.title)) = TRIM(LOWER(r.contest_name))
+            JOIN contest_registrations r ON (TRIM(LOWER(e.title)) = TRIM(LOWER(r.contest_name)) OR r.contest_name IS NULL)
             WHERE r.id = $1 AND ej.judge_id = $2
         `, [entryId, req.user.id]);
 
+        console.log(`[Judge Debug] Assignment check rows:`, assignmentCheck.rows);
+
         if (assignmentCheck.rows.length === 0) {
+            console.warn(`[Judge Debug] Access DENIED for Judge ${req.user.id} on Entry ${entryId}`);
             return res.status(403).json({ error: 'Anda tidak ditugaskan untuk menilai kontes ini.' });
         }
 
@@ -1062,8 +1067,10 @@ app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) =>
             [totalScore, score_body, score_form, score_color, comment, req.user.id, entryId]
         );
 
+        console.log(`[Judge Debug] Score saved successfully for Entry ${entryId}`);
         res.json({ success: true, message: 'Penilaian berhasil disimpan.', totalScore });
     } catch (err) {
+        console.error(`[Judge Debug] Error saving score:`, err.message);
         sendSecureError(res, 500, "Gagal menyimpan penilaian.", err.message);
     }
 });
