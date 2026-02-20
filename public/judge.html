@@ -211,8 +211,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
             if (userData) {
-                document.getElementById('judgeName').innerText = userData.fullName;
-                document.getElementById('welcomeJudge').innerText = userData.fullName.split(' ')[0];
+                const nameEl = document.getElementById('judgeName');
+                if (nameEl) nameEl.innerText = userData.fullName;
+
+                const welcomeEl = document.getElementById('welcomeJudge');
+                if (welcomeEl) welcomeEl.innerText = userData.fullName.split(' ')[0];
             }
             fetchAssignedEvents();
         });

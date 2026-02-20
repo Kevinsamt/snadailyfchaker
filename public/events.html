@@ -343,6 +343,16 @@
 
     <script src="js/navigation.js"></script>
     <script>
+        const escapeHTML = (str) => {
+            if (!str) return '';
+            return str.toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
 
@@ -500,6 +510,92 @@
             } catch (err) {
                 console.error(`Error fetching logos for event ${eventId}:`, err);
             }
+        }
+
+        async function checkIfWinnersExist(eventId) {
+            try {
+                const res = await fetch(`/api/events/${eventId}/winners`);
+                const data = await res.json();
+                if (data.success && data.data.length > 0) {
+                    const btn = document.getElementById(`winners-btn-container-${eventId}`);
+                    if (btn) btn.style.display = 'block';
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function openWinnersModal(eventId, title) {
+            const modal = document.getElementById('winnersModal');
+            const list = document.getElementById('winnersList');
+            document.getElementById('winnersEventTitle').innerText = title;
+            modal.style.display = 'flex';
+            list.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="ri-loader-4-line ri-spin"></i> Memuat pemenang...</div>';
+
+            try {
+                const res = await fetch(`/api/events/${eventId}/winners`);
+                const data = await res.json();
+                if (data.success) {
+                    renderWinners(data.data);
+                }
+            } catch (err) {
+                list.innerHTML = `<div style="text-align: center; color: var(--error);">Gagal memuat: ${err.message}</div>`;
+            }
+        }
+
+        function renderWinners(winners) {
+            const list = document.getElementById('winnersList');
+            const gc = winners.find(w => w.winner_rank_gc);
+            const bods = winners.filter(w => w.winner_rank_bod && !w.winner_rank_gc);
+            const classWinners = winners.filter(w => w.winner_rank_class && !w.winner_rank_bod && !w.winner_rank_gc);
+
+            let html = "";
+
+            if (gc) {
+                html += `
+                    <div class="glass-panel" style="margin-bottom: 2rem; border: 2px solid #FFD700; background: linear-gradient(135deg, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0) 100%); padding: 1.5rem; text-align: center;">
+                        <i class="ri-vip-crown-fill" style="font-size: 3rem; color: #FFD700; display: block; margin-bottom: 0.5rem; filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));"></i>
+                        <h4 style="font-size: 1.5rem; font-weight: 900; color: #FFD700; letter-spacing: 2px; margin-bottom: 1rem;">GRAND CHAMPION</h4>
+                        <img src="${gc.fish_image_url}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #FFD700; margin-bottom: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <h5 style="font-size: 1.25rem; font-weight: 800;">${escapeHTML(gc.fish_name)}</h5>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">${escapeHTML(gc.contestant_name)} • ${escapeHTML(gc.contest_class)}</p>
+                    </div>
+                `;
+            }
+
+            if (bods.length > 0) {
+                html += `<h4 style="font-weight: 800; font-size: 1.1rem; color: var(--secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;"><i class="ri-medal-fill"></i> BEST OF DIVISION</h4>`;
+                html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2rem;">`;
+                html += bods.map(b => `
+                    <div class="glass-panel" style="padding: 1rem; text-align: center; border-color: rgba(192,192,192,0.3);">
+                        <div style="font-size: 0.6rem; font-weight: 800; color: #C0C0C0; margin-bottom: 8px;">DIVISION ${b.contest_division}</div>
+                        <img src="${b.fish_image_url}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; margin-bottom: 8px; border: 2px solid #C0C0C0;">
+                        <h6 style="font-size: 0.85rem; font-weight: 800; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(b.fish_name)}</h6>
+                        <p style="font-size: 0.7rem; color: var(--text-muted);">${escapeHTML(b.contestant_name)}</p>
+                    </div>
+                `).join('');
+                html += `</div>`;
+            }
+
+            if (classWinners.length > 0) {
+                html += `<h4 style="font-weight: 800; font-size: 1.1rem; color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;"><i class="ri-award-fill"></i> CLASS WINNERS</h4>`;
+                html += `<div style="display: grid; gap: 10px;">`;
+                html += classWinners.map(w => `
+                    <div class="glass-panel" style="padding: 10px; display: flex; align-items: center; gap: 12px; border-radius: 12px;">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: ${w.winner_rank_class === 1 ? '#FFD700' : w.winner_rank_class === 2 ? '#C0C0C0' : '#CD7F32'}; color: #000; display: grid; place-items: center; font-weight: 900; font-size: 0.9rem;">${w.winner_rank_class}</div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.9rem; font-weight: 800;">${escapeHTML(w.fish_name)}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted);">${escapeHTML(w.contestant_name)} • Class ${w.contest_class}</div>
+                        </div>
+                        <img src="${w.fish_image_url}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
+                    </div>
+                `).join('');
+                html += `</div>`;
+            }
+
+            list.innerHTML = html;
+        }
+
+        function closeWinnersModal() {
+            document.getElementById('winnersModal').style.display = 'none';
         }
     </script>
 </body>

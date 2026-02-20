@@ -910,6 +910,7 @@
                             </div>
                             <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                                 <button onclick="openLogoManagement(${ev.id})" class="action-btn" style="color: var(--admin-primary); background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.2); width: auto; padding: 6px 14px; gap: 6px;" title="Manage Logos"><i class="ri-image-edit-line"></i> <span style="font-size: 0.75rem; font-weight: 700;">LOGOS</span></button>
+                                <button onclick="openResultsManagement(${ev.id})" class="action-btn" style="color: var(--admin-secondary); background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.2); width: auto; padding: 6px 14px; gap: 6px;" title="Championship Results"><i class="ri-trophy-line"></i> <span style="font-size: 0.75rem; font-weight: 700;">RESULTS</span></button>
                                 <button onclick="openJudgeAssignment(${ev.id})" class="action-btn" style="color: var(--admin-warning); background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.2);" title="Assign Judge"><i class="ri-user-star-line"></i></button>
                                 <button onclick="editEventByIndex(${index})" class="action-btn" title="Edit"><i class="ri-edit-2-line"></i></button>
                                 <button onclick="deleteEvent(${ev.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus"><i class="ri-delete-bin-line"></i></button>
@@ -1391,6 +1392,136 @@
                 if (res.ok) fetchEventLogos(currentEventIdForLogos);
             } catch (err) { console.error(err); }
         }
+
+        // --- RESULTS / CHAMPIONSHIP MANAGEMENT ---
+        let currentEventIdForResults = null;
+        let eventEntriesForResults = [];
+
+        async function openResultsManagement(eventId) {
+            currentEventIdForResults = eventId;
+            const modal = document.getElementById('resultsManagerModal');
+            if (modal) modal.style.display = 'flex';
+
+            fetchEventResults(eventId);
+        }
+
+        function closeResultsModal() {
+            document.getElementById('resultsManagerModal').style.display = 'none';
+            currentEventIdForResults = null;
+        }
+
+        async function fetchEventResults(eventId) {
+            const list = document.getElementById('resultsEntryList');
+            list.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="ri-loader-4-line ri-spin"></i> Memuat data...</div>';
+
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch(`/api/admin/judging/winners/${eventId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    eventEntriesForResults = data.data;
+                    renderResultsList();
+                }
+            } catch (err) {
+                list.innerHTML = `<div style="color: var(--admin-error); text-align: center; padding: 2rem;">Error: ${err.message}</div>`;
+            }
+        }
+
+        function renderResultsList() {
+            const list = document.getElementById('resultsEntryList');
+            if (eventEntriesForResults.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada kontestan disetujui.</p>';
+                return;
+            }
+
+            // Group by Division
+            const divisions = {};
+            eventEntriesForResults.forEach(entry => {
+                const div = entry.contest_division || 'Unknown';
+                if (!divisions[div]) divisions[div] = {};
+
+                const cls = entry.contest_class || 'Unknown';
+                if (!divisions[div][cls]) divisions[div][cls] = [];
+                divisions[div][cls].push(entry);
+            });
+
+            let html = "";
+            for (const divKey in divisions) {
+                html += `
+                    <div style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="color: var(--admin-secondary); font-weight: 800; font-size: 1.2rem; margin: 0;">Division ${divKey}</h4>
+                        </div>
+                `;
+
+                for (const clsKey in divisions[divKey]) {
+                    html += `
+                        <div style="margin-left: 1rem; margin-bottom: 1.5rem;">
+                            <h5 style="color: var(--admin-primary); font-size: 0.9rem; margin-bottom: 0.8rem;">Class ${clsKey}</h5>
+                            <div style="display: grid; gap: 8px;">
+                                ${divisions[divKey][clsKey].map(entry => renderResultItem(entry)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+            list.innerHTML = html;
+        }
+
+        function renderResultItem(entry) {
+            const isWinnerClass = entry.winner_rank_class;
+            const isBOD = entry.winner_rank_bod;
+            const isGC = entry.winner_rank_gc;
+
+            return `
+                <div class="glass-panel" style="padding: 12px; display: flex; align-items: center; gap: 12px; border-left: 3px solid ${isGC ? '#FFD700' : isBOD ? '#C0C0C0' : isWinnerClass ? 'var(--admin-secondary)' : 'rgba(255,255,255,0.1)'};">
+                    <img src="${entry.fish_image_url}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 0.85rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(entry.fish_name)}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">${escapeHTML(entry.contestant_name)} • Score: <span style="color: var(--admin-secondary); font-weight: 800;">${entry.score || 0}</span></div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 5px;">
+                        <!-- Class Rank Selection -->
+                        <select onchange="assignWinnerRank(${entry.id}, 'class', this.value)" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); font-size: 0.7rem; padding: 4px; border-radius: 6px;">
+                            <option value="">- Rank -</option>
+                            <option value="1" ${entry.winner_rank_class === 1 ? 'selected' : ''}>Juara 1</option>
+                            <option value="2" ${entry.winner_rank_class === 2 ? 'selected' : ''}>Juara 2</option>
+                            <option value="3" ${entry.winner_rank_class === 3 ? 'selected' : ''}>Juara 3</option>
+                        </select>
+
+                        <!-- BOD Toggle -->
+                        <button onclick="assignWinnerRank(${entry.id}, 'bod', ${!isBOD})" class="action-btn" style="width: 32px; height: 32px; font-size: 0.8rem; background: ${isBOD ? '#C0C0C0' : 'transparent'}; color: ${isBOD ? '#000' : '#fff'};" title="Best of Division">
+                            <i class="ri-medal-line"></i>
+                        </button>
+
+                        <!-- GC Toggle -->
+                        <button onclick="assignWinnerRank(${entry.id}, 'gc', ${!isGC})" class="action-btn" style="width: 32px; height: 32px; font-size: 0.8rem; background: ${isGC ? '#FFD700' : 'transparent'}; color: ${isGC ? '#000' : '#fff'};" title="Grand Champion">
+                            <i class="ri-vip-crown-line"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function assignWinnerRank(id, tier, rank) {
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch('/api/admin/judging/winners/assign', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ id, tier, rank })
+                });
+                if (res.ok) {
+                    fetchEventResults(currentEventIdForResults);
+                }
+            } catch (err) {
+                alert('Gagal update rank: ' + err.message);
+            }
+        }
     </script>
 
     <!-- Logo Manager Modal -->
@@ -1438,13 +1569,46 @@
                 </div>
 
                 <button onclick="uploadSupportLogo()" class="btn-primary logo-upload-btn"
-                    style="width: 100%; padding: 12px; font-size: 0.9rem; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,212,255,0.2);">
-                    <i class="ri-add-circle-line"></i> Add Sponsor logo
-                </button>
+                    style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; letter-spacing: 1px;">Add
+                    Logo</button>
             </div>
 
-            <div id="eventLogoList" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+            <h4 style="font-size: 0.85rem; font-weight: 800; margin-bottom: 1rem; color: var(--text-muted);"><i
+                    class="ri-list-ordered" style="margin-right: 8px;"></i>Logo Order (Drag to Reorder)</h4>
+            <div id="eventLogoList" style="max-height: 300px; overflow-y: auto; padding-right: 5px;"
+                class="hide-scrollbar">
                 <!-- Logos injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Results/Championship Manager Modal -->
+    <div id="resultsManagerModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 3000; align-items: center; justify-content: center; padding: 1.5rem;">
+        <div class="glass-panel"
+            style="width: 100%; max-width: 800px; height: 90vh; display: flex; flex-direction: column; padding: 2rem; position: relative; border-radius: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.6);">
+            <button onclick="closeResultsModal()"
+                style="position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,0.05); border: none; color: var(--text-muted); cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; transition: all 0.3s;"><i
+                    class="ri-close-line" style="font-size: 1.5rem;"></i></button>
+
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem;">
+                    <i class="ri-trophy-fill" style="color: var(--admin-secondary); font-size: 2rem;"></i>
+                    <h3 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; margin: 0;">Championship
+                        <span class="text-gradient">Results</span></h3>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Kelola pemenang Class, Best of Division, hingga
+                    Grand Champion.</p>
+            </div>
+
+            <div id="resultsEntryList" style="flex: 1; overflow-y: auto; padding-right: 15px;" class="hide-scrollbar">
+                <!-- Entries grouped by class/division injected here -->
+            </div>
+
+            <div
+                style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end;">
+                <button onclick="closeResultsModal()" class="btn-primary"
+                    style="padding: 12px 30px; border-radius: 12px; font-weight: 800;">Selesai</button>
             </div>
         </div>
     </div>

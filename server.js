@@ -452,9 +452,16 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS prize_redeemed BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS payment_proof_url TEXT");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS entry_number TEXT UNIQUE");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS winner_rank_class INTEGER");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS winner_rank_bod BOOLEAN DEFAULT FALSE");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS winner_rank_gc BOOLEAN DEFAULT FALSE");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS contest_division TEXT");
+            // One-time migration for divisions
+            await pool.query("UPDATE contest_registrations SET contest_division = UPPER(LEFT(contest_class, 1)) WHERE contest_division IS NULL");
 
             // One-time migration for existing entries without numbers
             const entriesWithoutNumbers = await pool.query("SELECT id, contest_name, contest_class FROM contest_registrations WHERE entry_number IS NULL ORDER BY created_at ASC");
+
             for (const row of entriesWithoutNumbers.rows) {
                 const classCode = (row.contest_class || 'A1').toUpperCase();
                 const prefix = classCode.charAt(0);
@@ -759,9 +766,11 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
         }
 
 
+        const prefix = (contestClass || 'A1').toUpperCase().charAt(0);
+
         const result = await pool.query(
-            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, registration_tier, payment_amount, spin_prize, payment_proof_url, entry_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULL) RETURNING *',
-            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, registrationTier, paymentAmount, spinPrize, proofUrl]
+            'INSERT INTO contest_registrations (user_id, contest_name, fish_name, fish_type, fish_image_url, team_name, wa_number, full_address, video_url, contest_class, contest_division, registration_tier, payment_amount, spin_prize, payment_proof_url, entry_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NULL) RETURNING *',
+            [userId, contestName, fishName, fishType, photoUrl, teamName, waNumber, fullAddress, videoUrl, contestClass, prefix, registrationTier, paymentAmount, spinPrize, proofUrl]
         );
 
         res.json({ success: true, data: result.rows[0] });
@@ -1129,10 +1138,11 @@ app.post('/api/admin/contest/status', adminAuthMiddleware, async (req, res) => {
             entryNumber = `${prefix}-${classCode}-${nextNum.toString().padStart(4, '0')}`;
         }
 
-        // 3. Update status and entry number
+        // 3. Update status, entry number, and ensure division is set
+        const prefix = (reg.contest_class || 'A1').toUpperCase().charAt(0);
         await client.query(
-            'UPDATE contest_registrations SET status = $1, entry_number = $2 WHERE id = $3',
-            [status, entryNumber, id]
+            'UPDATE contest_registrations SET status = $1, entry_number = $2, contest_division = $3 WHERE id = $4',
+            [status, entryNumber, prefix, id]
         );
 
         await client.query('COMMIT');
@@ -1623,6 +1633,78 @@ app.get('/api/products', apiLimiter, async (req, res) => {
 });
 
 
+
+
+// Public Winner List for an Event
+app.get('/api/events/:id/winners', async (req, res) => {
+    try {
+        const eventId = req.params.id;
+        const result = await pool.query(`
+            SELECT r.*, u.full_name as contestant_name
+            FROM contest_registrations r
+            JOIN users u ON r.user_id = u.id
+            JOIN events e ON r.contest_name = e.title
+            WHERE e.id = $1 AND r.status = 'approved' AND (r.winner_rank_class IS NOT NULL OR r.winner_rank_bod = TRUE OR r.winner_rank_gc = TRUE)
+            ORDER BY r.winner_rank_gc DESC, r.winner_rank_bod DESC, r.winner_rank_class ASC
+        `, [eventId]);
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- TIERED JUDGING / WINNER MANAGEMENT ---
+
+// Get all entries for an event grouped for tiered judging
+app.get('/api/admin/judging/winners/:eventId', adminAuthMiddleware, async (req, res) => {
+    try {
+        const eventId = req.params.eventId;
+
+        // Fetch all approved entries for this event
+        const result = await pool.query(`
+            SELECT r.*, u.full_name as contestant_name
+            FROM contest_registrations r
+            JOIN users u ON r.user_id = u.id
+            JOIN events e ON r.contest_name = e.title
+            WHERE e.id = $1 AND r.status = 'approved'
+            ORDER BY r.contest_division ASC, r.contest_class ASC, r.score DESC NULLS LAST
+        `, [eventId]);
+
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Assign Rank to an Entry
+app.post('/api/admin/judging/winners/assign', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { id, tier, rank } = req.body;
+        // tier: 'class', 'bod', 'gc'
+        // rank: INTEGER for class (1,2,3), BOOLEAN for bod/gc
+
+        let query = "";
+        let params = [];
+
+        if (tier === 'class') {
+            query = "UPDATE contest_registrations SET winner_rank_class = $1 WHERE id = $2 RETURNING *";
+            params = [rank, id];
+        } else if (tier === 'bod') {
+            query = "UPDATE contest_registrations SET winner_rank_bod = $1 WHERE id = $2 RETURNING *";
+            params = [rank === true || rank === 'true', id];
+        } else if (tier === 'gc') {
+            query = "UPDATE contest_registrations SET winner_rank_gc = $1 WHERE id = $2 RETURNING *";
+            params = [rank === true || rank === 'true', id];
+        } else {
+            return res.status(400).json({ error: 'Invalid tier type' });
+        }
+
+        const result = await pool.query(query, params);
+        res.json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 
 // Global Error Handler (Ensures JSON response instead of HTML)
