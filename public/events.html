@@ -7,18 +7,47 @@
     <title>SnaDaily - Betta Contest Events</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/seasonal-themes.css">
+    <script src="js/theme-switcher.js" defer></script>
     <style>
         .event-hero {
-            padding: 6rem 2rem 4rem;
+            padding: 8rem 1.5rem 5rem;
             text-align: center;
-            background: radial-gradient(circle at center, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle at center, rgba(0, 212, 255, 0.1) 0%, transparent 80%);
+            position: relative;
+        }
+
+        .event-hero h1 {
+            font-size: clamp(2.5rem, 10vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 1.25rem;
         }
 
         .event-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
             padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .event-hero {
+                padding: 4rem 1rem 2rem;
+            }
+
+            .event-grid {
+                padding: 0.75rem;
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+
+            .reg-list-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
         }
 
         .event-card {
@@ -109,6 +138,120 @@
             border-radius: 50px;
             border: 1px solid var(--glass-border);
         }
+
+        /* Support Logo Marquee Styles */
+        .sponsor-marquee-container {
+            margin-top: 1.25rem;
+            padding: 12px 0;
+            overflow: hidden;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+        }
+
+        .sponsor-marquee-track {
+            display: flex;
+            width: max-content;
+            gap: 50px;
+            animation: marquee 20s linear infinite;
+            padding: 8px 0;
+            align-items: center;
+        }
+
+        .sponsor-marquee-container:hover .sponsor-marquee-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .sponsor-logo {
+            height: 42px;
+            width: 42px;
+            object-fit: contain;
+            filter: grayscale(0.2) brightness(1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+        }
+
+        .sponsor-logo:hover {
+            filter: grayscale(0) brightness(1.2);
+            transform: scale(1.2) translateY(-5px);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Gold: The Platinum Tier */
+        .logo-gold {
+            height: 52px;
+            width: 52px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+            animation: gold-floating 3s ease-in-out infinite;
+        }
+
+        @keyframes gold-floating {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1.1);
+            }
+
+            50% {
+                transform: translateY(-5px) scale(1.15);
+            }
+        }
+
+        .logo-gold:hover {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+            border-color: rgba(255, 215, 0, 0.6);
+        }
+
+        /* Silver: The Premium Tier */
+        .logo-silver {
+            height: 46px;
+            width: 46px;
+            border: 1px solid rgba(192, 192, 192, 0.2);
+            background: radial-gradient(circle at center, rgba(192, 192, 192, 0.08), transparent);
+            animation: silver-pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes silver-pulse {
+
+            0%,
+            100% {
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 1;
+                border-color: rgba(192, 192, 192, 0.4);
+            }
+        }
+
+        /* Bronze: The Support Tier */
+        .logo-bronze {
+            opacity: 0.7;
+            border: 1px solid rgba(205, 127, 50, 0.1);
+        }
+
+        .logo-bronze:hover {
+            opacity: 1;
+            border-color: rgba(205, 127, 50, 0.3);
+        }
     </style>
 </head>
 
@@ -121,88 +264,156 @@
         <div class="bubble x5"></div>
     </div>
 
-    <nav class="user-nav" id="userNav">
-        <!-- Will be populated by JS -->
+    <nav class="navbar glass">
+        <div class="container nav-container">
+            <a href="index.html" class="nav-logo text-gradient">SnaDaily<span
+                    style="color: white; font-weight: 300;">Checker</span></a>
+
+            <!-- Desktop Links -->
+            <div class="desktop-nav-links">
+                <a href="index.html">Beranda</a>
+                <a href="events.html" class="active">Event Kontes</a>
+                <a href="track.html">Lacak Pesanan</a>
+                <a href="login.html" id="nav-login-link" class="nav-auth-btn">Login</a>
+            </div>
+
+            <button class="hamburger-btn mobile-only" onclick="toggleMenu()"
+                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
+                <i class="ri-menu-4-line"></i>
+            </button>
+        </div>
     </nav>
 
+    <!-- Nav Overlay -->
+    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
+    <div class="nav-overlay" id="navOverlay">
+        <div class="nav-menu-header">
+            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">MENU</span>
+            <button class="hamburger-btn" onclick="toggleMenu()" style="font-size: 1.25rem;">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="nav-menu-links">
+            <a href="index.html" class="nav-menu-link">
+                <i class="ri-home-4-line"></i> Beranda
+            </a>
+            <a href="events.html" class="nav-menu-link active">
+                <i class="ri-calendar-event-line"></i> Event Kontes
+            </a>
+            <a href="track.html" class="nav-menu-link">
+                <i class="ri-truck-line"></i> Lacak Pesanan
+            </a>
+            <div id="userMenuLinks"></div>
+        </div>
+    </div>
+
     <header class="event-hero">
-        <h1 class="text-gradient animate-fade-in" style="font-size: 3.5rem; margin-bottom: 1rem;">Betta Showdown 2026
-        </h1>
-        <p class="animate-fade-in"
-            style="color: var(--text-muted); font-size: 1.2rem; max-width: 700px; margin: 0 auto;">
-            Panggung tertinggi bagi para jawara cupang. Daftarkan ikan terbaikmu dan rebut total hadiah jutaan rupiah!
-        </p>
+        <div class="container">
+            <h1 class="text-gradient animate-fade-in"
+                style="font-size: clamp(2.5rem, 8vw, 4rem); margin-bottom: 1rem; font-weight: 800; line-height: 1.1;">
+                Betta Showdown <span style="color: white;">2026</span></h1>
+            <p class="animate-fade-in"
+                style="color: var(--text-muted); font-size: clamp(1rem, 3vw, 1.25rem); max-width: 700px; margin: 0 auto; line-height: 1.6;">
+                Panggung tertinggi bagi para jawara cupang. Daftarkan ikan terbaikmu dan rebut total hadiah jutaan
+                rupiah!
+            </p>
+        </div>
     </header>
 
     <main class="container">
-        <div class="event-grid">
-            <!-- Event Card 1 -->
-            <div class="glass-panel event-card animate-fade-in">
-                <img src="https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?q=80&w=1412&auto=format&fit=crop"
-                    alt="Halfmoon Contest" class="event-img">
-                <div class="event-content">
-                    <span class="event-tag">REGISTRATION OPEN</span>
-                    <h2 class="event-title">Sumatera Betta Championship</h2>
-                    <div class="event-info">
-                        <span><i class="ri-calendar-line"></i> 15-18 Feb 2026</span>
-                        <span><i class="ri-map-pin-line"></i> Medan Mall</span>
-                    </div>
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
-                        Kontest cupang skala nasional dengan juri internasional. Terbuka untuk kategori Halfmoon,
-                        Plakat, dan Crowntail.
-                    </p>
-                    <a href="contest-entry.html?event=sumatera2026" class="btn-register">DAFTAR KONTES</a>
-                </div>
-            </div>
-
-            <!-- Event Card 2 -->
-            <div class="glass-panel event-card animate-fade-in" style="animation-delay: 0.2s;">
-                <img src="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?q=80&w=1587&auto=format&fit=crop"
-                    alt="Plakat Contest" class="event-img">
-                <div class="event-content">
-                    <span class="event-tag">UPCOMING</span>
-                    <h2 class="event-title">Wild Betta Exhibition</h2>
-                    <div class="event-info">
-                        <span><i class="ri-calendar-line"></i> 02 Mar 2026</span>
-                        <span><i class="ri-map-pin-line"></i> Digital Park</span>
-                    </div>
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
-                        Pameran dan edukasi pelestarian cupang alam nusantara. Raih doorprize ikan hias langka!
-                    </p>
-                    <a href="#" class="btn-register"
-                        style="background: rgba(255,255,255,0.1); color: #fff; cursor: not-allowed;">REMIND ME</a>
-                </div>
+        <div id="eventGrid" class="grid grid-3 animate-fade-in">
+            <!-- Dynamic events will appear here -->
+            <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 5rem;">
+                <i class="ri-loader-4-line ri-spin"
+                    style="font-size: 3rem; display: block; margin-bottom: 1rem; color: var(--primary);"></i>
+                <span>Memuat daftar event terbaik...</span>
             </div>
         </div>
 
-        <section id="myRegistrations" style="margin-top: 4rem; display: none;">
-            <h2 style="margin-bottom: 2rem;">Pendaftaran Saya</h2>
-            <div id="regList" class="event-grid" style="padding: 0;">
+        <section id="myRegistrations" style="margin-top: 6rem; display: none;" class="animate-fade-in">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                <div style="width: 4px; height: 30px; background: var(--secondary); border-radius: 10px;"></div>
+                <h2 style="font-size: 2rem; font-weight: 800;">Pendaftaran <span class="text-gradient">Saya</span></h2>
+            </div>
+            <div id="regList" class="grid grid-2">
                 <!-- User's entries will appear here -->
             </div>
         </section>
     </main>
 
+    <script src="js/navigation.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
-            const userNav = document.getElementById('userNav');
 
             if (userData) {
-                userNav.innerHTML = `
-                    <div class="user-profile">
-                        <i class="ri-user-smile-line" style="color: var(--primary)"></i>
-                        <span style="font-weight: 600;">${userData.fullName}</span>
-                    </div>
-                    <button onclick="logout()" style="background: none; border: none; color: var(--error); cursor: pointer; font-weight: 600;">
-                        <i class="ri-logout-box-r-line"></i>
-                    </button>
-                `;
                 fetchUserRegistrations();
-            } else {
-                userNav.innerHTML = `<a href="login.html" class="btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.9rem;">LOGIN</a>`;
             }
+
+            fetchEvents();
         });
+
+        async function fetchEvents() {
+            try {
+                const response = await fetch('/api/events');
+                const data = await response.json();
+                if (data.success) {
+                    const grid = document.getElementById('eventGrid');
+                    if (data.data.length === 0) {
+                        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Belum ada event tersedia.</div>';
+                        return;
+                    }
+
+                    grid.innerHTML = data.data.map((ev, idx) => `
+                        <div class="glass-panel animate-fade-in hover-lift" style="animation-delay: ${idx * 0.1}s; display: flex; flex-direction: column; height: 100%; overflow: hidden; border-top: 4px solid ${ev.status === 'active' ? 'var(--secondary)' : 'var(--glass-border)'};">
+                            <div style="position: relative; height: 220px; overflow: hidden;">
+                                <img src="${ev.image_url}" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 6px 14px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; color: white; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 6px;">
+                                    <i class="ri-user-follow-line" style="color: var(--primary)"></i> <span>${ev.registration_count || 0} Terdaftar</span>
+                                </div>
+                            </div>
+                            <div style="padding: 1.75rem; display: flex; flex-direction: column; flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+                                    <span class="badge ${ev.status === 'active' ? 'badge-primary' : 'badge-rejected'}" style="font-size: 0.65rem;">
+                                        ${ev.status.toUpperCase()}
+                                    </span>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+                                        <i class="ri-calendar-event-line"></i> ${ev.event_date}
+                                    </span>
+                                </div>
+                                <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.75rem; line-height: 1.2;">${ev.title}</h3>
+                                <div style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; font-weight: 500;">
+                                    <i class="ri-map-pin-2-fill" style="color: var(--primary)"></i>
+                                    <span>${ev.location}</span>
+                                </div>
+                                <p style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 2rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                    ${ev.description}
+                                </p>
+                                <div style="margin-top: auto;">
+                                    <div id="logos-${ev.id}" class="sponsor-marquee-container" style="display: none; margin-bottom: 20px; border-radius: 12px;">
+                                        <div class="sponsor-marquee-track"></div>
+                                    </div>
+                                    ${ev.status === 'past' ?
+                            '<button class="btn-primary" style="width: 100%; opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--glass-border); box-shadow: none;">EVENT SELESAI</button>' :
+                            ev.status === 'upcoming' ?
+                                '<button class="btn-primary" style="width: 100%; opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--glass-border); box-shadow: none;">BELUM DIBUKA</button>' :
+                                `<a href="contest-entry.html?event=${encodeURIComponent(ev.title)}" class="btn-primary hover-glow" style="width: 100%; border-radius: 100px;">DAFTAR SEKARANG</a>`
+                        }
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    data.data.forEach(ev => fetchAndRenderLogos(ev.id));
+                } else {
+                    document.getElementById('eventGrid').innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--error);">Gagal memuat event: ${data.error || 'Server error'}</div>`;
+                }
+            } catch (err) {
+                console.error('Error fetching events:', err);
+                document.getElementById('eventGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--error);">Terjadi kesalahan koneksi.</div>';
+            }
+        }
+
 
         function logout() {
             localStorage.removeItem('sna_user_token');
@@ -225,17 +436,15 @@
                     const list = document.getElementById('regList');
                     container.style.display = 'block';
 
-                    list.innerHTML = data.data.map(reg => `
-                        <div class="glass-panel" style="padding: 1.5rem; display: flex; gap: 1.5rem; align-items: center;">
-                            <img src="${reg.fish_image_url || 'https://via.placeholder.com/100'}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover;">
-                            <div style="flex: 1;">
-                                <h3 style="margin-bottom: 0.2rem;">${reg.fish_name}</h3>
-                                <div style="color: var(--text-muted); font-size: 0.85rem;">Type: ${reg.fish_type}</div>
-                                <div style="margin-top: 0.5rem;">
-                                    <span style="padding: 0.2rem 0.8rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; background: ${getStatusColor(reg.status)}">
-                                        ${reg.status.toUpperCase()}
-                                    </span>
-                                </div>
+                    list.innerHTML = data.data.map((reg, idx) => `
+                        <div class="reg-card-premium animate-fade-in" style="animation-delay: ${idx * 0.1}s; padding: 1rem;">
+                            <img src="${reg.fish_image_url || 'https://via.placeholder.com/100'}" style="width: 60px; height: 60px; border-radius: 10px; object-fit: cover;">
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="margin-bottom: 0.1rem; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${reg.fish_name}</h3>
+                                <div style="color: var(--text-muted); font-size: 0.75rem; font-weight: 500;">Type: ${reg.fish_type}</div>
+                            </div>
+                            <div style="flex-shrink: 0;">
+                                <span class="badge badge-${reg.status.toLowerCase()}">${reg.status.toUpperCase()}</span>
                             </div>
                         </div>
                     `).join('');
@@ -245,11 +454,51 @@
             }
         }
 
-        function getStatusColor(status) {
+        function getStatusColor(status, isEvent = false) {
+            if (isEvent) {
+                switch (status) {
+                    case 'active': return 'rgba(0, 255, 136, 0.2); color: #00ff88;';
+                    case 'past': return 'rgba(255, 255, 255, 0.1); color: #888;';
+                    default: return 'rgba(0, 212, 255, 0.1); color: var(--primary);';
+                }
+            }
             switch (status) {
                 case 'approved': return 'rgba(0, 255, 136, 0.2); color: #00ff88;';
                 case 'rejected': return 'rgba(255, 77, 77, 0.2); color: #ff4d4d;';
                 default: return 'rgba(255, 215, 0, 0.2); color: #ffd700;';
+            }
+        }
+
+        // Update Desktop Nav Auth Link
+        const loginLink = document.getElementById('nav-login-link');
+        const userData = JSON.parse(localStorage.getItem('sna_user_data'));
+        if (userData && loginLink) {
+            loginLink.innerText = 'Dashboard';
+            loginLink.href = userData.role === 'judge' ? 'judge.html' : 'dashboard.html';
+        }
+
+        async function fetchAndRenderLogos(eventId) {
+            try {
+                const response = await fetch(`/api/events/${eventId}/logos`);
+                const data = await response.json();
+                if (data.success && data.data.length > 0) {
+                    const container = document.getElementById(`logos-${eventId}`);
+                    const track = container ? container.querySelector('.sponsor-marquee-track') : null;
+                    if (!container || !track) return;
+
+                    container.style.display = 'block';
+
+                    const logosHtml = data.data.map(logo => `
+                        <img src="${logo.logo_url}" class="sponsor-logo logo-${logo.sponsor_level.toLowerCase()}" title="${logo.sponsor_level} Sponsor">
+                    `).join('');
+
+                    track.innerHTML = logosHtml + logosHtml;
+
+                    const duration = Math.max(10, data.data.length * 3);
+                    track.style.animationDuration = `${duration}s`;
+                }
+            } catch (err) {
+                console.error(`Error fetching logos for event ${eventId}:`, err);
             }
         }
     </script>
