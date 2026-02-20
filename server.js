@@ -1060,18 +1060,28 @@ app.post('/api/judge/entries/:id/score', userAuthMiddleware, async (req, res) =>
         }
 
         // Calculate average score
-        const totalScore = Math.round((parseInt(score_body) + parseInt(score_form) + parseInt(score_color)) / 3);
+        const parsedBody = parseInt(score_body) || 0;
+        const parsedForm = parseInt(score_form) || 0;
+        const parsedColor = parseInt(score_color) || 0;
+        const totalScore = Math.round((parsedBody + parsedForm + parsedColor) / 3);
+
+        console.log(`[Judge Debug] Saving - Body: ${parsedBody}, Form: ${parsedForm}, Color: ${parsedColor}, Total: ${totalScore}`);
 
         await pool.query(
             "UPDATE contest_registrations SET score = $1, score_body = $2, score_form = $3, score_color = $4, judge_comment = $5, judged_by = $6 WHERE id = $7",
-            [totalScore, score_body, score_form, score_color, comment, req.user.id, entryId]
+            [totalScore, parsedBody, parsedForm, parsedColor, comment, req.user.id, parseInt(entryId)]
         );
 
         console.log(`[Judge Debug] Score saved successfully for Entry ${entryId}`);
         res.json({ success: true, message: 'Penilaian berhasil disimpan.', totalScore });
     } catch (err) {
-        console.error(`[Judge Debug] Error saving score:`, err.message);
-        sendSecureError(res, 500, "Gagal menyimpan penilaian.", err.message);
+        console.error(`[Judge Debug] CRITICAL Error saving score:`, err);
+        res.status(500).json({
+            success: false,
+            error: "Gagal menyimpan penilaian.",
+            details: err.message,
+            hint: "Hubungi admin atau periksa log server."
+        });
     }
 });
 
