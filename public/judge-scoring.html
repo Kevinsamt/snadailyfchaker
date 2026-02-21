@@ -653,11 +653,14 @@
                     cancelScoring();
                 } else {
                     const error = await res.json();
-                    alert('Gagal: ' + (error.error || 'Terjadi kesalahan saat menyimpan nilai'));
+                    let msg = 'Gagal: ' + (error.error || 'Terjadi kesalahan');
+                    if (error.details) msg += '\n\nDetail: ' + error.details;
+                    if (error.hint) msg += '\n\nSaran: ' + error.hint;
+                    alert(msg);
                 }
             } catch (err) {
                 console.error(err);
-                alert('Gagal menyimpan nilai. Periksa koneksi internet Anda.');
+                alert('Gagal menyimpan nilai. Periksa koneksi internet Anda atau hubungi admin.');
             }
         });
         // Navbar scroll effect
