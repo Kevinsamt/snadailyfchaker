@@ -264,28 +264,40 @@
                             style="font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 900; letter-spacing: -0.5px; margin: 0;">
                             Daftar <span class="text-gradient">Kontestan</span></h2>
                     </div>
-                    <button class="tab-btn" id="compareToggle" onclick="toggleCompareMode()"
-                        style="font-size: 0.85rem; padding: 8px 20px; border-radius: 12px; white-space: nowrap;">
-                        <i class="ri-layout-grid-line"></i> <span class="mobile-hide">Mode</span> Bandingkan
-                    </button>
+                    <div style="display: flex; gap: 0.8rem; align-items: center;">
+                        <select id="classFilter" class="glass-input" onchange="renderEntries()"
+                            style="padding: 8px 15px; border-radius: 12px; font-size: 0.85rem; width: auto; min-width: 140px; background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.2); font-weight: 700; color: #fff;">
+                            <option value="all">Semua Kelas</option>
+                        </select>
+                        <button class="tab-btn" id="compareToggle" onclick="toggleCompareMode()"
+                            style="font-size: 0.85rem; padding: 8px 15px; border-radius: 12px; white-space: nowrap;">
+                            <i class="ri-layout-grid-line"></i> <span class="mobile-hide">Mode</span> Bandingkan
+                        </button>
+                    </div>
                 </div>
 
                 <style>
-                    @media (max-width: 540px) {
+                    @media (max-width: 640px) {
                         .contestant-header {
                             flex-direction: column !important;
                             align-items: flex-start !important;
-                            gap: 1rem !important;
+                            gap: 1.2rem !important;
                         }
 
-                        #compareToggle {
+                        .contestant-header>div:last-child {
                             width: 100%;
+                            flex-direction: column;
+                        }
+
+                        #classFilter,
+                        #compareToggle {
+                            width: 100% !important;
                         }
                     }
                 </style>
 
-                <div id="entriesList" style="display: grid; gap: 1rem;">
-                    <!-- Entries injected here -->
+                <div id="entriesContainer" style="display: grid; gap: 1rem;">
+                    <!-- Divisions and Entries injected here -->
                 </div>
 
                 <!-- Comparison Grid (Hidden by default) -->
@@ -470,6 +482,7 @@
                 const data = await res.json();
                 if (data.success) {
                     allEntries = data.data;
+                    populateClassFilter();
                     renderEntries();
                 }
             } catch (err) {
@@ -477,62 +490,101 @@
             }
         }
 
-        function renderEntries() {
-            const list = allEntries;
-            const entriesList = document.getElementById('entriesList');
-            const compareGrid = document.getElementById('compareGrid');
+        function populateClassFilter() {
+            const filter = document.getElementById('classFilter');
+            const classes = [...new Set(allEntries.map(e => e.contest_class))].filter(Boolean).sort();
 
-            if (list.length === 0) {
-                entriesList.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 5rem;">Belum ada kontestan yang disetujui di event ini.</p>`;
+            // Keep "All" and add classes
+            filter.innerHTML = '<option value="all">Semua Kelas</option>' +
+                classes.map(c => `<option value="${escapeHTML(c)}">Kelas ${escapeHTML(c)}</option>`).join('');
+        }
+
+        function renderEntries() {
+            const selectedClass = document.getElementById('classFilter').value;
+            const entriesContainer = document.getElementById('entriesContainer');
+            const compareGrid = document.getElementById('compareGrid');
+            const isGridView = compareGrid.style.display === 'grid';
+
+            let filtered = allEntries;
+            if (selectedClass !== 'all') {
+                filtered = allEntries.filter(e => e.contest_class === selectedClass);
+            }
+
+            if (filtered.length === 0) {
+                entriesContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 5rem;">Belum ada kontestan ${selectedClass !== 'all' ? `di kelas ${selectedClass}` : ''} yang disetujui.</p>`;
+                compareGrid.innerHTML = '';
                 return;
             }
 
-            // List View
-            entriesList.innerHTML = list.map(entry => `
-                <div class="entry-card-mini animate-fade-in ${entry.id == document.getElementById('selectedEntryId').value ? 'active' : ''}" 
-                    onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})"
-                    style="${entry.score ? 'border-left: 4px solid var(--secondary);' : ''}">
-                    <div style="font-family: monospace; font-weight: 900; color: var(--primary); font-size: 0.85rem; padding: 4px 8px; background: rgba(0,212,255,0.1); border-radius: 8px; min-width: 90px; text-align: center;">${escapeHTML(entry.entry_number || '-')}</div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
-                            ${escapeHTML(entry.fish_name)}
-                            ${entry.winner_rank_gc ? '<i class="ri-vip-crown-fill" style="color: #FFD700; font-size: 0.9rem;"></i>' : ''}
-                            ${entry.winner_rank_bod ? '<i class="ri-medal-fill" style="color: #C0C0C0; font-size: 0.9rem;"></i>' : ''}
-                            ${entry.winner_rank_class ? '<i class="ri-trophy-fill" style="color: var(--secondary); font-size: 0.9rem;"></i>' : ''}
-                        </div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(entry.team_name || entry.contestant_name)} • ${escapeHTML(entry.fish_type)}</div>
-                    </div>
-                    ${entry.score ? `<div style="text-align: right;"><div style="font-size: 0.6rem; color: var(--text-muted); font-weight: 700;">TOTAL</div><div style="color: var(--primary); font-weight: 900; font-size: 1.2rem;">${entry.score}</div></div>` : '<i class="ri-edit-2-line" style="color: var(--text-muted);"></i>'}
-                </div>
-            `).join('');
+            // Group by Division
+            const divisions = {};
+            filtered.forEach(entry => {
+                const div = entry.contest_division || 'Tanpa Divisi';
+                if (!divisions[div]) divisions[div] = [];
+                divisions[div].push(entry);
+            });
 
-            // Grid View
-            compareGrid.innerHTML = list.map(entry => `
-                <div class="compare-item animate-fade-in" onclick="selectEntry(${JSON.stringify(entry).replace(/"/g, '&quot;')})" style="cursor: pointer; position: relative; ${entry.id == document.getElementById('selectedEntryId').value ? 'border: 2px solid var(--primary);' : ''}">
+            // List View Rendering
+            let listHtml = "";
+            for (const div in divisions) {
+                listHtml += `
+                    <div class="division-group" style="margin-bottom: 2rem;">
+                        <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; padding: 0 0.5rem;">
+                            <span style="font-size: 0.8rem; font-weight: 800; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px;">DIVISI ${escapeHTML(div)}</span>
+                            <div style="flex: 1; height: 1px; background: linear-gradient(to right, rgba(0,255,136,0.2), transparent);"></div>
+                        </div>
+                        <div style="display: grid; gap: 1rem;">
+                            ${divisions[div].map(entry => `
+                                <div class="entry-card-mini animate-fade-in ${entry.id == document.getElementById('selectedEntryId').value ? 'active' : ''}" 
+                                    onclick='selectEntry(${JSON.stringify(entry).replace(/'/g, "&#39;")})'
+                                    style="${entry.score ? 'border-left: 4px solid var(--secondary);' : ''}">
+                                    <div style="font-family: monospace; font-weight: 900; color: var(--primary); font-size: 0.85rem; padding: 4px 8px; background: rgba(0,212,255,0.1); border-radius: 8px; min-width: 90px; text-align: center;">${escapeHTML(entry.entry_number || '-')}</div>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                                            ${escapeHTML(entry.fish_name)}
+                                            ${entry.winner_rank_gc ? '<i class="ri-vip-crown-fill" style="color: #FFD700; font-size: 0.9rem;" title="Grand Champion"></i>' : ''}
+                                            ${entry.winner_rank_bod ? '<i class="ri-medal-fill" style="color: #C0C0C0; font-size: 0.9rem;" title="Best of Division"></i>' : ''}
+                                            ${entry.winner_rank_class ? '<i class="ri-trophy-fill" style="color: var(--secondary); font-size: 0.9rem;" title="Juara Kelas"></i>' : ''}
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(entry.team_name || entry.contestant_name)} • ${escapeHTML(entry.fish_type)}</div>
+                                    </div>
+                                    ${entry.score ? `<div style="text-align: right;"><div style="font-size: 0.6rem; color: var(--text-muted); font-weight: 700;">TOTAL</div><div style="color: var(--primary); font-weight: 900; font-size: 1.2rem;">${entry.score}</div></div>` : '<i class="ri-edit-2-line" style="color: var(--text-muted);"></i>'}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            entriesContainer.innerHTML = listHtml;
+
+            // Grid View (Flat for comparison)
+            compareGrid.innerHTML = filtered.map(entry => `
+                <div class="compare-item animate-fade-in" onclick='selectEntry(${JSON.stringify(entry).replace(/'/g, "&#39;")})' style="cursor: pointer; position: relative; ${entry.id == document.getElementById('selectedEntryId').value ? 'border: 2px solid var(--primary);' : ''}">
                     <img src="${escapeHTML(entry.fish_image_url)}" style="width: 100%; height: 150px; object-fit: cover;">
                     <div style="padding: 1rem;">
                         <div style="font-weight: 800; font-size: 0.9rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">${escapeHTML(entry.fish_name)}</div>
                         <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(entry.fish_type)}</div>
                         ${entry.score ? `<div style="margin-top: 8px; font-weight: 900; color: var(--primary); font-size: 1.1rem;">${entry.score}</div>` : ''}
                     </div>
+                    ${entry.winner_rank_class ? `<div style="position: absolute; top: 10px; right: 10px; background: rgba(0,255,136,0.9); color: #000; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800;"><i class="ri-trophy-fill"></i> Juara</div>` : ''}
                 </div>
             `).join('');
         }
 
         function toggleCompareMode() {
-            const list = document.getElementById('entriesList');
+            const list = document.getElementById('entriesContainer');
             const grid = document.getElementById('compareGrid');
             const btn = document.getElementById('compareToggle');
 
             if (list.style.display === 'none') {
                 list.style.display = 'grid';
                 grid.style.display = 'none';
-                btn.innerHTML = '<i class="ri-layout-grid-line"></i> Mode Bandingkan';
+                btn.innerHTML = '<i class="ri-layout-grid-line"></i> <span class="mobile-hide">Mode</span> Bandingkan';
                 btn.classList.remove('active');
             } else {
                 list.style.display = 'none';
                 grid.style.display = 'grid';
-                btn.innerHTML = '<i class="ri-list-check"></i> Mode List';
+                btn.innerHTML = '<i class="ri-list-check"></i> <span class="mobile-hide">Mode</span> List';
                 btn.classList.add('active');
             }
         }
@@ -543,16 +595,17 @@
 
             document.getElementById('selectedEntryId').value = entry.id;
             document.getElementById('fishTitle').innerText = entry.fish_name;
-            document.getElementById('fishType').innerText = entry.fish_type;
+            document.getElementById('fishType').innerText = `${entry.fish_type} • Kelas ${entry.contest_class || '-'}`;
             document.getElementById('fishPreview').src = entry.fish_image_url;
             document.getElementById('teamVal').innerText = entry.team_name || '-';
             document.getElementById('waVal').innerText = entry.wa_number || '-';
 
             // Set Entry Number and Winner Badges
-            let badgeHtml = escapeHTML(entry.entry_number || '-');
-            if (entry.winner_rank_gc) badgeHtml += ' <span style="color: #FFD700;"><i class="ri-vip-crown-fill"></i> GC</span>';
-            else if (entry.winner_rank_bod) badgeHtml += ' <span style="color: #C0C0C0;"><i class="ri-medal-fill"></i> BOD</span>';
-            else if (entry.winner_rank_class) badgeHtml += ` <span style="color: var(--secondary);"><i class="ri-trophy-fill"></i> Juara ${entry.winner_rank_class}</span>`;
+            let badgeHtml = `<span style="background: rgba(0,212,255,0.1); padding: 4px 10px; border-radius: 8px; font-family: monospace; font-weight: 900; color: var(--primary);">${escapeHTML(entry.entry_number || '-')}</span>`;
+
+            if (entry.winner_rank_gc) badgeHtml += ' <span style="color: #FFD700; margin-left: 10px; font-weight: 800;"><i class="ri-vip-crown-fill"></i> GRAND CHAMPION</span>';
+            else if (entry.winner_rank_bod) badgeHtml += ` <span style="color: #C0C0C0; margin-left: 10px; font-weight: 800;"><i class="ri-medal-fill"></i> BEST OF DIV ${entry.contest_division}</span>`;
+            else if (entry.winner_rank_class) badgeHtml += ` <span style="color: var(--secondary); margin-left: 10px; font-weight: 800;"><i class="ri-trophy-fill"></i> JUARA ${entry.winner_rank_class} KELAS</span>`;
 
             document.getElementById('entryNumberVal').innerHTML = badgeHtml;
 
