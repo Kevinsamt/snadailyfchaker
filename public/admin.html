@@ -661,34 +661,34 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Section: Users Management -->
-            <div id="section-users" class="admin-section">
-                <div class="glass-panel animate-fade-in">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-                        <div style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px;">
-                        </div>
-                        <h2 style="font-size: 1.5rem; font-weight: 800;">Kelola <span class="text-gradient">Users</span>
-                        </h2>
+        <!-- Section: Users Management -->
+        <div id="section-users" class="admin-section">
+            <div class="glass-panel animate-fade-in">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                    <div style="width: 4px; height: 24px; background: var(--admin-primary); border-radius: 10px;">
                     </div>
-                    <div class="admin-table-container">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Password (Hash)</th>
-                                    <th>Nama Lengkap</th>
-                                    <th>WhatsApp</th>
-                                    <th>Role</th>
-                                    <th>Joined</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="userTableBody">
-                                <!-- Injected by JS -->
-                            </tbody>
-                        </table>
-                    </div>
+                    <h2 style="font-size: 1.5rem; font-weight: 800;">Kelola <span class="text-gradient">Users</span>
+                    </h2>
+                </div>
+                <div class="admin-table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Password (Hash)</th>
+                                <th>Nama Lengkap</th>
+                                <th>WhatsApp</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -797,8 +797,13 @@
                 if (data.success) {
                     allJudges = data.data;
                     const list = document.getElementById('judgeList');
-                    if (allJudges.length === 0) {
-                        list.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada juri terdaftar.</p>`;
+                    if (!allJudges || allJudges.length === 0) {
+                        list.innerHTML = `
+                        <div style="text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.1);">
+                            <i class="ri-team-line" style="font-size: 3rem; color: var(--text-dim); margin-bottom: 1rem; display: block;"></i>
+                            <h3 style="color: white; margin-bottom: 0.5rem;">Belum ada Juri</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 300px; margin: 0 auto;">Silakan tambah akun juri baru menggunakan form di atas untuk mulai menugaskan mereka ke event.</p>
+                        </div>`;
                         return;
                     }
                     list.innerHTML = data.data.map(j => `
@@ -860,7 +865,18 @@
                 const res = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
                 if (data.success) {
-                    document.getElementById('userTableBody').innerHTML = data.data.map(u => `
+                    const body = document.getElementById('userTableBody');
+                    if (!data.data || data.data.length === 0) {
+                        body.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                            <div style="opacity: 0.5; margin-bottom: 1rem;">
+                                <i class="ri-user-search-line" style="font-size: 3rem;"></i>
+                            </div>
+                            <div style="font-weight: 800; color: white; margin-bottom: 0.5rem;">Belum ada User Peserta</div>
+                            <p style="font-size: 0.85rem;">Peserta yang mendaftar melalui halaman Register akan muncul di sini.</p>
+                        </td></tr>`;
+                        return;
+                    }
+                    body.innerHTML = data.data.map(u => `
                     <tr>
                         <td style="font-weight: 600;">${escapeHTML(u.username)}</td>
                         <td style="font-family: monospace; font-size: 0.7rem; color: var(--text-dim); max-width: 120px; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(u.password)}</td>
