@@ -1411,12 +1411,64 @@
             document.getElementById('resultsEntryList').scrollTop = 0;
         }
 
+        async function changeEventPhase(phase) {
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch(`/api/admin/events/${currentEventIdForResults}/phase`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ phase })
+                });
+                if (res.ok) {
+                    alert(`Fase diubah ke: ${phase.toUpperCase()}`);
+                    fetchEventResults(currentEventIdForResults);
+                } else {
+                    const err = await res.json();
+                    alert('Gagal ubah fase: ' + err.error);
+                }
+            } catch (err) { alert('Gagal ubah fase: ' + err.message); }
+        }
+
+        async function openAuditLogs() {
+            const token = sessionStorage.getItem('sna_admin_token');
+            const logContainer = document.getElementById('auditLogContainer');
+            const modal = document.getElementById('auditLogModal');
+
+            if (modal) modal.style.display = 'flex';
+            logContainer.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="ri-loader-4-line ri-spin"></i> Memuat log...</div>';
+
+            try {
+                const res = await fetch(`/api/admin/events/${currentEventIdForResults}/audit`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.data.length === 0) {
+                        logContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada riwayat aktivitas.</div>';
+                        return;
+                    }
+                    logContainer.innerHTML = data.data.map(log => `
+                        <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="color: var(--admin-primary); font-weight: 800;">${log.action}</span>
+                                <span style="color: var(--text-muted);">${new Date(log.created_at).toLocaleString()}</span>
+                            </div>
+                            <div style="color: #fff; margin-bottom: 5px;"><strong>${log.user_name}</strong> (${log.user_role})</div>
+                            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; font-family: monospace; color: var(--text-muted);">
+                                ${JSON.stringify(log.details, null, 2)}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) { logContainer.innerHTML = `Error: ${err.message}`; }
+        }
+
         async function openResultsManagement(eventId) {
             currentEventIdForResults = eventId;
             const modal = document.getElementById('resultsManagerModal');
             if (modal) modal.style.display = 'flex';
 
-            // Reset to Step 1: Class
+            // Reset to Step 1: Class (UI only)
             currentChampionshipStep = 1;
             document.querySelectorAll('.step-tab').forEach(tab => {
                 tab.classList.toggle('active', parseInt(tab.dataset.step) === 1);
@@ -1442,6 +1494,16 @@
                 const data = await res.json();
                 if (data.success) {
                     eventEntriesForResults = data.data;
+
+                    // Update Phase UI in Modal
+                    const phase = data.phase || 'scoring';
+                    const phaseIndicator = document.getElementById('currentPhaseIndicator');
+                    if (phaseIndicator) {
+                        phaseIndicator.innerText = phase.toUpperCase();
+                        const phaseSelect = document.getElementById('judgingPhaseSelect');
+                        if (phaseSelect) phaseSelect.value = phase;
+                    }
+
                     renderResultsList();
                 }
             } catch (err) {
@@ -1722,11 +1784,53 @@
                     class="ri-close-line" style="font-size: 1.5rem;"></i></button>
 
             <div style="margin-bottom: 2rem;">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem;">
-                    <i class="ri-trophy-fill" style="color: var(--admin-secondary); font-size: 2rem;"></i>
-                    <h3 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; margin: 0;">Championship
-                        <span class="text-gradient">Results</span>
-                    </h3>
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="ri-trophy-fill" style="color: var(--admin-secondary); font-size: 2rem;"></i>
+                        <h3 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; margin: 0;">Championship
+                            <span class="text-gradient">Results</span>
+                        </h3>
+                    </div>
+
+                    <!-- Admin Control: Current Phase Select -->
+                    <div
+                        style="background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px;">
+                        <span
+                            style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Set
+                            Fase:</span>
+                        <select id="judgingPhaseSelect" onchange="changeEventPhase(this.value)"
+                            style="background: transparent; border: none; color: var(--admin-primary); font-weight: 900; font-size: 0.85rem; outline: none; cursor: pointer; padding: 5px 0;">
+                            <option value="scoring">SCORING</option>
+                            <option value="class">JUARA KELAS</option>
+                            <option value="bod">BOD</option>
+                            <option value="gc">GRAND CHAMPION</option>
+                            <option value="finished">FINISHED</option>
+                        </select>
+                        <button onclick="openAuditLogs()" title="Lihat Audit Log"
+                            style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 6px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="ri-history-line" style="font-size: 1rem;"></i>
+                        </button>
+                        <div id="currentPhaseIndicator" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Audit Log Modal -->
+                <div id="auditLogModal"
+                    style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 2rem;">
+                    <div
+                        style="background: var(--admin-card); width: 100%; max-width: 600px; height: 80vh; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; position: relative; box-shadow: 0 40px 100px rgba(0,0,0,0.8);">
+                        <div
+                            style="padding: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin: 0; font-weight: 900;"><i class="ri-history-line"></i> Audit <span
+                                    class="text-gradient">Logs</span></h3>
+                            <button onclick="document.getElementById('auditLogModal').style.display='none'"
+                                style="background: rgba(255,255,255,0.05); border: none; color: #fff; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;"><i
+                                    class="ri-close-line"></i></button>
+                        </div>
+                        <div id="auditLogContainer" style="flex: 1; overflow-y: auto; padding: 1rem;"
+                            class="hide-scrollbar"></div>
+                    </div>
                 </div>
 
                 <!-- Championship Step Indicator Tabs -->

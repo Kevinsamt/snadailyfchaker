@@ -509,7 +509,19 @@ async function initDb() {
             await pool.query("ALTER TABLE events ADD COLUMN IF NOT EXISTS mid_start_date TEXT");
             await pool.query("ALTER TABLE events ADD COLUMN IF NOT EXISTS last_start_date TEXT");
             await pool.query("ALTER TABLE events ADD COLUMN IF NOT EXISTS early_bird_start_date TEXT");
-        } catch (e) { console.log("Event pricing columns already exists."); }
+            await pool.query("ALTER TABLE events ADD COLUMN IF NOT EXISTS judging_phase TEXT DEFAULT 'scoring'");
+            await pool.query("ALTER TABLE events ADD COLUMN IF NOT EXISTS judging_phase_expires_at TIMESTAMP");
+        } catch (e) { console.log("Event pricing/phase columns already exists."); }
+
+        // Event Audit Log Table
+        await pool.query(`CREATE TABLE IF NOT EXISTS event_audit_log (
+            id SERIAL PRIMARY KEY,
+            event_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
+            user_id INTEGER REFERENCES users(id),
+            action TEXT,
+            details JSONB,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
 
         // Event Judges Assignment Table
         await pool.query(`CREATE TABLE IF NOT EXISTS event_judges (
@@ -1676,14 +1688,111 @@ app.get('/api/events/:id/winners', async (req, res) => {
 
 // --- TIERED JUDGING / WINNER MANAGEMENT ---
 
-// Get all entries for an event grouped for tiered judging
-app.get('/api/admin/judging/winners/:eventId', adminAuthMiddleware, async (req, res) => {
+// Helper: Add Audit Log Entry
+async function addAuditLog(eventId, userId, action, details) {
+    try {
+        await pool.query(
+            "INSERT INTO event_audit_log (event_id, user_id, action, details) VALUES ($1, $2, $3, $4)",
+            [eventId, userId, action, JSON.stringify(details)]
+        );
+    } catch (err) {
+        console.error("Audit Log Error:", err.message);
+    }
+}
+
+// Admin/Judge: Update Judging Phase
+app.patch('/api/admin/events/:id/phase', userAuthMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { phase } = req.body; // 'scoring', 'class', 'bod', 'gc', 'finished'
+        const user = req.user;
+
+        // Security Check: Admin or Assigned Judge
+        if (user.role === 'judge') {
+            const assignment = await pool.query("SELECT id FROM event_judges WHERE event_id = $1 AND judge_id = $2", [id, user.id]);
+            if (assignment.rows.length === 0) return res.status(403).json({ error: 'Not assigned to this event' });
+        } else if (user.role !== 'admin') {
+            return res.status(403).json({ error: 'Admin or assigned Judge access required' });
+        }
+
+        const validPhases = ['scoring', 'class', 'bod', 'gc', 'finished'];
+        if (!validPhases.includes(phase)) return res.status(400).json({ error: 'Invalid phase' });
+
+        // Sequential Validation
+        const entriesResult = await pool.query(`
+            SELECT r.* FROM contest_registrations r
+            JOIN events e ON r.contest_name = e.title
+            WHERE e.id = $1 AND r.status = 'approved'
+        `, [id]);
+        const entries = entriesResult.rows;
+
+        if (phase === 'bod') {
+            const classes = [...new Set(entries.map(e => e.contest_class))].filter(Boolean);
+            const missingClassWinners = classes.filter(c => !entries.some(e => e.contest_class === c && e.winner_rank_class === 1));
+            if (missingClassWinners.length > 0) {
+                return res.status(400).json({ error: `Belum semua kelas memiliki Juara 1: ${missingClassWinners.join(', ')}` });
+            }
+        } else if (phase === 'gc') {
+            if (!entries.some(e => e.winner_rank_bod === true)) {
+                return res.status(400).json({ error: 'Belum ada pemenang BOD yang dipilih.' });
+            }
+        }
+
+        // Set Expiry (10 mins for new phase, except finished/scoring)
+        let expiry = null;
+        if (['class', 'bod', 'gc'].includes(phase)) {
+            expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        }
+
+        await pool.query("UPDATE events SET judging_phase = $1, judging_phase_expires_at = $2 WHERE id = $3", [phase, expiry, id]);
+
+        await addAuditLog(id, user.id, 'PHASE_CHANGE', { new_phase: phase, expiry });
+
+        res.json({ success: true, phase, expires_at: expiry });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get Audit Logs for an Event (Admin Only)
+app.get('/api/admin/events/:id/audit', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query(`
+            SELECT a.*, u.full_name as user_name, u.role as user_role
+            FROM event_audit_log a
+            LEFT JOIN users u ON a.user_id = u.id
+            WHERE a.event_id = $1
+            ORDER BY a.created_at DESC
+        `, [id]);
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get all entries for an event grouped for tiered judging (Access for Admin & Assigned Judges)
+app.get('/api/admin/judging/winners/:eventId', userAuthMiddleware, async (req, res) => {
     try {
         const eventId = req.params.eventId;
+        const user = req.user;
+
+        // Security Check: If judge, verify assignment
+        if (user.role === 'judge') {
+            const assignment = await pool.query("SELECT id FROM event_judges WHERE event_id = $1 AND judge_id = $2", [eventId, user.id]);
+            if (assignment.rows.length === 0) return res.status(403).json({ error: 'Not assigned to this event' });
+        } else if (user.role !== 'admin') {
+            return res.status(403).json({ error: 'Admin or assigned Judge access required' });
+        }
+
+        // Fetch event info (to get current phase)
+        const eventResult = await pool.query("SELECT * FROM events WHERE id = $1", [eventId]);
+        if (eventResult.rows.length === 0) return res.status(404).json({ error: 'Event not found' });
+        const eventInfo = eventResult.rows[0];
 
         // Fetch all approved entries for this event
         const result = await pool.query(`
-            SELECT r.*, u.full_name as contestant_name
+            SELECT r.*, u.full_name as contestant_name, u.phone as wa_number, u.id as user_id_val
             FROM contest_registrations r
             JOIN users u ON r.user_id = u.id
             JOIN events e ON r.contest_name = e.title
@@ -1691,18 +1800,34 @@ app.get('/api/admin/judging/winners/:eventId', adminAuthMiddleware, async (req, 
             ORDER BY r.contest_division ASC, r.contest_class ASC, r.score DESC NULLS LAST
         `, [eventId]);
 
-        res.json({ success: true, data: result.rows });
+        res.json({
+            success: true,
+            data: result.rows,
+            phase: eventInfo.judging_phase,
+            expires_at: eventInfo.judging_phase_expires_at
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Assign Rank to an Entry
-app.post('/api/admin/judging/winners/assign', adminAuthMiddleware, async (req, res) => {
+// Assign Rank to an Entry (Access for Admin & Assigned Judges)
+app.post('/api/admin/judging/winners/assign', userAuthMiddleware, async (req, res) => {
     try {
-        const { id, tier, rank } = req.body;
+        const { id, tier, rank, eventId } = req.body;
         // tier: 'class', 'bod', 'gc'
         // rank: INTEGER for class (1,2,3), BOOLEAN for bod/gc
+
+        if (!eventId) return res.status(400).json({ error: 'Event ID required' });
+        const user = req.user;
+
+        // Security Check: If judge, verify assignment
+        if (user.role === 'judge') {
+            const assignment = await pool.query("SELECT id FROM event_judges WHERE event_id = $1 AND judge_id = $2", [eventId, user.id]);
+            if (assignment.rows.length === 0) return res.status(403).json({ error: 'Not assigned to this event' });
+        } else if (user.role !== 'admin') {
+            return res.status(403).json({ error: 'Admin or assigned Judge access required' });
+        }
 
         let query = "";
         let params = [];
@@ -1721,6 +1846,14 @@ app.post('/api/admin/judging/winners/assign', adminAuthMiddleware, async (req, r
         }
 
         const result = await pool.query(query, params);
+
+        await addAuditLog(eventId, user.id, 'WINNER_ASSIGNED', {
+            entry_id: id,
+            tier,
+            rank,
+            entry_number: (await pool.query("SELECT entry_number FROM contest_registrations WHERE id = $1", [id])).rows[0]?.entry_number
+        });
+
         res.json({ success: true, data: result.rows[0] });
     } catch (err) {
         res.status(500).json({ error: err.message });
