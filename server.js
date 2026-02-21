@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
 const { Readable } = require('stream');
+const crypto = require('crypto');
 require('dotenv').config();
 
 // Trigger redeploy to pick up new env vars
@@ -406,6 +407,8 @@ async function initDb() {
             full_name TEXT,
             phone TEXT,
             role TEXT DEFAULT 'user',
+            reset_token TEXT,
+            reset_expiry TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
 
@@ -479,6 +482,8 @@ async function initDb() {
 
                 await pool.query("UPDATE contest_registrations SET entry_number = $1 WHERE id = $2", [entryNum, row.id]);
             }
+            await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token TEXT");
+            await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_expiry TIMESTAMP");
         } catch (migErr) {
             console.log("Migration columns check done.");
         }
@@ -689,6 +694,94 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
         });
     } catch (err) {
         sendSecureError(res, 500, "Gagal memproses login.", err.message);
+    }
+});
+
+// --- PASSWORD RESET SYSTEM ---
+
+// 1. Admin: Reset Password Peserta
+app.post('/api/admin/reset-user-password', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { userId, newPassword } = req.body;
+
+        if (!newPassword || newPassword.length < 8) {
+            return res.status(400).json({ error: 'Password minimal 8 karakter!' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await pool.query('UPDATE users SET password = $1, reset_token = NULL, reset_expiry = NULL WHERE id = $2', [hashedPassword, userId]);
+
+        res.json({ success: true, message: "Password berhasil direset oleh Admin." });
+    } catch (err) {
+        sendSecureError(res, 500, "Gagal reset password user.", err.message);
+    }
+});
+
+// 2. Forgot Password: Generate Token
+app.post('/api/auth/forgot-password', loginLimiter, async (req, res) => {
+    try {
+        const { identifier } = req.body; // could be username or phone
+
+        const result = await pool.query(
+            'SELECT id, username, phone FROM users WHERE username = $1 OR phone = $2',
+            [identifier, identifier]
+        );
+
+        if (result.rows.length === 0) {
+            // SECURITY: Don't leak if user exists, but for participant ease we might be more descriptive
+            return res.status(404).json({ error: 'Akun tidak ditemukan. Pastikan Username atau nomor WA benar.' });
+        }
+
+        const user = result.rows[0];
+        const token = crypto.randomBytes(4).toString('hex').toUpperCase(); // 8 characters for easy input
+        const expiry = new Date(Date.now() + 3600000); // 1 hour
+
+        await pool.query(
+            'UPDATE users SET reset_token = $1, reset_expiry = $2 WHERE id = $3',
+            [token, expiry, user.id]
+        );
+
+        // In a real app, send WA/Email here. For now, return it (to be displayed or manually shared)
+        res.json({
+            success: true,
+            message: "Token reset berhasil dibuat.",
+            debugToken: process.env.NODE_ENV !== 'production' ? token : undefined,
+            token: token // Returning for simulation/manual use
+        });
+    } catch (err) {
+        sendSecureError(res, 500, "Gagal memproses permintaan reset.", err.message);
+    }
+});
+
+// 3. Reset Password: Using Token
+app.post('/api/auth/reset-password', loginLimiter, async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!newPassword || newPassword.length < 8) {
+            return res.status(400).json({ error: 'Password minimal 8 karakter!' });
+        }
+
+        const result = await pool.query(
+            'SELECT id FROM users WHERE reset_token = $1 AND reset_expiry > NOW()',
+            [token]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: 'Token tidak valid atau sudah kadaluarsa.' });
+        }
+
+        const user = result.rows[0];
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await pool.query(
+            'UPDATE users SET password = $1, reset_token = NULL, reset_expiry = NULL WHERE id = $2',
+            [hashedPassword, user.id]
+        );
+
+        res.json({ success: true, message: "Password berhasil diperbarui. Silakan login." });
+    } catch (err) {
+        sendSecureError(res, 500, "Gagal memperbarui password.", err.message);
     }
 });
 

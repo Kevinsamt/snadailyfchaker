@@ -694,6 +694,34 @@
         </div>
     </main>
 
+    <!-- Modal: Reset Password User -->
+    <div id="resetPasswordModal" class="modal-overlay">
+        <div class="modal-content glass-panel" style="max-width: 400px; padding: 2.5rem; animation: slideUp 0.3s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h3 style="font-size: 1.5rem; font-weight: 800;"><span class="text-gradient">Reset</span> Password</h3>
+                <button onclick="closeResetModal()" class="action-btn"><i class="ri-close-line"></i></button>
+            </div>
+
+            <p id="resetUsernameLabel" style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem;">Reset
+                password untuk: <strong>-</strong></p>
+
+            <form id="resetPasswordForm">
+                <input type="hidden" id="resetUserId">
+                <div class="input-group">
+                    <label class="input-label">Password Baru</label>
+                    <div style="position: relative;">
+                        <input type="password" id="newAdminPassword" class="glass-input" required
+                            placeholder="Minimal 8 karakter">
+                        <i class="ri-eye-line" id="toggleResetEye" onclick="toggleResetPass()"
+                            style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-dim);"></i>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1.5rem; height: 50px;">SIMPAN
+                    PASSWORD BARU</button>
+            </form>
+        </div>
+    </div>
+
     <script src="js/app.js"></script>
     <script>
         let allEvents = [];
@@ -884,11 +912,11 @@
                         <td>${escapeHTML(u.phone)}</td>
                         <td><span style="background: rgba(0,212,255,0.1); color: var(--admin-primary); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 800;">${escapeHTML(u.role).toUpperCase()}</span></td>
                         <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(u.created_at).toLocaleDateString()}</td>
-                        <td>
-                            <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus User"><i class="ri-user-unfollow-line"></i></button>
-                        </td>
-                    </tr>
-                `).join('');
+                             <button onclick="resetUserPasswordModal(${u.id}, '${escapeHTML(u.username)}')" class="action-btn" style="color: var(--admin-warning);" title="Reset Password"><i class="ri-key-line"></i></button>
+                             <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus User"><i class="ri-user-unfollow-line"></i></button>
+                         </td>
+                     </tr>
+                 `).join('');
                 }
             } catch (err) { console.error(err); }
         }
@@ -902,6 +930,56 @@
             });
             if (res.ok) fetchUsers();
         }
+
+        function resetUserPasswordModal(id, username) {
+            document.getElementById('resetUserId').value = id;
+            document.getElementById('resetUsernameLabel').querySelector('strong').innerText = username;
+            document.getElementById('resetPasswordModal').classList.add('active');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetPasswordModal').classList.remove('active');
+            document.getElementById('resetPasswordForm').reset();
+        }
+
+        function toggleResetPass() {
+            const input = document.getElementById('newAdminPassword');
+            const eye = document.getElementById('toggleResetEye');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eye.classList.replace('ri-eye-line', 'ri-eye-off-line');
+            } else {
+                input.type = 'password';
+                eye.classList.replace('ri-eye-off-line', 'ri-eye-line');
+            }
+        }
+
+        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('resetUserId').value;
+            const newPassword = document.getElementById('newAdminPassword').value;
+            const token = sessionStorage.getItem('sna_admin_token');
+
+            try {
+                const res = await fetch('/api/admin/reset-user-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ userId, newPassword })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Password berhasil diperbarui!');
+                    closeResetModal();
+                } else {
+                    alert(data.error || 'Gagal reset password');
+                }
+            } catch (err) {
+                alert('Terjadi kesalahan sistem.');
+            }
+        });
 
         async function fetchEvents() {
             try {
