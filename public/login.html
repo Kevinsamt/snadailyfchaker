@@ -222,9 +222,6 @@
             const password = document.getElementById('password').value;
 
             let endpoint = '/api/auth/login';
-            if (username === 'bettatumedan') {
-                endpoint = '/api/admin/login';
-            }
 
             try {
                 const res = await fetch(endpoint, {

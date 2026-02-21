@@ -594,34 +594,10 @@ async function initDb() {
     }
 }
 
-// ADMIN LOGIN ROUTE (Secure JWT-based)
+// ADMIN LOGIN ROUTE (Unified Logic Alias)
 app.post('/api/admin/login', loginLimiter, async (req, res) => {
-    const { username, password } = req.body;
-
-    // Get from process.env with fallbacks for development only if absolutely necessary
-    const ADMIN_USER = process.env.ADMIN_USER || 'bettatumedan';
-    const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'snadailybetta';
-
-    // SECURITY: Warn if default credentials used in production (but allow for now)
-    if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_USER || !process.env.ADMIN_PASSWORD)) {
-        console.warn("⚠️ SECURITY WARNING: Using default admin credentials in production. Please set ADMIN_USER and ADMIN_PASSWORD in environment variables!");
-    }
-
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
-        const token = jwt.sign(
-            { username: ADMIN_USER, role: 'admin' },
-            ACTUAL_SECRET,
-            { expiresIn: '12h' }
-        );
-
-        res.json({
-            success: true,
-            token: token,
-            role: 'admin'
-        });
-    } else {
-        res.status(401).json({ success: false, message: 'Invalid Admin Credentials' });
-    }
+    // Redirect to the unified login endpoint
+    return res.status(307).redirect(308, '/api/auth/login');
 });
 
 
@@ -657,9 +633,29 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // User Login (Standard User)
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
+
+        // 1. Check if this is the System Admin (Super Admin)
+        const ADMIN_USER = process.env.ADMIN_USER || 'bettatumedan';
+        const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'snadailybetta';
+
+        if (username === ADMIN_USER && password === ADMIN_PASS) {
+            const token = jwt.sign(
+                { username: ADMIN_USER, role: 'admin' },
+                ACTUAL_SECRET,
+                { expiresIn: '12h' }
+            );
+            return res.json({
+                success: true,
+                token,
+                role: 'admin',
+                user: { username: ADMIN_USER, fullName: 'Super Admin' }
+            });
+        }
+
+        // 2. Check Database Users
         const result = await pool.query(
             'SELECT id, username, password, full_name, role FROM users WHERE username = $1',
             [username]
