@@ -173,21 +173,42 @@
                 <form id="registerForm">
                     <div class="input-group">
                         <label class="input-label">Username</label>
-                        <input type="text" id="username" class="glass-input" required placeholder="Pilih username unik">
+                        <div style="position: relative;">
+                            <i class="ri-user-6-line"
+                                style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                            <input type="text" id="username" class="glass-input" required
+                                placeholder="Pilih username unik" style="padding-left: 3rem;">
+                        </div>
                     </div>
                     <div class="input-group">
                         <label class="input-label">Password</label>
-                        <input type="password" id="password" class="glass-input" required
-                            placeholder="Minimal 6 karakter">
+                        <div style="position: relative;">
+                            <i class="ri-lock-password-line"
+                                style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                            <input type="password" id="password" class="glass-input" required
+                                placeholder="Minimal 6 karakter" style="padding-left: 3rem; padding-right: 3rem;">
+                            <i class="ri-eye-line" id="togglePasswordIcon"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim); cursor: pointer; z-index: 10;"
+                                onclick="togglePasswordVisibility()"></i>
+                        </div>
                     </div>
                     <div class="input-group">
                         <label class="input-label">Nama Lengkap</label>
-                        <input type="text" id="fullName" class="glass-input" required
-                            placeholder="Nama sesuai identitas">
+                        <div style="position: relative;">
+                            <i class="ri-attachment-line"
+                                style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                            <input type="text" id="fullName" class="glass-input" required
+                                placeholder="Nama sesuai identitas" style="padding-left: 3rem;">
+                        </div>
                     </div>
                     <div class="input-group">
                         <label class="input-label">Nomor WhatsApp</label>
-                        <input type="tel" id="phone" class="glass-input" required placeholder="e.g., 08123456789">
+                        <div style="position: relative;">
+                            <i class="ri-whatsapp-line"
+                                style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                            <input type="tel" id="phone" class="glass-input" required placeholder="e.g., 08123456789"
+                                style="padding-left: 3rem;">
+                        </div>
                     </div>
 
                     <button type="submit" class="btn-primary"
@@ -265,6 +286,22 @@
         document.querySelectorAll('.hamburger-btn').forEach(btn => {
             btn.onclick = toggleMenu;
         });
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('togglePasswordIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('ri-eye-line');
+                toggleIcon.classList.add('ri-eye-off-line');
+                toggleIcon.style.color = 'var(--secondary)';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('ri-eye-off-line');
+                toggleIcon.classList.add('ri-eye-line');
+                toggleIcon.style.color = 'var(--text-dim)';
+            }
+        }
     </script>
 </body>
 

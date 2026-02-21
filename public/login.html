@@ -186,7 +186,10 @@
                             <i class="ri-lock-password-line"
                                 style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
                             <input type="password" id="password" class="glass-input" required placeholder="••••••••"
-                                style="padding-left: 3rem;">
+                                style="padding-left: 3rem; padding-right: 3rem;">
+                            <i class="ri-eye-line" id="togglePasswordIcon"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim); cursor: pointer; z-index: 10;"
+                                onclick="togglePasswordVisibility()"></i>
                         </div>
                     </div>
                     <div id="errorMsg" class="error-msg" style="margin-bottom: 1rem; text-align: center;"></div>
@@ -287,6 +290,22 @@
         document.querySelectorAll('.hamburger-btn').forEach(btn => {
             btn.onclick = toggleMenu;
         });
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('togglePasswordIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('ri-eye-line');
+                toggleIcon.classList.add('ri-eye-off-line');
+                toggleIcon.style.color = 'var(--primary)';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('ri-eye-off-line');
+                toggleIcon.classList.add('ri-eye-line');
+                toggleIcon.style.color = 'var(--text-dim)';
+            }
+        }
     </script>
 </body>
 
