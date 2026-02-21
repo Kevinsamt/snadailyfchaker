@@ -627,7 +627,7 @@ const initAdmin = () => {
 const initCustomer = () => {
     const searchBtn = document.getElementById('searchBtn');
     const input = document.getElementById('batchIdInput');
-    const resultCard = document.getElementById('resultCard');
+    const resultCard = document.getElementById('resultCard') || document.getElementById('resultContainer');
     const errorMsg = document.getElementById('errorMsg');
 
     console.log("initCustomer started. searchBtn:", !!searchBtn);
@@ -637,37 +637,42 @@ const initCustomer = () => {
         return;
     }
 
-    if (!resultCard) {
-        console.log("initCustomer: resultCard NOT FOUND - Likely handled by inline script");
-        return;
-    }
-
     const showResult = (data) => {
-        resultCard.style.display = 'block';
-        resultCard.classList.add('animate-fade-in');
-        errorMsg.style.display = 'none';
+        if (resultCard) {
+            resultCard.style.display = 'block';
+            resultCard.classList.add('animate-fade-in');
+            // Reset animation
+            resultCard.classList.remove('animate-reveal');
+            void resultCard.offsetWidth; // Trigger reflow
+            resultCard.classList.add('animate-reveal');
+        }
 
-        document.getElementById('res-species').textContent = data.species;
-        document.getElementById('res-origin').textContent = data.origin;
+        if (errorMsg) errorMsg.style.display = 'none';
+
+        const speciesEl = document.getElementById('res-species');
+        if (speciesEl) speciesEl.textContent = data.species;
+
+        const originEl = document.getElementById('res-origin');
+        if (originEl) originEl.textContent = data.origin;
 
         const resDateEl = document.getElementById('res-date');
         if (resDateEl) {
             if (data.catchDate) {
-                if (resDateEl.parentElement) resDateEl.parentElement.style.display = 'block';
                 resDateEl.textContent = formatDate(data.catchDate);
+                if (resDateEl.parentElement) resDateEl.parentElement.style.display = 'block';
             } else {
-                if (resDateEl.parentElement) resDateEl.parentElement.style.display = 'none';
+                resDateEl.textContent = '-';
             }
         }
 
         const resWeightEl = document.getElementById('res-weight');
-        if (resWeightEl) resWeightEl.textContent = data.weight + ' kg';
+        if (resWeightEl) resWeightEl.textContent = (data.weight || 0) + ' kg';
 
         const resMethodEl = document.getElementById('res-method');
-        if (resMethodEl) resMethodEl.textContent = data.method;
+        if (resMethodEl) resMethodEl.textContent = data.method || '-';
 
         const resIdEl = document.getElementById('res-id');
-        if (resIdEl) resIdEl.textContent = data.id;
+        if (resIdEl) resIdEl.textContent = 'ID: ' + data.id;
 
         const importDateContainer = document.getElementById('res-import-date-container');
         const importDateEl = document.getElementById('res-import-date');
@@ -675,15 +680,10 @@ const initCustomer = () => {
         const isPremium = (data.origin && data.origin.toLowerCase().includes('thailand')) ||
             (data.importDate && data.importDate.length > 0);
 
-        // Reset animation
-        resultCard.classList.remove('animate-reveal');
-        void resultCard.offsetWidth; // Trigger reflow
-
         if (isPremium) {
-            resultCard.classList.add('premium-card');
-            resultCard.classList.add('animate-reveal'); // Trigger entrance animation
+            if (resultCard) resultCard.classList.add('premium-card');
 
-            const h2 = document.querySelector('#resultCard h2');
+            const h2 = document.querySelector('#resultCard h2, #resultContainer h2');
             if (h2) {
                 h2.innerHTML = '<i class="ri-vip-crown-fill" style="margin-right:8px"></i> Premium Verified';
                 h2.classList.add('premium-shine');
@@ -692,13 +692,13 @@ const initCustomer = () => {
             // Play Sound
             playSound('premiumSound');
 
-            // Override Origin for Premium
+            // Override Origin for Premium if specific label exists
             const originLabel = document.getElementById('res-origin-label');
             if (originLabel) originLabel.textContent = 'Variety / Species';
-            if (document.getElementById('res-origin')) document.getElementById('res-origin').textContent = data.species;
+            if (originEl && !document.getElementById('res-species')) originEl.textContent = data.species;
         } else {
-            resultCard.classList.remove('premium-card');
-            const h2 = document.querySelector('#resultCard h2');
+            if (resultCard) resultCard.classList.remove('premium-card');
+            const h2 = document.querySelector('#resultCard h2, #resultContainer h2');
             if (h2) {
                 h2.innerHTML = '<i class="ri-checkbox-circle-fill" style="color: var(--success); margin-right: 8px;"></i> Data Terverifikasi';
                 h2.classList.remove('premium-shine');
@@ -707,7 +707,6 @@ const initCustomer = () => {
             // Revert Origin for Standard
             const originLabel = document.getElementById('res-origin-label');
             if (originLabel) originLabel.textContent = 'Asal (Origin)';
-            if (document.getElementById('res-origin')) document.getElementById('res-origin').textContent = data.origin;
         }
 
         if (data.importDate && importDateEl) {
@@ -719,9 +718,11 @@ const initCustomer = () => {
     };
 
     const showError = () => {
-        resultCard.style.display = 'none';
-        errorMsg.style.display = 'block';
-        errorMsg.textContent = "Data tidak ditemukan. Mohon periksa kembali ID Batch anda.";
+        if (resultCard) resultCard.style.display = 'none';
+        if (errorMsg) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = "Data tidak ditemukan. Mohon periksa kembali ID Batch anda.";
+        }
     };
 
     searchBtn.addEventListener('click', () => {
@@ -733,6 +734,7 @@ const initCustomer = () => {
         }
 
         // Simulate loading
+        const originalText = searchBtn.innerHTML;
         searchBtn.textContent = 'Verifying...';
 
         // 800ms delay for UX + async fetch
@@ -741,7 +743,7 @@ const initCustomer = () => {
                 console.log("Executing DataStore.find for:", id);
                 const data = await DataStore.find(id);
                 console.log("Search Result:", data);
-                searchBtn.textContent = 'Check Authenticity';
+                searchBtn.innerHTML = originalText;
 
                 if (data) {
                     showResult(data);
@@ -753,7 +755,7 @@ const initCustomer = () => {
             } catch (err) {
                 console.error("Search Logic Error:", err);
                 alert("Terjadi kesalahan saat mencari: " + err.message);
-                searchBtn.textContent = 'Check Authenticity';
+                searchBtn.innerHTML = originalText;
             }
         }, 800);
     });
