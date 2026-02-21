@@ -445,9 +445,12 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS registration_tier TEXT");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS payment_amount INTEGER");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS spin_prize TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score INTEGER");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_body INTEGER DEFAULT 0");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_form INTEGER DEFAULT 0");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS score_color INTEGER DEFAULT 0");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS judge_comment TEXT");
+            await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS judged_by INTEGER REFERENCES users(id)");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS has_spun BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS prize_redeemed BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS payment_proof_url TEXT");
@@ -456,6 +459,7 @@ async function initDb() {
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS winner_rank_bod BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS winner_rank_gc BOOLEAN DEFAULT FALSE");
             await pool.query("ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS contest_division TEXT");
+
             // One-time migration for divisions
             await pool.query("UPDATE contest_registrations SET contest_division = UPPER(LEFT(contest_class, 1)) WHERE contest_division IS NULL");
 
