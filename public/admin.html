@@ -1396,11 +1396,31 @@
         // --- RESULTS / CHAMPIONSHIP MANAGEMENT ---
         let currentEventIdForResults = null;
         let eventEntriesForResults = [];
+        let currentChampionshipStep = 1; // 1: Class, 2: BOD, 3: GC
+
+        async function setChampionshipStep(step) {
+            currentChampionshipStep = step;
+            renderResultsList();
+
+            // UI Update for tabs
+            document.querySelectorAll('.step-tab').forEach(tab => {
+                tab.classList.toggle('active', parseInt(tab.dataset.step) === step);
+            });
+
+            // Scroll to top of list
+            document.getElementById('resultsEntryList').scrollTop = 0;
+        }
 
         async function openResultsManagement(eventId) {
             currentEventIdForResults = eventId;
             const modal = document.getElementById('resultsManagerModal');
             if (modal) modal.style.display = 'flex';
+
+            // Reset to Step 1: Class
+            currentChampionshipStep = 1;
+            document.querySelectorAll('.step-tab').forEach(tab => {
+                tab.classList.toggle('active', parseInt(tab.dataset.step) === 1);
+            });
 
             fetchEventResults(eventId);
         }
@@ -1436,9 +1456,25 @@
                 return;
             }
 
-            // Group by Division
+            let filtered = eventEntriesForResults;
+            let stepTitle = "";
+            let stepHint = "";
+
+            if (currentChampionshipStep === 2) {
+                // Step 2: BOD - Only Juara 1 from each class
+                filtered = eventEntriesForResults.filter(e => e.winner_rank_class === 1);
+                stepTitle = "Pemilihan Best of Division (BOD)";
+                stepHint = "Bandingkan para Juara 1 di tiap Divisi untuk menentukan BOD.";
+            } else if (currentChampionshipStep === 3) {
+                // Step 3: GC - Only BOD winners
+                filtered = eventEntriesForResults.filter(e => e.winner_rank_bod === true);
+                stepTitle = "Pemilihan Grand Champion (GC)";
+                stepHint = "Pilih yang terbaik dari para pemenang BOD!";
+            }
+
+            // Grouping logic (depends on step)
             const divisions = {};
-            eventEntriesForResults.forEach(entry => {
+            filtered.forEach(entry => {
                 const div = entry.contest_division || 'Unknown';
                 if (!divisions[div]) divisions[div] = {};
 
@@ -1448,11 +1484,24 @@
             });
 
             let html = "";
+
+            if (currentChampionshipStep > 1) {
+                html += `
+                    <div style="margin-bottom: 2rem; padding: 1.25rem; background: rgba(0,212,255,0.05); border-radius: 20px; border: 1px solid rgba(0,212,255,0.1); position: relative; overflow: hidden;">
+                        <div style="position: absolute; left: 0; top: 0; width: 4px; height: 100%; background: var(--admin-primary);"></div>
+                        <h4 style="color: var(--admin-primary); margin: 0 0 5px 0; font-weight: 800;">${stepTitle}</h4>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">${stepHint}</p>
+                    </div>
+                `;
+            }
+
             for (const divKey in divisions) {
                 html += `
                     <div style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h4 style="color: var(--admin-secondary); font-weight: 800; font-size: 1.2rem; margin: 0;">Division ${divKey}</h4>
+                            <h4 style="color: var(--admin-secondary); font-weight: 800; font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <i class="ri-folder-fill"></i> Division ${divKey}
+                            </h4>
                         </div>
                 `;
 
@@ -1463,19 +1512,52 @@
                     html += `
                         <div style="margin-left: 1rem; margin-bottom: 1.5rem;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-                                <h5 style="color: var(--admin-primary); font-size: 0.9rem; margin: 0;">Class ${clsKey}</h5>
-                                <button onclick="autoRankClass('${divKey}', '${clsKey}')" class="action-btn" style="width: auto; height: auto; padding: 4px 10px; font-size: 0.7rem; background: rgba(0,212,255,0.1); color: var(--admin-primary); border-radius: 8px;">
-                                    <i class="ri-magic-line"></i> AUTO RANK
-                                </button>
+                                <h5 style="color: var(--admin-primary); font-size: 0.9rem; margin: 0; font-weight: 700;">Class ${clsKey}</h5>
+                                ${currentChampionshipStep === 1 ? `
+                                    <button onclick="autoRankClass('${divKey}', '${clsKey}')" class="action-btn" style="width: auto; height: auto; padding: 4px 10px; font-size: 0.7rem; background: rgba(0,212,255,0.1); color: var(--admin-primary); border-radius: 8px; font-weight: 700;">
+                                        <i class="ri-magic-line"></i> AUTO RANK
+                                    </button>
+                                ` : ''}
                             </div>
                             <div style="display: grid; gap: 8px;">
-                                ${sortedClassEntries.map((entry, index) => renderResultItem(entry, index < 3)).join('')}
+                                ${sortedClassEntries.map((entry, index) => renderResultItem(entry, currentChampionshipStep === 1 && index < 3)).join('')}
                             </div>
                         </div>
                     `;
                 }
                 html += `</div>`;
             }
+
+            // Navigation Buttons
+            if (currentChampionshipStep === 1) {
+                html += `
+                    <div style="display: flex; justify-content: center; padding: 2rem 0;">
+                        <button onclick="setChampionshipStep(2)" class="btn-primary" style="padding: 14px 40px; border-radius: 18px; font-weight: 900; box-shadow: 0 10px 30px rgba(0,212,255,0.3); border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                            LANJUT KE PEMILIHAN BOD <i class="ri-arrow-right-line" style="font-size: 1.1rem;"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (currentChampionshipStep === 2) {
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; gap: 15px;">
+                        <button onclick="setChampionshipStep(1)" class="tab-btn" style="border: none; background: rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 15px; font-weight: 700; color: var(--text-muted); cursor: pointer;">
+                            <i class="ri-arrow-left-line"></i> KEMBALI
+                        </button>
+                        <button onclick="setChampionshipStep(3)" class="btn-primary" style="padding: 14px 40px; border-radius: 18px; font-weight: 900; background: #C0C0C0; color: #000; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                            LANJUT KE PEMILIHAN GC <i class="ri-arrow-right-line"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (currentChampionshipStep === 3) {
+                html += `
+                    <div style="display: flex; justify-content: flex-start; padding: 2rem 0;">
+                        <button onclick="setChampionshipStep(2)" class="tab-btn" style="border: none; background: rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 15px; font-weight: 700; color: var(--text-muted); cursor: pointer;">
+                            <i class="ri-arrow-left-line"></i> KEMBALI
+                        </button>
+                    </div>
+                `;
+            }
+
             list.innerHTML = html;
         }
 
@@ -1500,23 +1582,29 @@
                     </div>
                     
                     <div style="display: flex; gap: 5px;">
-                        <!-- Class Rank Selection -->
-                        <select onchange="assignWinnerRank(${entry.id}, 'class', this.value)" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); font-size: 0.7rem; padding: 4px; border-radius: 6px;">
-                            <option value="">- Rank -</option>
-                            <option value="1" ${entry.winner_rank_class === 1 ? 'selected' : ''}>Juara 1</option>
-                            <option value="2" ${entry.winner_rank_class === 2 ? 'selected' : ''}>Juara 2</option>
-                            <option value="3" ${entry.winner_rank_class === 3 ? 'selected' : ''}>Juara 3</option>
-                        </select>
+                        ${currentChampionshipStep === 1 ? `
+                            <!-- Class Rank Selection -->
+                            <select onchange="assignWinnerRank(${entry.id}, 'class', this.value)" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); font-size: 0.7rem; padding: 4px; border-radius: 6px;">
+                                <option value="">- Rank -</option>
+                                <option value="1" ${entry.winner_rank_class === 1 ? 'selected' : ''}>Juara 1</option>
+                                <option value="2" ${entry.winner_rank_class === 2 ? 'selected' : ''}>Juara 2</option>
+                                <option value="3" ${entry.winner_rank_class === 3 ? 'selected' : ''}>Juara 3</option>
+                            </select>
+                        ` : ''}
 
-                        <!-- BOD Toggle -->
-                        <button onclick="assignWinnerRank(${entry.id}, 'bod', ${!isBOD})" class="action-btn" style="width: 32px; height: 32px; font-size: 0.8rem; background: ${isBOD ? '#C0C0C0' : 'transparent'}; color: ${isBOD ? '#000' : '#fff'};" title="Best of Division">
-                            <i class="ri-medal-line"></i>
-                        </button>
+                        ${currentChampionshipStep === 2 ? `
+                            <!-- BOD Toggle -->
+                            <button onclick="assignWinnerRank(${entry.id}, 'bod', ${!isBOD})" class="action-btn" style="width: auto; height: auto; padding: 6px 12px; font-size: 0.8rem; background: ${isBOD ? '#C0C0C0' : 'rgba(192,192,192,0.1)'}; color: ${isBOD ? '#000' : '#fff'}; border-radius: 8px; font-weight: 800; display: flex; align-items: center; gap: 5px;" title="Best of Division">
+                                <i class="ri-medal-fill"></i> ${isBOD ? 'BOD AKTIF' : 'SET BOD'}
+                            </button>
+                        ` : ''}
 
-                        <!-- GC Toggle -->
-                        <button onclick="assignWinnerRank(${entry.id}, 'gc', ${!isGC})" class="action-btn" style="width: 32px; height: 32px; font-size: 0.8rem; background: ${isGC ? '#FFD700' : 'transparent'}; color: ${isGC ? '#000' : '#fff'};" title="Grand Champion">
-                            <i class="ri-vip-crown-line"></i>
-                        </button>
+                        ${currentChampionshipStep === 3 ? `
+                            <!-- GC Toggle -->
+                            <button onclick="assignWinnerRank(${entry.id}, 'gc', ${!isGC})" class="action-btn" style="width: auto; height: auto; padding: 6px 14px; font-size: 0.8rem; background: ${isGC ? '#FFD700' : 'rgba(255,215,0,0.1)'}; color: ${isGC ? '#000' : '#fff'}; border-radius: 8px; font-weight: 800; display: flex; align-items: center; gap: 5px;" title="Grand Champion">
+                                <i class="ri-vip-crown-fill"></i> ${isGC ? 'GC AKTIF' : 'SET GRAND CHAMPION'}
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -1640,8 +1728,46 @@
                         <span class="text-gradient">Results</span>
                     </h3>
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.95rem;">Kelola pemenang Class, Best of Division, hingga
-                    Grand Champion.</p>
+
+                <!-- Championship Step Indicator Tabs -->
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 1.5rem; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div class="step-tab active" data-step="1" onclick="setChampionshipStep(1)"
+                        style="padding: 12px; border-radius: 14px; text-align: center; cursor: pointer; transition: all 0.3s ease; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="ri-medal-line"></i> <span class="mobile-hide">STEP 1:</span> CLASS
+                    </div>
+                    <div class="step-tab" data-step="2" onclick="setChampionshipStep(2)"
+                        style="padding: 12px; border-radius: 14px; text-align: center; cursor: pointer; transition: all 0.3s ease; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="ri-copper-diamond-line"></i> <span class="mobile-hide">STEP 2:</span> BOD
+                    </div>
+                    <div class="step-tab" data-step="3" onclick="setChampionshipStep(3)"
+                        style="padding: 12px; border-radius: 14px; text-align: center; cursor: pointer; transition: all 0.3s ease; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="ri-vip-crown-2-line"></i> <span class="mobile-hide">STEP 3:</span> GC
+                    </div>
+                </div>
+
+                <style>
+                    .step-tab {
+                        color: rgba(255, 255, 255, 0.4);
+                    }
+
+                    .step-tab:hover {
+                        background: rgba(255, 255, 255, 0.03);
+                        color: #fff;
+                    }
+
+                    .step-tab.active {
+                        background: var(--admin-primary);
+                        color: #000;
+                        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+                    }
+
+                    @media (max-width: 600px) {
+                        .mobile-hide {
+                            display: none;
+                        }
+                    }
+                </style>
             </div>
 
             <div id="resultsEntryList" style="flex: 1; overflow-y: auto; padding-right: 15px;" class="hide-scrollbar">
