@@ -785,6 +785,57 @@ app.post('/api/auth/reset-password', loginLimiter, async (req, res) => {
     }
 });
 
+// --- USER PROFILE MANAGEMENT ---
+
+// Get current user profile
+app.get('/api/user/profile', userAuthMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT username, full_name, phone FROM users WHERE id = $1',
+            [req.user.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User tidak ditemukan.' });
+        }
+
+        res.json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        sendSecureError(res, 500, "Gagal memuat profil.", err.message);
+    }
+});
+
+// Update current user profile
+app.post('/api/user/profile', userAuthMiddleware, async (req, res) => {
+    try {
+        const { fullName, phone, password } = req.body;
+
+        if (!fullName || !phone) {
+            return res.status(400).json({ error: 'Nama dan WhatsApp wajib diisi!' });
+        }
+
+        if (password && password.length > 0) {
+            if (password.length < 8) {
+                return res.status(400).json({ error: 'Password minimal 8 karakter!' });
+            }
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await pool.query(
+                'UPDATE users SET full_name = $1, phone = $2, password = $3 WHERE id = $4',
+                [fullName, phone, hashedPassword, req.user.id]
+            );
+        } else {
+            await pool.query(
+                'UPDATE users SET full_name = $1, phone = $2 WHERE id = $3',
+                [fullName, phone, req.user.id]
+            );
+        }
+
+        res.json({ success: true, message: "Profil berhasil diperbarui." });
+    } catch (err) {
+        sendSecureError(res, 500, "Gagal memperbarui profil.", err.message);
+    }
+});
+
 // Alias for backwards compatibility (Optional but helpful during transition)
 app.post('/api/login', (req, res) => {
     // Check if it's admin or user based on request body (old behavior)
