@@ -27,6 +27,7 @@
             --admin-secondary: #10b981;
             --admin-warning: #fbbf24;
             --admin-error: #ef4444;
+            --admin-card-bg: rgba(15, 23, 42, 0.4);
         }
 
         .theme-imlek {
@@ -35,6 +36,7 @@
             --admin-secondary: #FF4D4D;
         }
 
+        /* --- Header & Navigation --- */
         .admin-nav {
             background: rgba(7, 11, 20, 0.95);
             backdrop-filter: blur(25px);
@@ -46,10 +48,24 @@
             right: 0;
             z-index: 1000;
             width: 100%;
+            transition: all 0.3s;
         }
 
         .theme-imlek .admin-nav {
             background: rgba(42, 5, 5, 0.95);
+        }
+
+        .nav-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+        }
+
+        .admin-nav .container {
+            padding: 1rem 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .tab-container {
@@ -58,6 +74,7 @@
             overflow-x: auto;
             padding: 0.5rem 0;
             scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
         .tab-container::-webkit-scrollbar {
@@ -68,8 +85,8 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--glass-border);
             color: var(--text-muted);
-            padding: 0.6rem 1.25rem;
-            border-radius: 12px;
+            padding: 0.65rem 1.25rem;
+            border-radius: 14px;
             font-size: 0.85rem;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
@@ -77,10 +94,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-        }
-
-        .tab-btn i {
-            font-size: 1.1rem;
         }
 
         .tab-btn.active {
@@ -91,18 +104,27 @@
             transform: translateY(-1px);
         }
 
+        /* --- Cards & Panels --- */
+        .glass-panel {
+            padding: 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+        }
+
         .stat-card {
             border-top: 4px solid var(--accent, var(--admin-primary));
         }
 
+        /* --- Table Styling --- */
         .admin-table-container {
-            background: rgba(15, 23, 42, 0.4);
+            background: var(--admin-card-bg);
             backdrop-filter: blur(40px);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
-            overflow-x: auto;
+            overflow: hidden;
             margin-top: 1.5rem;
-            -webkit-overflow-scrolling: touch;
         }
 
         .admin-table {
@@ -112,7 +134,7 @@
 
         .admin-table th {
             text-align: left;
-            padding: 1.25rem 1rem;
+            padding: 1.25rem 1.5rem;
             color: var(--text-muted);
             font-size: 0.75rem;
             text-transform: uppercase;
@@ -120,19 +142,39 @@
             background: rgba(255, 255, 255, 0.02);
             border-bottom: 1px solid var(--glass-border);
             white-space: nowrap;
-            /* Prevent vertical stacking */
         }
 
         .admin-table td {
-            padding: 1.25rem 1rem;
+            padding: 1.25rem 1.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             vertical-align: middle;
         }
 
-        .admin-table tr:last-child td {
-            border-bottom: none;
+        .admin-table tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
         }
 
+        /* --- Buttons --- */
+        .action-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: white;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            border-color: var(--glass-border-bright);
+        }
+
+        /* --- Sections --- */
         .admin-section {
             display: none;
             padding: 2rem 0 5rem;
@@ -142,119 +184,179 @@
             display: block;
         }
 
-        .action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            color: white;
-            transition: all 0.2s;
-        }
-
-        .glass-panel {
-            padding: 2rem;
-        }
-
-        .action-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.1);
+        /* --- Responsive Queries --- */
+        @media (max-width: 1024px) {
+            .admin-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem;
+            }
         }
 
         @media (max-width: 768px) {
             .admin-nav .container {
-                padding: 0.5rem 1rem !important;
+                padding: 0.75rem 1rem !important;
             }
 
-            .admin-nav .text-gradient {
-                font-size: 1.1rem !important;
-                letter-spacing: -1px !important;
-            }
-
-            .admin-nav .text-gradient span {
-                font-size: 0.9rem !important;
-            }
-
-            .admin-grid {
-                gap: 1.25rem;
-            }
-
-            .glass-panel {
-                padding: 1.25rem !important;
-            }
-
-            .admin-section {
-                padding: 1rem 0 4rem;
+            .main-content {
+                padding-top: 130px !important;
             }
 
             .grid-4 {
                 grid-template-columns: 1fr 1fr;
-                gap: 0.75rem;
+                gap: 1rem;
             }
 
             .stat-card {
-                padding: 1.25rem !important;
+                padding: 1.5rem !important;
             }
 
             .stat-card div:last-child {
-                font-size: 1.75rem !important;
+                font-size: 2rem !important;
+            }
+
+            .glass-panel {
+                padding: 1.5rem !important;
+            }
+
+            /* Complex Header Shrink */
+            .nav-logo-container {
+                gap: 8px;
+            }
+
+            .nav-logo-container>div:first-child {
+                width: 32px !important;
+                height: 32px !important;
+            }
+
+            .nav-logo-container .nav-logo {
+                font-size: 1.1rem !important;
+            }
+        }
+
+        /* --- MOBILE TABLE CARD VIEW --- */
+        @media (max-width: 600px) {
+            .admin-table-container {
+                background: transparent;
+                border: none;
+                backdrop-filter: none;
+            }
+
+            .admin-table thead {
+                display: none;
+                /* Hide headers on mobile card view */
+            }
+
+            .admin-table,
+            .admin-table tbody,
+            .admin-table tr,
+            .admin-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .admin-table tr {
+                background: var(--admin-card-bg);
+                backdrop-filter: blur(20px);
+                border: 1px solid var(--glass-border);
+                border-radius: 20px;
+                margin-bottom: 1.25rem;
+                padding: 1rem;
+                position: relative;
+            }
+
+            .admin-table td {
+                text-align: right;
+                padding: 0.75rem 0.5rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                min-height: 50px;
+            }
+
+            .admin-table td:last-child {
+                border-bottom: none;
+            }
+
+            .admin-table td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 700;
+                text-transform: uppercase;
+                font-size: 0.65rem;
+                color: var(--text-muted);
+                letter-spacing: 0.5px;
+            }
+
+            /* Special handling for ID/Number in head of card */
+            .admin-table tr td:first-child {
+                border-bottom: 2px solid var(--glass-border);
+                margin-bottom: 0.5rem;
+                padding-bottom: 1rem;
+                justify-content: center;
+                text-align: center;
+                background: rgba(0, 212, 255, 0.05);
+                border-radius: 12px;
+            }
+
+            .admin-table tr td:first-child::before {
+                display: none;
+            }
+
+            /* Adjust grid for very small screens */
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-nav .container {
+                padding: 0.6rem 0.75rem !important;
             }
 
             .tab-btn {
                 padding: 0.5rem 0.85rem;
                 font-size: 0.75rem;
-            }
-
-            .tab-btn i {
-                font-size: 0.95rem;
+                border-radius: 10px;
             }
         }
 
-        @media (max-width: 480px) {
-            .admin-nav .container>div:first-child {
-                gap: 0.5rem !important;
+        /* --- Modals --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
             }
 
-            .admin-nav .container>div:first-child>div:first-child {
-                width: 32px !important;
-                height: 32px !important;
-            }
-
-            .admin-nav .container>div:first-child>div:first-child i {
-                font-size: 1rem !important;
-            }
-
-            .admin-nav .text-gradient {
-                font-size: 1rem !important;
-                font-weight: 800 !important;
-            }
-
-            .admin-nav .text-gradient span {
-                font-size: 0.85rem !important;
-            }
-
-            .grid-4 {
-                grid-template-columns: 1fr;
-            }
-
-            .tab-btn {
-                padding: 0.45rem 0.75rem;
-                font-size: 0.7rem;
-            }
-
-            .tab-btn i {
-                font-size: 0.9rem;
-            }
-
-            .action-btn {
-                width: 36px !important;
-                height: 36px !important;
-            }
-
-            .action-btn i {
-                font-size: 1.1rem !important;
+            to {
+                transform: translateY(0);
+                opacity: 1;
             }
         }
     </style>
@@ -268,18 +370,19 @@
     </div>
 
     <nav class="admin-nav">
-        <div class="container" style="padding: 0.75rem 1.25rem; max-width: 1400px; margin: 0 auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <div class="nav-logo-container">
                     <div
-                        style="width: 38px; height: 38px; background: var(--admin-primary); border-radius: 10px; display: grid; place-items: center; color: #000; box-shadow: 0 0 15px var(--admin-primary-glow);">
+                        style="width: 38px; height: 38px; background: var(--admin-primary); border-radius: 12px; display: grid; place-items: center; color: #000; box-shadow: 0 0 15px var(--admin-primary-glow);">
                         <i class="ri-shield-flash-fill" style="font-size: 1.25rem;"></i>
                     </div>
-                    <a href="index.html" class="nav-logo text-gradient">SnaDaily<span
-                            style="color: white; font-weight: 300;">Checker</span></a>
+                    <a href="index.html" class="nav-logo text-gradient"
+                        style="font-size: 1.4rem; font-weight: 850; text-decoration: none; letter-spacing: -0.5px;">SnaDaily<span
+                            style="color: white; font-weight: 300;">Admin</span></a>
                 </div>
                 <button onclick="logout()" class="action-btn"
-                    style="color: var(--admin-error); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); width: 42px; height: 42px;"
+                    style="color: var(--admin-error); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1);"
                     title="Logout">
                     <i class="ri-logout-box-r-line" style="font-size: 1.25rem;"></i>
                 </button>
@@ -298,7 +401,7 @@
         </div>
     </nav>
 
-    <main class="container" style="padding-top: 140px;">
+    <main class="container main-content" style="padding-top: 150px;">
         <!-- Dashboard Overview -->
         <div id="section-overview" class="admin-section active animate-fade-in">
             <div class="grid grid-4 mb-4">
@@ -777,12 +880,12 @@
                     if (s.recentPending && s.recentPending.length > 0) {
                         document.getElementById('pendingTableBody').innerHTML = s.recentPending.map(r => `
                             <tr class="animate-fade-in">
-                                <td style="font-family: monospace; font-weight: 800; color: var(--admin-primary); font-size: 0.75rem;">${r.entry_number ? escapeHTML(r.entry_number) : '<span style="color: var(--text-muted); font-weight: 400; font-size: 0.7rem;">Menunggu Approval</span>'}</td>
-                                <td style="font-weight: 700;">${escapeHTML(r.user_name)}</td>
-                                <td>${escapeHTML(r.team_name || '-')}</td>
-                                <td style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</td>
-                                <td>
-                                    <div style="display: flex; gap: 8px;">
+                                <td data-label="No. Entri" style="font-family: monospace; font-weight: 800; color: var(--admin-primary); font-size: 0.75rem;">${r.entry_number ? escapeHTML(r.entry_number) : '<span style="color: var(--text-muted); font-weight: 400; font-size: 0.7rem;">Menunggu Approval</span>'}</td>
+                                <td data-label="Nama Peserta" style="font-weight: 700;">${escapeHTML(r.user_name)}</td>
+                                <td data-label="Tim">${escapeHTML(r.team_name || '-')}</td>
+                                <td data-label="Event" style="font-size: 0.8rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</td>
+                                <td data-label="Aksi">
+                                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                         <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary); background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.2);" title="Approve"><i class="ri-check-double-line"></i></button>
                                         <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error); background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2);" title="Reject"><i class="ri-close-circle-line"></i></button>
                                     </div>
@@ -906,14 +1009,17 @@
                     }
                     body.innerHTML = data.data.map(u => `
                     <tr>
-                        <td style="font-weight: 600;">${escapeHTML(u.username)}</td>
-                        <td style="font-family: monospace; font-size: 0.7rem; color: var(--text-dim); max-width: 120px; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(u.password)}</td>
-                        <td style="color: var(--admin-primary); font-weight: 700;">${escapeHTML(u.full_name)}</td>
-                        <td>${escapeHTML(u.phone)}</td>
-                        <td><span style="background: rgba(0,212,255,0.1); color: var(--admin-primary); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 800;">${escapeHTML(u.role).toUpperCase()}</span></td>
-                        <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(u.created_at).toLocaleDateString()}</td>
-                             <button onclick="resetUserPasswordModal(${u.id}, '${escapeHTML(u.username)}')" class="action-btn" style="color: var(--admin-warning);" title="Reset Password"><i class="ri-key-line"></i></button>
-                             <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus User"><i class="ri-user-unfollow-line"></i></button>
+                        <td data-label="Username" style="font-weight: 600;">${escapeHTML(u.username)}</td>
+                        <td data-label="Password (Hash)" style="font-family: monospace; font-size: 0.7rem; color: var(--text-dim); max-width: 120px; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(u.password)}</td>
+                        <td data-label="Nama Lengkap" style="color: var(--admin-primary); font-weight: 700;">${escapeHTML(u.full_name)}</td>
+                        <td data-label="WhatsApp">${escapeHTML(u.phone)}</td>
+                        <td data-label="Role"><span style="background: rgba(0,212,255,0.1); color: var(--admin-primary); padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 800;">${escapeHTML(u.role).toUpperCase()}</span></td>
+                        <td data-label="Joined" style="color: var(--text-muted); font-size: 0.8rem;">${new Date(u.created_at).toLocaleDateString()}</td>
+                        <td data-label="Aksi">
+                             <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                 <button onclick="resetUserPasswordModal(${u.id}, '${escapeHTML(u.username)}')" class="action-btn" style="color: var(--admin-warning);" title="Reset Password"><i class="ri-key-line"></i></button>
+                                 <button onclick="deleteUser(${u.id})" class="action-btn" style="color: var(--admin-error);" title="Hapus User"><i class="ri-user-unfollow-line"></i></button>
+                             </div>
                          </td>
                      </tr>
                  `).join('');
@@ -1190,12 +1296,12 @@
                         const statusClass = r.status === 'approved' ? 'admin-secondary' : r.status === 'rejected' ? 'admin-error' : 'text-muted';
                         return `
                         <tr>
-                            <td style="font-family: monospace; font-weight: 800; color: var(--admin-primary); font-size: 0.75rem;">${(r.status === 'approved' && r.entry_number) ? escapeHTML(r.entry_number) : '<span style="color: var(--text-muted); font-weight: 400; font-size: 0.7rem;">Menunggu Approval</span>'}</td>
-                            <td><div style="font-weight: 700;">${escapeHTML(r.user_name)}</div></td>
-                            <td><div style="font-size: 0.85rem; color: var(--text-dim);">${escapeHTML(r.team_name || '-')}</div></td>
-                             <td><div style="font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</div></td>
-                             <td>
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <td data-label="No. Entri" style="font-family: monospace; font-weight: 800; color: var(--admin-primary); font-size: 0.75rem;">${(r.status === 'approved' && r.entry_number) ? escapeHTML(r.entry_number) : '<span style="color: var(--text-muted); font-weight: 400; font-size: 0.7rem;">Menunggu Approval</span>'}</td>
+                            <td data-label="Nama Peserta"><div style="font-weight: 700;">${escapeHTML(r.user_name)}</div></td>
+                            <td data-label="Tim"><div style="font-size: 0.85rem; color: var(--text-dim);">${escapeHTML(r.team_name || '-')}</div></td>
+                            <td data-label="Event"><div style="font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(r.contest_name)}</div></td>
+                            <td data-label="Payment">
+                                <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
                                     ${r.payment_proof_url ? `
                                         <a href="${r.payment_proof_url}" target="_blank" class="action-btn" style="width: auto; height: auto; padding: 4px 10px; font-size: 0.7rem; color: #fff; background: rgba(0,212,255,0.2); border-radius: 6px; text-decoration: none;">
                                             <i class="ri-file-search-line"></i> BUKTI BAYAR
@@ -1204,15 +1310,17 @@
                                     <div style="font-size: 0.8rem; font-weight: 800; color: white;">Rp ${r.payment_amount?.toLocaleString() || 0}</div>
                                 </div>
                             </td>
-                            <td>
-                                <div style="font-size: 1rem; font-weight: 800; color: var(--admin-secondary);">${score}</div>
-                                <div style="font-size: 0.65rem; color: var(--text-dim);">B:${r.score_body} F:${r.score_form} C:${r.score_color}</div>
+                            <td data-label="Skor Juri">
+                                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                                    <div style="font-size: 1rem; font-weight: 800; color: var(--admin-secondary);">${score}</div>
+                                    <div style="font-size: 0.65rem; color: var(--text-dim);">B:${r.score_body} F:${r.score_form} C:${r.score_color}</div>
+                                </div>
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <span style="background: rgba(255,255,255,0.05); color: var(--${statusClass}); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1);">${escapeHTML(r.status)}</span>
                             </td>
-                            <td>
-                                <div style="display: flex; gap: 8px;">
+                            <td data-label="Aksi">
+                                <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                     ${r.status === 'pending' ? `
                                         <button onclick="quickAction(${r.id}, 'approved')" class="action-btn" style="color: var(--admin-secondary);" title="Approve"><i class="ri-check-line"></i></button>
                                         <button onclick="quickAction(${r.id}, 'rejected')" class="action-btn" style="color: var(--admin-error);" title="Reject"><i class="ri-close-line"></i></button>
