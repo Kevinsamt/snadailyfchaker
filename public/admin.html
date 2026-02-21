@@ -1457,11 +1457,19 @@
                 `;
 
                 for (const clsKey in divisions[divKey]) {
+                    // SORT BY SCORE FOR SUGGESTION
+                    const sortedClassEntries = [...divisions[divKey][clsKey]].sort((a, b) => (b.score || 0) - (a.score || 0));
+
                     html += `
                         <div style="margin-left: 1rem; margin-bottom: 1.5rem;">
-                            <h5 style="color: var(--admin-primary); font-size: 0.9rem; margin-bottom: 0.8rem;">Class ${clsKey}</h5>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                                <h5 style="color: var(--admin-primary); font-size: 0.9rem; margin: 0;">Class ${clsKey}</h5>
+                                <button onclick="autoRankClass('${divKey}', '${clsKey}')" class="action-btn" style="width: auto; height: auto; padding: 4px 10px; font-size: 0.7rem; background: rgba(0,212,255,0.1); color: var(--admin-primary); border-radius: 8px;">
+                                    <i class="ri-magic-line"></i> AUTO RANK
+                                </button>
+                            </div>
                             <div style="display: grid; gap: 8px;">
-                                ${divisions[divKey][clsKey].map(entry => renderResultItem(entry)).join('')}
+                                ${sortedClassEntries.map((entry, index) => renderResultItem(entry, index < 3)).join('')}
                             </div>
                         </div>
                     `;
@@ -1471,13 +1479,13 @@
             list.innerHTML = html;
         }
 
-        function renderResultItem(entry) {
+        function renderResultItem(entry, isSuggested = false) {
             const isWinnerClass = entry.winner_rank_class;
             const isBOD = entry.winner_rank_bod;
             const isGC = entry.winner_rank_gc;
 
             return `
-                <div class="glass-panel" style="padding: 12px; display: flex; align-items: center; gap: 12px; border-left: 3px solid ${isGC ? '#FFD700' : isBOD ? '#C0C0C0' : isWinnerClass ? 'var(--admin-secondary)' : 'rgba(255,255,255,0.1)'};">
+                <div class="glass-panel" style="padding: 12px; display: flex; align-items: center; gap: 12px; border-left: 3px solid ${isGC ? '#FFD700' : isBOD ? '#C0C0C0' : isWinnerClass ? 'var(--admin-secondary)' : isSuggested ? 'rgba(0,212,255,0.4)' : 'rgba(255,255,255,0.1)'};">
                     <img src="${entry.fish_image_url}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover;">
                     <div style="flex: 1; min-width: 0;">
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
@@ -1485,6 +1493,7 @@
                             ${isGC ? '<span style="color: #FFD700; font-size: 0.75rem; font-weight: 800;"><i class="ri-vip-crown-fill"></i> GC</span>' : ''}
                             ${isBOD ? '<span style="color: #C0C0C0; font-size: 0.75rem; font-weight: 800;"><i class="ri-medal-fill"></i> BOD</span>' : ''}
                             ${isWinnerClass ? `<span style="color: var(--admin-secondary); font-size: 0.75rem; font-weight: 800;"><i class="ri-trophy-fill"></i> Juara ${isWinnerClass}</span>` : ''}
+                            ${isSuggested && !isWinnerClass ? '<span style="color: var(--admin-primary); font-size: 0.7rem; font-weight: 700; background: rgba(0,212,255,0.05); padding: 2px 6px; border-radius: 4px;"><i class="ri-lightbulb-fill"></i> SUGGEST</span>' : ''}
                         </div>
                         <div style="font-size: 0.85rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(entry.fish_name)}</div>
                         <div style="font-size: 0.7rem; color: var(--text-muted);">${escapeHTML(entry.contestant_name)} • Score: <span style="color: var(--admin-secondary); font-weight: 800;">${entry.score || 0}</span></div>
@@ -1511,6 +1520,33 @@
                     </div>
                 </div>
             `;
+        }
+
+        async function autoRankClass(div, cls) {
+            const entries = eventEntriesForResults.filter(e =>
+                (e.contest_division || 'Unknown') === div && (e.contest_class || 'Unknown') === cls
+            );
+
+            const sorted = entries.sort((a, b) => (b.score || 0) - (a.score || 0));
+            if (sorted.length === 0) return alert('Tidak ada peserta di kelas ini.');
+
+            if (!confirm(`Otomatis berikan Juara 1, 2, 3 untuk Kelas ${cls} berdasarkan skor tertinggi?`)) return;
+
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                // Assign top 3 (if exists)
+                for (let i = 0; i < Math.min(sorted.length, 3); i++) {
+                    await fetch('/api/admin/judging/winners/assign', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ id: sorted[i].id, tier: 'class', rank: i + 1 })
+                    });
+                }
+                alert(`Otomatis Juara untuk Kelas ${cls} berhasil diterapkan!`);
+                fetchEventResults(currentEventIdForResults);
+            } catch (err) {
+                alert('Gagal auto rank: ' + err.message);
+            }
         }
 
         async function assignWinnerRank(id, tier, rank) {
