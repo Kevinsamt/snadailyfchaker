@@ -220,7 +220,7 @@
 
                 <div style="margin-top: 2rem; text-align: center; font-size: 0.85rem;">
                     <span style="color: var(--text-muted);">Sudah punya akun?</span>
-                    <a href="login.html"
+                    <a id="loginLink" href="login.html"
                         style="color: var(--secondary); text-decoration: none; font-weight: 800; margin-left: 5px;">Masuk</a>
                 </div>
             </div>
@@ -229,6 +229,13 @@
 
     <script src="js/navigation.js"></script>
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+        if (redirect) {
+            const loginLink = document.getElementById('loginLink');
+            if (loginLink) loginLink.href = `login.html?redirect=${encodeURIComponent(redirect)}`;
+        }
+
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('regBtn');
@@ -252,7 +259,8 @@
 
                 if (data.success) {
                     alert('Registrasi Berhasil! Silakan masuk.');
-                    window.location.href = 'login.html';
+                    const loginUrl = redirect ? `login.html?redirect=${encodeURIComponent(redirect)}` : 'login.html';
+                    window.location.href = loginUrl;
                 } else {
                     alert(data.error || 'Gagal registrasi');
                     btn.disabled = false;

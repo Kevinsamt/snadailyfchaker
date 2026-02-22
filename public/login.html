@@ -204,7 +204,7 @@
                         style="color: var(--text-muted); text-decoration: none; display: block; margin-bottom: 1rem;">Lupa
                         Password?</a>
                     <span style="color: var(--text-muted);">Belum punya akses?</span>
-                    <a href="register.html"
+                    <a id="registerLink" href="register.html"
                         style="color: var(--primary); text-decoration: none; font-weight: 800; margin-left: 5px;">Daftar
                         Akun</a>
                 </div>
@@ -215,6 +215,14 @@
     <script src="js/navigation.js"></script>
     <script src="js/app.js"></script>
     <script>
+        // Forward redirect param to register link
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+        if (redirect) {
+            const regLink = document.getElementById('registerLink');
+            if (regLink) regLink.href = `register.html?redirect=${encodeURIComponent(redirect)}`;
+        }
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
@@ -241,14 +249,6 @@
                     if (data.role === 'admin') {
                         sessionStorage.setItem('sna_admin_token', data.token);
                         window.location.href = 'admin.html';
-                    } else if (data.role === 'judge') {
-                        localStorage.setItem('sna_user_token', data.token);
-                        localStorage.setItem('sna_user_data', JSON.stringify({
-                            username: data.user.username,
-                            fullName: data.user.fullName,
-                            role: data.role
-                        }));
-                        window.location.href = 'judge.html';
                     } else {
                         localStorage.setItem('sna_user_token', data.token);
                         localStorage.setItem('sna_user_data', JSON.stringify({
@@ -256,7 +256,16 @@
                             fullName: data.user.fullName,
                             role: data.role
                         }));
-                        window.location.href = 'dashboard.html';
+
+                        // Handle Redirect Parameter
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirectTo = urlParams.get('redirect');
+
+                        if (redirectTo) {
+                            window.location.href = redirectTo;
+                        } else {
+                            window.location.href = data.role === 'judge' ? 'judge.html' : 'dashboard.html';
+                        }
                     }
                 } else {
                     errorMsg.innerText = data.error || data.message || 'Username atau password salah!';

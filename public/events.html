@@ -363,6 +363,18 @@
             fetchEvents();
         });
 
+        function checkAuthAndRegister(eventTitle) {
+            const token = localStorage.getItem('sna_user_token');
+            const targetUrl = `contest-entry.html?event=${encodeURIComponent(eventTitle)}`;
+
+            if (token) {
+                window.location.href = targetUrl;
+            } else {
+                // Redirect to login with redirect param
+                window.location.href = `login.html?redirect=${encodeURIComponent(targetUrl)}`;
+            }
+        }
+
         async function fetchEvents() {
             try {
                 const response = await fetch('/api/events');
@@ -407,7 +419,7 @@
                             '<button class="btn-primary" style="width: 100%; opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--glass-border); box-shadow: none;">EVENT SELESAI</button>' :
                             ev.status === 'upcoming' ?
                                 '<button class="btn-primary" style="width: 100%; opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--glass-border); box-shadow: none;">BELUM DIBUKA</button>' :
-                                `<a href="contest-entry.html?event=${encodeURIComponent(ev.title)}" class="btn-primary hover-glow" style="width: 100%; border-radius: 100px;">DAFTAR SEKARANG</a>`
+                                `<button onclick="checkAuthAndRegister('${escapeHTML(ev.title)}')" class="btn-primary hover-glow" style="width: 100%; border-radius: 100px; border: none; cursor: pointer;">DAFTAR SEKARANG</button>`
                         }
                                 </div>
                             </div>
