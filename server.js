@@ -1029,6 +1029,67 @@ app.post('/api/contest/registrations/:id/redeem', userAuthMiddleware, async (req
     }
 });
 
+// Update Registration Video
+app.post('/api/contest/registrations/:id/video', userAuthMiddleware, upload.single('fishVideo'), async (req, res) => {
+    try {
+        const registrationId = req.params.id;
+        const userId = req.user.id;
+        const video = req.file;
+
+        if (!video) {
+            return res.status(400).json({ error: 'Tidak ada video yang diunggah.' });
+        }
+
+        // 1. Verify ownership and status
+        const check = await pool.query(
+            "SELECT video_url, status FROM contest_registrations WHERE id = $1 AND user_id = $2",
+            [registrationId, userId]
+        );
+
+        if (check.rows.length === 0) {
+            return res.status(404).json({ error: 'Pendaftaran tidak ditemukan atau Anda tidak memiliki akses.' });
+        }
+
+        const reg = check.rows[0];
+        if (reg.status !== 'pending' && reg.status !== 'approved') {
+            return res.status(403).json({ error: 'Video pendaftaran sudah tidak bisa diganti pada tahap ini.' });
+        }
+
+        // 2. Upload new video with MIME check
+        const allowedTypes = ['video/mp4', 'video/quicktime', 'video/webm'];
+        if (!allowedTypes.includes(video.mimetype)) {
+            return res.status(400).json({ error: "Format video tidak didukung. Gunakan MP4/MOV/WebM." });
+        }
+
+        const newVideoUrl = await uploadToSupabase(video.buffer, video.originalname, video.mimetype);
+
+        // 3. Cleanup old video from Supabase if it exists
+        if (reg.video_url) {
+            const extractPath = (url) => {
+                if (!url) return null;
+                const parts = url.split('contest-files/');
+                return parts.length > 1 ? parts[1] : null;
+            };
+            const oldPath = extractPath(reg.video_url);
+            if (oldPath) {
+                await supabase.storage.from('contest-files').remove([oldPath]);
+            }
+        }
+
+        // 4. Update Database
+        await pool.query(
+            "UPDATE contest_registrations SET video_url = $1 WHERE id = $2",
+            [newVideoUrl, registrationId]
+        );
+
+        res.json({ success: true, message: 'Video berhasil diperbarui.', videoUrl: newVideoUrl });
+    } catch (err) {
+        console.error("Update Video Error:", err.message);
+        const errMsg = err.message.includes('413') ? "Ukuran file terlalu besar! (Maks 4.5MB)" : err.message;
+        res.status(500).json({ error: "Gagal memperbarui video: " + errMsg });
+    }
+});
+
 // My Registrations
 app.get('/api/contest/my-registrations', userAuthMiddleware, async (req, res) => {
     try {

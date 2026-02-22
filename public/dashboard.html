@@ -545,6 +545,56 @@
         </div>
     </div>
 
+    <!-- Video Update Modal -->
+    <div id="videoModal" class="modal">
+        <div class="glass-panel modal-content animate-fade-in"
+            style="border: 1px solid var(--glass-border-bright); max-width: 450px;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="width: 4px; height: 24px; background: var(--secondary); border-radius: 10px;"></div>
+                <h2 style="font-size: 1.5rem; font-weight: 800;">Update <span class="text-gradient"
+                        style="background: linear-gradient(135deg, var(--secondary), #fff);">Video Ikan</span></h2>
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem; line-height: 1.5;">
+                Pilih video terbaru untuk menggantikan video lama. Pastikan ukuran file tidak lebih dari 4.5 MB.
+            </p>
+
+            <div class="input-group">
+                <div id="videoDropZone"
+                    style="border: 2px dashed rgba(255,255,255,0.1); border-radius: 20px; padding: 2rem; text-align: center; cursor: pointer; transition: 0.3s;"
+                    onclick="document.getElementById('newFishVideo').click()">
+                    <i class="ri-video-upload-line"
+                        style="font-size: 2.5rem; color: var(--secondary); display: block; margin-bottom: 1rem;"></i>
+                    <span id="videoFileNameDisplay"
+                        style="font-size: 0.9rem; font-weight: 600; color: rgba(255,255,255,0.6);">Klik untuk Pilih
+                        Video (MP4)</span>
+                </div>
+                <input type="file" id="newFishVideo" hidden accept="video/*" onchange="handleVideoSelect(this)">
+            </div>
+
+            <div id="uploadProgressContainer" style="display: none; margin-top: 1.5rem;">
+                <div
+                    style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; color: var(--secondary);">
+                    <span>Mengunggah...</span>
+                    <span id="uploadPercent">0%</span>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">
+                    <div id="uploadProgressBar"
+                        style="width: 0%; height: 100%; background: var(--secondary); transition: width 0.3s; box-shadow: 0 0 10px var(--secondary-glow);">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="button" class="btn-primary"
+                    style="background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); box-shadow: none;"
+                    id="cancelVideoBtn" onclick="closeVideoModal()">BATAL</button>
+                <button type="button" class="btn-primary" style="flex: 1; background: var(--secondary); color: #000;"
+                    id="uploadVideoBtn" onclick="uploadNewVideo()">UNGGAH VIDEO</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Spin Wheel Overlay -->
     <div id="wheelOverlay" class="spin-wheel-overlay">
         <div style="text-align: center; margin-bottom: 2rem;">
@@ -698,6 +748,11 @@
                                         ${canSpin ? `
                                             <button onclick="openWheel('${reg.id}')" class="gift-box-btn hover-lift">
                                                 <i class="ri-gift-fill"></i> SPIN!
+                                            </button>
+                                        ` : ''}
+                                        ${(reg.status.toLowerCase() === 'approved' || reg.status.toLowerCase() === 'pending') ? `
+                                            <button onclick="openVideoModal('${reg.id}')" class="btn-primary" style="padding: 6px 12px; font-size: 0.7rem; background: rgba(255,255,255,0.1); color: #fff; border-radius: 8px; font-weight: 800; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                                                <i class="ri-video-add-line"></i> GANTI VIDEO
                                             </button>
                                         ` : ''}
                                         ${reg.status === 'approved' ? `
@@ -961,6 +1016,83 @@
 
         function openModal() { document.getElementById('editModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+
+        // --- VIDEO UPDATE LOGIC ---
+        function openVideoModal(regId) {
+            currentRegId = regId;
+            document.getElementById('videoModal').style.display = 'flex';
+            document.getElementById('videoFileNameDisplay').innerText = 'Klik untuk Pilih Video (MP4)';
+            document.getElementById('newFishVideo').value = '';
+            document.getElementById('uploadProgressContainer').style.display = 'none';
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').style.display = 'none';
+        }
+
+        function handleVideoSelect(input) {
+            const file = input.files[0];
+            if (file) {
+                const name = file.name.length > 25 ? file.name.substring(0, 22) + '...' : file.name;
+                document.getElementById('videoFileNameDisplay').innerText = name;
+                document.getElementById('videoDropZone').style.borderColor = 'var(--secondary)';
+            }
+        }
+
+        async function uploadNewVideo() {
+            const file = document.getElementById('newFishVideo').files[0];
+            if (!file) return alert('Pilih file video dulu ya Cak!');
+
+            const btn = document.getElementById('uploadVideoBtn');
+            const cancelBtn = document.getElementById('cancelVideoBtn');
+            const progressBar = document.getElementById('uploadProgressBar');
+            const progressPercent = document.getElementById('uploadPercent');
+            const progressContainer = document.getElementById('uploadProgressContainer');
+            const token = localStorage.getItem('sna_user_token');
+
+            btn.disabled = true;
+            cancelBtn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> PROSES...';
+            progressContainer.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('fishVideo', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `/api/contest/registrations/${currentRegId}/video`, true);
+            xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressPercent.innerText = percent + '%';
+                }
+            };
+
+            xhr.onload = function () {
+                const response = JSON.parse(xhr.responseText);
+                if (xhr.status === 200 && response.success) {
+                    alert('Video berhasil diperbarui!');
+                    closeVideoModal();
+                    fetchRegistrations(); // Refresh UI
+                } else {
+                    alert(response.error || 'Gagal mengunggah video. Pastikan ukuran file di bawah 4.5 MB.');
+                }
+                btn.disabled = false;
+                cancelBtn.disabled = false;
+                btn.innerHTML = 'UNGGAH VIDEO';
+            };
+
+            xhr.onerror = function () {
+                alert('Terjadi kesalahan jaringan.');
+                btn.disabled = false;
+                cancelBtn.disabled = false;
+                btn.innerHTML = 'UNGGAH VIDEO';
+            };
+
+            xhr.send(formData);
+        }
 
         function toggleEditPass() {
             const input = document.getElementById('editPassword');
