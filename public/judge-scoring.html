@@ -15,97 +15,135 @@
     <script src="js/theme-switcher.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
+        :root {
+            --primary: #00d4ff;
+            --primary-glow: rgba(0, 212, 255, 0.4);
+            --secondary: #10b981;
+            --warning: #fbbf24;
+            --error: #ef4444;
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --radius-lg: 24px;
+        }
+
         body {
-            background: radial-gradient(circle at 50% 0%, #0a192f 0%, #010409 100%);
+            background: #020617;
             min-height: 100vh;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* --- Header & Navbar --- */
+        .navbar {
+            background: rgba(7, 11, 20, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
         }
 
         .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
             padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .scoring-card {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
             padding: 2rem;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
         }
 
         .criteria-row {
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-            border: 1px solid transparent;
-            transition: all 0.3s;
+            border-radius: 18px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .criteria-row:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
             border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         .range-slider {
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 10px;
             outline: none;
-            margin: 15px 0;
+            margin: 18px 0;
         }
 
         .range-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             background: var(--primary);
             cursor: pointer;
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary);
-            transition: all 0.2s;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px var(--primary-glow);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .range-slider::-webkit-slider-thumb:hover {
             transform: scale(1.2);
+            box-shadow: 0 0 25px var(--primary);
         }
 
         .entry-card-mini {
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 1rem 1.25rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.25rem;
         }
 
         .entry-card-mini:hover {
             background: rgba(255, 255, 255, 0.08);
-            border-color: var(--primary);
-            transform: translateX(5px);
+            border-color: rgba(0, 212, 255, 0.4);
+            transform: translateX(8px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .entry-card-mini.active {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(0, 212, 255, 0.08);
             border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.2);
         }
 
         .total-score-display {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, #ffffff 0%, var(--primary) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             font-size: 3.5rem;
             font-weight: 900;
             line-height: 1;
+            filter: drop-shadow(0 0 10px var(--primary-glow));
         }
 
         .compare-item {
@@ -198,6 +236,12 @@
 </head>
 
 <body>
+    <div class="ocean-background">
+        <div class="bubble x1"></div>
+        <div class="bubble x2"></div>
+        <div class="bubble x3"></div>
+        <div class="bubble x4"></div>
+    </div>
     <nav class="navbar">
         <div class="nav-container">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
