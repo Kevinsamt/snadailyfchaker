@@ -649,6 +649,33 @@
         </div>
     </div>
 
+    <!-- Competitors Modal -->
+    <div id="competitorsModal" class="modal">
+        <div class="modal-content glass" style="max-width: 800px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div>
+                    <h2 id="compModalTitle" style="margin: 0; font-size: 1.5rem; font-weight: 800;">Daftar Saingan</h2>
+                    <p id="compModalSub"
+                        style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;"></p>
+                </div>
+                <button onclick="closeCompetitorsModal()"
+                    style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div id="competitorsList" class="competitors-grid">
+                <!-- Competitors injected here -->
+            </div>
+
+            <div id="compEmptyState" style="display: none; text-align: center; padding: 3rem 0;">
+                <i class="ri-rest-time-line" style="font-size: 3rem; color: var(--text-muted); opacity: 0.5;"></i>
+                <p style="color: var(--text-muted); margin-top: 1rem;">Belum ada saingan lain yang terdaftar (Approved)
+                    di kelas ini.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Spin Wheel Overlay -->
     <div id="wheelOverlay" class="spin-wheel-overlay">
         <div style="text-align: center; margin-bottom: 2rem;">
