@@ -16,14 +16,8 @@ require('dotenv').config();
 
 // Trigger redeploy to pick up new env vars
 const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-    if (process.env.NODE_ENV === 'production') {
-        console.error("❌ FATAL: JWT_SECRET IS MISSING IN PRODUCTION!");
-        // We throw an accidental error instead of hard exit to allow middleware to catch it or logs to persist
-    } else {
-        console.warn("⚠️ WARNING: JWT_SECRET missing. Using insecure fallback for local development.");
-    }
+if (process.env.NODE_ENV === 'production' && !JWT_SECRET) {
+    throw new Error("❌ FATAL: JWT_SECRET IS MISSING! Server cannot start in production without security keys.");
 }
 const ACTUAL_SECRET = JWT_SECRET || 'snadaily_dev_insecure_secret';
 
@@ -1013,7 +1007,7 @@ app.post('/api/contest/registrations/:id/redeem', userAuthMiddleware, async (req
     try {
         const registrationId = req.params.id;
 
-        // Mark as redeemed
+        // Mark as redeemed with OWNERSHIP check (IDOR Protection)
         const result = await pool.query(
             "UPDATE contest_registrations SET prize_redeemed = TRUE WHERE id = $1 AND user_id = $2 RETURNING prize_redeemed",
             [registrationId, req.user.id]
@@ -1140,32 +1134,10 @@ app.get('/api/contest/my-registrations', userAuthMiddleware, async (req, res) =>
 });
 
 // Get User Profile
-app.get('/api/user/profile', userAuthMiddleware, async (req, res) => {
-    try {
-        const result = await pool.query('SELECT username, full_name, phone, role FROM users WHERE id = $1', [req.user.id]);
-        if (result.rows.length > 0) {
-            res.json({ success: true, data: result.rows[0] });
-        } else {
-            res.status(404).json({ error: 'User not found' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+// (Duplicate Route GET Profile Removed - Defined above at line 791)
 
 // Update User Profile
-app.post('/api/user/profile', userAuthMiddleware, async (req, res) => {
-    try {
-        const { fullName, phone } = req.body;
-        const result = await pool.query(
-            'UPDATE users SET full_name = $1, phone = $2 WHERE id = $3 RETURNING username, full_name, phone, role',
-            [fullName, phone, req.user.id]
-        );
-        res.json({ success: true, data: result.rows[0] });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
+// (Duplicate Route Profile Removed - Defined above at line 809)
 
 // --- ADMIN SPECIFIC ROUTES ---
 
@@ -1688,16 +1660,23 @@ app.get('/api/events/:eventId/logos', async (req, res) => {
 
 // Bulk Reorder Logos
 app.patch('/api/admin/events/logos/reorder', adminAuthMiddleware, async (req, res) => {
+    const client = await pool.connect();
     try {
         const { logos } = req.body;
-        if (!Array.isArray(logos)) return res.status(400).json({ error: 'Invalid data' });
+        if (!Array.isArray(logos)) return res.status(400).json({ error: 'Data tidak valid (Harus Array)' });
 
+        await client.query('BEGIN');
         for (const item of logos) {
-            await pool.query("UPDATE event_support_logos SET position = $1 WHERE id = $2", [item.position, item.id]);
+            await client.query("UPDATE event_support_logos SET position = $1 WHERE id = $2", [parseInt(item.position), item.id]);
         }
-        res.json({ success: true });
+        await client.query('COMMIT');
+        res.json({ success: true, message: 'Urutan logo berhasil diperbarui' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        await client.query('ROLLBACK');
+        console.error("Reorder Logo Error:", err.message);
+        res.status(500).json({ error: "Gagal memperbarui urutan logo" });
+    } finally {
+        client.release();
     }
 });
 
@@ -1714,17 +1693,9 @@ app.delete('/api/admin/events/logos/:id', adminAuthMiddleware, async (req, res) 
 
 // --- END OF SUPPORT LOGOS API ---
 
-// Assign Judge to Event (Admin Only)
-app.post('/api/admin/events/:eventId/assign-judge', adminAuthMiddleware, async (req, res) => {
-    try {
-        const { eventId } = req.params;
-        const { judgeId } = req.body;
-        await pool.query("UPDATE registrations SET judge_id = $1 WHERE contest_id = $2", [judgeId, eventId]);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+// --- END OF SUPPORT LOGOS API ---
+
+// (Duplicate Route Removed)
 
 // Compatibility for legacy PUT requests
 app.put('/api/admin/events/:id', adminAuthMiddleware, async (req, res) => {
