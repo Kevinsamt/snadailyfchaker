@@ -835,6 +835,9 @@
                                             <button onclick="openVideoModal('${reg.id}')" class="btn-primary" style="padding: 6px 12px; font-size: 0.7rem; background: rgba(255,255,255,0.1); color: #fff; border-radius: 8px; font-weight: 800; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
                                                 <i class="ri-video-add-line"></i> GANTI VIDEO
                                             </button>
+                                            <button onclick="openCompetitorsModal('${reg.id}')" class="btn-primary" style="padding: 6px 12px; font-size: 0.7rem; background: rgba(0,114,255,0.2); color: var(--primary); border-radius: 8px; font-weight: 800; display: flex; align-items: center; gap: 4px; border: 1px solid var(--primary); cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                                                <i class="ri-team-line"></i> LIHAT SAINGAN
+                                            </button>
                                         ` : ''}
                                         ${reg.status === 'approved' ? `
                                             <button onclick="printEntryCard('${reg.id}')" class="btn-primary" style="padding: 6px 12px; font-size: 0.7rem; background: var(--primary); color: #000; border-radius: 8px; font-weight: 800; display: flex; align-items: center; gap: 4px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 212, 255, 0.3);">
