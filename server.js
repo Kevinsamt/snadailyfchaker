@@ -1090,6 +1090,42 @@ app.post('/api/contest/registrations/:id/video', userAuthMiddleware, upload.sing
     }
 });
 
+// Get Class Competitors
+app.get('/api/contest/registrations/:id/class-competitors', userAuthMiddleware, async (req, res) => {
+    try {
+        const registrationId = req.params.id;
+        const userId = req.user.id;
+
+        // 1. Get the class and contest of the requested registration
+        const currentReg = await pool.query(
+            "SELECT contest_name, contest_class FROM contest_registrations WHERE id = $1 AND user_id = $2",
+            [registrationId, userId]
+        );
+
+        if (currentReg.rows.length === 0) {
+            return res.status(404).json({ error: 'Pendaftaran tidak ditemukan.' });
+        }
+
+        const { contest_name, contest_class } = currentReg.rows[0];
+
+        // 2. Get all other approved registrations in the same class
+        const result = await pool.query(`
+            SELECT id, fish_name, team_name, fish_image_url, entry_number
+            FROM contest_registrations
+            WHERE contest_name = $1 AND contest_class = $2 AND status = 'approved'
+            ORDER BY entry_number ASC
+        `, [contest_name, contest_class]);
+
+        res.json({
+            success: true,
+            data: result.rows,
+            meta: { contest_name, contest_class }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // My Registrations
 app.get('/api/contest/my-registrations', userAuthMiddleware, async (req, res) => {
     try {
