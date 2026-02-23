@@ -355,6 +355,55 @@
                 box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
             }
         }
+
+        /* Competitors Grid */
+        .competitors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+
+        .comp-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .comp-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .comp-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .comp-info {
+            padding: 1rem;
+        }
+
+        .comp-name {
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .comp-team {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -1033,6 +1082,55 @@
 
         function closeVideoModal() {
             document.getElementById('videoModal').style.display = 'none';
+        }
+
+        // --- COMPETITORS LOGIC ---
+        function openCompetitorsModal(regId) {
+            const modal = document.getElementById('competitorsModal');
+            const list = document.getElementById('competitorsList');
+            const empty = document.getElementById('compEmptyState');
+            const sub = document.getElementById('compModalSub');
+            const title = document.getElementById('compModalTitle');
+            const token = localStorage.getItem('sna_user_token');
+
+            modal.style.display = 'flex';
+            list.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;"><i class="ri-loader-4-line ri-spin" style="font-size: 2rem;"></i><p>Mencari saingan...</p></div>';
+            empty.style.display = 'none';
+
+            fetch(`/api/contest/registrations/${regId}/class-competitors`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        sub.innerText = `${data.meta.contest_name} | Kelas: ${data.meta.contest_class}`;
+
+                        if (data.data.length === 0) {
+                            list.innerHTML = '';
+                            empty.style.display = 'block';
+                        } else {
+                            list.innerHTML = data.data.map(comp => `
+                            <div class="comp-card">
+                                <img src="${comp.fish_image_url || 'https://via.placeholder.com/200x150?text=No+Photo'}" class="comp-img" alt="Fish">
+                                <div class="comp-info">
+                                    <div class="comp-name">${comp.fish_name}</div>
+                                    <div class="comp-team"><i class="ri-shield-user-line"></i> ${comp.team_name || 'Individual'}</div>
+                                    <div style="font-size: 0.7rem; color: var(--primary); margin-top: 5px; font-weight: 700;"># ${comp.entry_number || 'PENDING'}</div>
+                                </div>
+                            </div>
+                        `).join('');
+                        }
+                    } else {
+                        list.innerHTML = `<p style="grid-column: 1/-1; color: var(--error); text-align: center;">${data.error || 'Gagal memuat saingan'}</p>`;
+                    }
+                })
+                .catch(err => {
+                    list.innerHTML = `<p style="grid-column: 1/-1; color: var(--error); text-align: center;">Terjadi kesalahan sistem.</p>`;
+                });
+        }
+
+        function closeCompetitorsModal() {
+            document.getElementById('competitorsModal').style.display = 'none';
         }
 
         function handleVideoSelect(input) {
