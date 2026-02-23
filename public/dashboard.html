@@ -676,6 +676,20 @@
         </div>
     </div>
 
+    <!-- Competitors Video Modal -->
+    <div id="compVideoModal" class="modal" style="z-index: 10001;">
+        <div class="modal-content glass" style="max-width: 500px; padding: 1rem;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+                <button onclick="closeCompVideoModal()"
+                    style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <video id="playerCompVideo" controls
+                style="width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></video>
+        </div>
+    </div>
+
     <!-- Spin Wheel Overlay -->
     <div id="wheelOverlay" class="spin-wheel-overlay">
         <div style="text-align: center; margin-bottom: 2rem;">
@@ -1141,11 +1155,25 @@
                         } else {
                             list.innerHTML = data.data.map(comp => `
                             <div class="comp-card">
-                                <img src="${comp.fish_image_url || 'https://via.placeholder.com/200x150?text=No+Photo'}" class="comp-img" alt="Fish">
+                                <div style="position: relative;">
+                                    <img src="${comp.fish_image_url || 'https://via.placeholder.com/200x150?text=No+Photo'}" class="comp-img" alt="Fish">
+                                    ${comp.video_url ? `
+                                        <button onclick="viewCompVideo('${comp.video_url}')" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: 0.3s;" class="hover-scale">
+                                            <i class="ri-play-fill"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
                                 <div class="comp-info">
                                     <div class="comp-name">${comp.fish_name}</div>
                                     <div class="comp-team"><i class="ri-shield-user-line"></i> ${comp.team_name || 'Individual'}</div>
-                                    <div style="font-size: 0.7rem; color: var(--primary); margin-top: 5px; font-weight: 700;"># ${comp.entry_number || 'PENDING'}</div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                                        <div style="font-size: 0.7rem; color: var(--primary); font-weight: 700;"># ${comp.entry_number || 'PENDING'}</div>
+                                        ${comp.video_url ? `
+                                            <button onclick="viewCompVideo('${comp.video_url}')" style="background: none; border: none; color: var(--primary); font-size: 0.7rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                                <i class="ri-video-line"></i> LIHAT VIDEO
+                                            </button>
+                                        ` : ''}
+                                    </div>
                                 </div>
                             </div>
                         `).join('');
@@ -1161,6 +1189,22 @@
 
         function closeCompetitorsModal() {
             document.getElementById('competitorsModal').style.display = 'none';
+        }
+
+        function viewCompVideo(url) {
+            const modal = document.getElementById('compVideoModal');
+            const video = document.getElementById('playerCompVideo');
+            video.src = url;
+            modal.style.display = 'flex';
+            video.play();
+        }
+
+        function closeCompVideoModal() {
+            const modal = document.getElementById('compVideoModal');
+            const video = document.getElementById('playerCompVideo');
+            video.pause();
+            video.src = '';
+            modal.style.display = 'none';
         }
 
         function handleVideoSelect(input) {

@@ -1110,7 +1110,7 @@ app.get('/api/contest/registrations/:id/class-competitors', userAuthMiddleware, 
 
         // 2. Get all other approved registrations in the same class
         const result = await pool.query(`
-            SELECT id, fish_name, team_name, fish_image_url, entry_number
+            SELECT id, fish_name, team_name, fish_image_url, video_url, entry_number
             FROM contest_registrations
             WHERE contest_name = $1 AND contest_class = $2 AND status = 'approved'
             ORDER BY entry_number ASC
