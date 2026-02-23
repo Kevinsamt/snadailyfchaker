@@ -943,7 +943,7 @@ app.post('/api/contest/register', userAuthMiddleware, upload.fields([
 });
 
 // --- SECURE SPIN WHEEL LOGIC (SERVER-SIDE) ---
-const SPIN_PRIZES = ["PINK AURORA", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis"];
+const SPIN_PRIZES = ["PINK AURORA", "SALDO 750K", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis", "Ikan Random"];
 
 app.post('/api/contest/start-spin/:id', userAuthMiddleware, async (req, res) => {
     try {

@@ -216,7 +216,7 @@
             border: 5px solid #0f172a;
             /* conic-gradient for background slots */
             background: conic-gradient(#ffd700 0deg 60deg,
-                    #ffffff 60deg 120deg,
+                    #7c3aed 60deg 120deg,
                     #ffd700 120deg 180deg,
                     #ffffff 180deg 240deg,
                     #ffd700 240deg 300deg,
@@ -247,6 +247,11 @@
 
         .wheel-segment-label[data-index="0"] {
             color: #fff;
+        }
+
+        .wheel-segment-label[data-index="1"] {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px #ffd700;
         }
 
         /* Diamond Pack label white */
@@ -802,7 +807,7 @@
         }
 
         // --- SPIN WHEEL LOGIC ---
-        const PRIZES = ["PINK AURORA", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis"];
+        const PRIZES = ["PINK AURORA", "SALDO 750K", "+1 Entry Gratis", "Ikan Random", "+1 Entry Gratis", "Ikan Random"];
         let currentRegId = null;
         let isSpinning = false;
         let currentPrize = "";
