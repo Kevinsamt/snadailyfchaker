@@ -1,3 +1,4 @@
+<!-- VERSION 5.1 - REWRITE FINAL - SYNC CHECK -->
 <!DOCTYPE html>
 <html lang="id">
 
@@ -357,7 +358,7 @@
             <!-- Form Content -->
             <div class="form-panel">
                 <form id="contestForm">
-                    <input type="hidden" id="eventName" name="contestName" value="SnaDaily Contest">
+                    <input type="hidden" id="eventName" name="contestName" value="Daftar Kontes">
 
                     <!-- STEP 1: FISH DETAILS -->
                     <div class="form-step active" id="step1">
@@ -451,7 +452,6 @@
                                     Rp 40.000</div>
                             </div>
 
-                            <!-- QRIS Mockup / Instructions -->
                             <div
                                 style="background: white; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem; color: black; margin-bottom: 1.5rem;">
                                 <img src="img/qrispyment.png" style="width: 50px; border: 1px solid #ddd;" alt="QRIS"
@@ -473,12 +473,10 @@
                         <span id="sizeBadge" class="size-badge">Total file: 0 MB / 4.5 MB</span>
                     </div>
 
-                    <!-- Hidden Inputs for Files -->
                     <input type="file" id="fishPhoto" hidden accept="image/*" required>
                     <input type="file" id="fishVideo" hidden accept="video/*" required>
                     <input type="file" id="paymentProof" hidden accept="image/*" required>
 
-                    <!-- Navigation -->
                     <div class="nav-btns">
                         <button type="button" class="btn-nav btn-prev" id="btnPrev" style="visibility: hidden;">
                             <i class="ri-arrow-left-s-line"></i> KEMBALI
@@ -495,7 +493,6 @@
         </div>
     </main>
 
-    <!-- Success Overlay -->
     <div id="successOverlay" class="success-overlay">
         <div class="glass-panel" style="padding: 3rem; border-radius: 32px; max-width: 450px;">
             <div
@@ -518,7 +515,6 @@
             3: { title: 'Selesaikan <span class="text-gradient">Pembayaran</span>', desc: 'Upload file ikan dan bukti bayar untuk konfirmasi pendaftaran.' }
         };
 
-        // UI Helpers
         function updateStepUI() {
             document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
             document.getElementById(`step${currentStep}`).classList.add('active');
@@ -550,7 +546,6 @@
             document.getElementById('totalBill').innerText = `Rp ${price.toLocaleString('id-ID')}`;
         }
 
-        // Navigation
         document.getElementById('btnNext').onclick = () => {
             if (validateStep(currentStep)) {
                 currentStep++;
@@ -579,7 +574,6 @@
             return valid;
         }
 
-        // File Handling & Size Validation
         const fileSizes = { photo: 0, video: 0, proof: 0 };
         const MAX_TOTAL_SIZE = 4.5 * 1024 * 1024; // 4.5MB
 
@@ -625,7 +619,6 @@
             }
         };
 
-        // Final Submission
         document.getElementById('contestForm').onsubmit = async (e) => {
             e.preventDefault();
 
@@ -674,13 +667,11 @@
             }
         };
 
-        // Get Event Name from URL
         const params = new URLSearchParams(window.location.search);
         if (params.get('event')) {
             document.getElementById('eventName').value = params.get('event');
         }
 
-        // Auth Check
         if (!localStorage.getItem('sna_user_token')) {
             window.location.href = 'login.html';
         }
