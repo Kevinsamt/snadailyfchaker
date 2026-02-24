@@ -344,7 +344,7 @@
 
         function checkAuthAndRegister(eventTitle) {
             const token = localStorage.getItem('sna_user_token');
-            const targetUrl = `contest-entry.html?event=${encodeURIComponent(eventTitle)}`;
+            const targetUrl = `pendaftaran-kontes.html?event=${encodeURIComponent(eventTitle)}`;
 
             if (token) {
                 window.location.href = targetUrl;
