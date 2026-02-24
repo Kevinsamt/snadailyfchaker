@@ -48,16 +48,65 @@
             }
 
             .reg-card-premium {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-                padding: 1rem;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 1rem !important;
+                padding: 1.25rem 1rem !important;
             }
 
             .fish-thumb {
-                width: 100%;
-                height: 160px;
+                width: 100% !important;
+                height: 180px !important;
             }
+
+            .reg-actions {
+                flex-direction: row !important;
+                flex-wrap: wrap;
+                gap: 8px !important;
+                justify-content: flex-start !important;
+                align-items: center !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                padding-top: 1rem;
+                margin-top: 0.5rem;
+            }
+
+            .reg-actions button {
+                flex: 1;
+                min-width: 120px;
+                justify-content: center;
+                padding: 10px !important;
+            }
+        }
+
+        .reg-card-premium {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .reg-card-premium:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .reg-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .reg-actions {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
         }
 
         .user-avatar {
@@ -819,7 +868,7 @@
                             const statusClass = `badge-${reg.status.toLowerCase()}`;
 
                             return `
-                                <div class="reg-card-premium animate-fade-in" style="animation-delay: ${idx * 0.1}s; display: flex; align-items: center; gap: 1.5rem;">
+                                <div class="reg-card-premium animate-fade-in" style="animation-delay: ${idx * 0.1}s;">
                                     <div style="flex-shrink: 0;">
                                         <input type="checkbox" class="row-check" value="${reg.id}" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
                                     </div>
@@ -827,7 +876,7 @@
                                         <img src="${escapeHTML(reg.fish_image_url) || 'https://via.placeholder.com/100'}" class="fish-thumb" onclick="window.open('${escapeHTML(reg.fish_image_url)}', '_blank')">
                                         ${isDiamond ? '<div style="position: absolute; top: -8px; right: -8px; background: #ffd700; color: #000; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);"><i class="ri-vip-diamond-fill"></i></div>' : ''}
                                     </div>
-                                    <div style="flex: 1; min-width: 0;">
+                                    <div class="reg-info">
                                         <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 0.25rem;">
                                             <span style="font-family: monospace; font-weight: 900; color: var(--primary); font-size: 0.7rem; padding: 2px 8px; background: rgba(0,212,255,0.1); border-radius: 4px; border: 1px solid rgba(0,212,255,0.2);">${escapeHTML(reg.entry_number || '-')}</span>
                                             <span class="badge badge-primary" style="font-size: 0.6rem;">${escapeHTML(reg.contest_name)}</span>
@@ -839,7 +888,7 @@
                                             ${reg.spin_prize ? `<span style="color: #ffd700;"><i class="ri-gift-line"></i> ${escapeHTML(reg.spin_prize)}</span>` : ''}
                                         </div>
                                     </div>
-                                    <div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                                    <div class="reg-actions">
                                         ${canSpin ? `
                                             <button onclick="openWheel('${reg.id}')" class="gift-box-btn hover-lift">
                                                 <i class="ri-gift-fill"></i> SPIN!
