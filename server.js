@@ -175,6 +175,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS
     'https://snadailyfchaker.vercel.app',
     'https://snadigitaltech.com',
     'https://snadigital.shop',
+    'https://www.snadigital.shop',
     'http://localhost:3000',
     'http://localhost:5173',
     'http://localhost:5500',
@@ -184,12 +185,17 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS
 
 app.use(cors({
     origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl)
         if (!origin) return callback(null, true);
 
         const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1');
+
+        // Comprehensive check for allowed origins
         const isAllowed = allowedOrigins.some(o => {
-            const cleanAllowed = o.trim().replace('https://', '').replace('http://', '');
-            const cleanOrigin = origin.replace('https://', '').replace('http://', '');
+            const cleanAllowed = o.trim().replace(/^https?:\/\//, '');
+            const cleanOrigin = origin.replace(/^https?:\/\//, '');
+
+            // Exact match or subdomain match
             return cleanOrigin === cleanAllowed || cleanOrigin.endsWith('.' + cleanAllowed);
         });
 
@@ -197,9 +203,13 @@ app.use(cors({
             callback(null, true);
         } else {
             console.warn("[Security Alert]: CORS blocked for origin:", origin);
-            callback(new Error('Akses ditolak oleh Firewall Keamanan (CORS). Silakan hubungi admin.'));
+            // In dev mode, maybe be more lenient or log better
+            callback(new Error(`Akses ditolak oleh CORS (Origin: ${origin}).`));
         }
-    }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 const sanitizeInput = (req, res, next) => {
