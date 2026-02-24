@@ -702,10 +702,13 @@
                     <h2><i class="ri-ball-pen-fill"></i> Formulir Registrasi</h2>
 
                     <div class="input-box">
-                        <label>Pilih Event Aktif</label>
-                        <select id="eventName" class="premium-input" required>
-                            <option value="">Memuat list event...</option>
-                        </select>
+                        <label>Event yang Diikuti</label>
+                        <div id="eventDisplay" class="premium-input"
+                            style="background: rgba(0, 212, 255, 0.05); border-color: rgba(0, 212, 255, 0.2); display: flex; align-items: center; gap: 0.75rem; font-weight: 600;">
+                            <i class="ri-calendar-check-line" style="color: #00d4ff; font-size: 1.25rem;"></i>
+                            <span id="eventNameDisplay">Memuat info event...</span>
+                            <input type="hidden" id="eventName" name="eventName" required>
+                        </div>
                     </div>
 
                     <div class="file-grid" style="margin-bottom: 2rem;">
@@ -990,31 +993,23 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    const select = document.getElementById('eventName');
-                    if (!select) return;
+                    const eventNameInput = document.getElementById('eventName');
+                    const eventNameDisplay = document.getElementById('eventNameDisplay');
 
-                    const events = data.data.filter(ev => ev.status !== 'past');
-
-                    if (events.length === 0) {
-                        select.innerHTML = '<option value="">Belum ada event aktif</option>';
+                    if (!selectedEvent) {
+                        if (eventNameDisplay) eventNameDisplay.innerHTML = '<span style="color: var(--error);">❌ Pilih event dulu Cak!</span>';
+                        setTimeout(() => window.location.href = 'events.html', 1500);
                         return;
                     }
 
-                    select.innerHTML = '<option value="">Pilih Event Aktif...</option>' +
-                        events.map(ev =>
-                            `<option value="${ev.title}" ${selectedEvent === decodeURIComponent(ev.title) ? 'selected' : ''}>${ev.title}</option>`
-                        ).join('');
+                    const targetEvent = data.data.find(ev => ev.title === decodeURIComponent(selectedEvent));
 
-                    // Listen for event change
-                    select.addEventListener('change', (e) => {
-                        const targetEvent = events.find(ev => ev.title === e.target.value);
-                        if (targetEvent) updateTierAvailability(targetEvent);
-                    });
-
-                    // Initial load if event pre-selected
-                    if (selectedEvent) {
-                        const targetEvent = events.find(ev => ev.title === decodeURIComponent(selectedEvent));
-                        if (targetEvent) updateTierAvailability(targetEvent);
+                    if (targetEvent) {
+                        if (eventNameDisplay) eventNameDisplay.innerText = targetEvent.title;
+                        if (eventNameInput) eventNameInput.value = targetEvent.title;
+                        updateTierAvailability(targetEvent);
+                    } else {
+                        throw new Error('Event tidak ditemukan atau sudah tidak aktif');
                     }
                 } else {
                     throw new Error(data.error || 'Server memberikan respon gagal');
