@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Halaman Tidak Ditemukan | SNA Daily Fish Checker</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #001219;
+            --bg-mid: #005f73;
+            --water-light: #0a9396;
+            --sand: #e9d8a6;
+            --text: #ffffff;
+            --accent: #ee9b00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, var(--bg-deep), var(--bg-mid));
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text);
+        }
+
+        /* Aquarium Background */
+        .aquarium {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+            perspective: 1000px;
+        }
+
+        /* God Rays */
+        .god-rays {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(60deg,
+                    transparent 0, transparent 40px,
+                    rgba(255, 255, 255, 0.03) 50px,
+                    rgba(255, 255, 255, 0.03) 80px,
+                    transparent 100px);
+            filter: blur(20px);
+            opacity: 0.6;
+            animation: rays-shift 20s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes rays-shift {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: 1000px 0;
+            }
+        }
+
+        /* Marine Snow */
+        .marine-snow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .snow-flake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.3;
+            filter: blur(1px);
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            from {
+                transform: translateY(-100px) translateX(0);
+            }
+
+            to {
+                transform: translateY(110vh) translateX(50px);
+            }
+        }
+
+        .bubbles {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: rise 10s infinite ease-in;
+        }
+
+        @keyframes rise {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: translateY(-110vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        /* Realistic SVG Fish Animation - Ultra Fluid Upgrade */
+        .fish-container {
+            position: absolute;
+            z-index: 2;
+            width: 150px;
+            animation: swim 20s infinite linear, buoyancy 4s infinite ease-in-out;
+            pointer-events: none;
+            transition: transform 0.2s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes buoyancy {
+
+            0%,
+            100% {
+                margin-top: 0;
+            }
+
+            50% {
+                margin-top: -15px;
+            }
+        }
+
+        @keyframes swim {
+            0% {
+                left: -200px;
+                transform: rotateY(0deg) rotateZ(0deg);
+            }
+
+            49% {
+                transform: rotateY(0deg) rotateZ(0deg);
+            }
+
+            50% {
+                left: 100%;
+                transform: rotateY(180deg) rotateZ(0deg);
+            }
+
+            99% {
+                transform: rotateY(180deg) rotateZ(0deg);
+            }
+
+            100% {
+                left: -200px;
+                transform: rotateY(0deg) rotateZ(0deg);
+            }
+        }
+
+        .fish-body-group {
+            animation: body-wave 2.5s infinite ease-in-out;
+            transform-origin: 70% 50%;
+        }
+
+        @keyframes body-wave {
+
+            0%,
+            100% {
+                transform: rotateZ(-3deg) skewX(-3deg);
+            }
+
+            50% {
+                transform: rotateZ(3deg) skewX(3deg);
+            }
+        }
+
+        .tail {
+            animation: tail-fluid 0.8s infinite ease-in-out;
+            transform-origin: 35px 30px;
+        }
+
+        @keyframes tail-fluid {
+
+            0%,
+            100% {
+                transform: rotate(-20deg) scaleX(0.8);
+            }
+
+            50% {
+                transform: rotate(20deg) scaleX(1.2);
+            }
+        }
+
+        .fin {
+            animation: fin-fluid 2s infinite ease-in-out;
+            transform-origin: 50% 50%;
+        }
+
+        @keyframes fin-fluid {
+
+            0%,
+            100% {
+                transform: rotateY(0) scaleX(1);
+            }
+
+            50% {
+                transform: rotateY(45deg) scaleX(0.7);
+            }
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            padding: 3rem;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            max-width: 95%;
+            width: 500px;
+            animation: fadeIn 1s ease-out;
+            transition: transform 0.1s ease-out;
+            /* For parallax */
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .content {
+                padding: 2.5rem 1.5rem;
+                width: 90%;
+            }
+
+            h1 {
+                font-size: 5rem !important;
+            }
+
+            h2 {
+                font-size: 1.5rem !important;
+            }
+
+            p {
+                font-size: 1rem !important;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 1rem !important;
+            }
+
+            .fish-container {
+                width: 100px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 4rem !important;
+            }
+
+            .content {
+                padding: 2rem 1.25rem;
+            }
+
+            .god-rays {
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #fff, var(--water-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            font-weight: 800;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            color: #94d2bd;
+        }
+
+        p {
+            margin-bottom: 2.5rem;
+            opacity: 0.8;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(238, 155, 0, 0.4);
+        }
+
+        .btn:hover {
+            transform: scale(1.05) translateY(-3px);
+            background: #ca8a04;
+            box-shadow: 0 10px 25px rgba(238, 155, 0, 0.6);
+        }
+
+        /* Plants */
+        .plant {
+            position: absolute;
+            bottom: -5px;
+            width: 50px;
+            height: 180px;
+            background: linear-gradient(to top, #081c15, #1b4332);
+            border-radius: 50% 50% 0 0;
+            transform-origin: bottom;
+            animation: sway 5s infinite ease-in-out alternate;
+            z-index: 3;
+            opacity: 0.8;
+        }
+
+        @keyframes sway {
+            from {
+                transform: rotate(-8deg) scaleY(0.95);
+            }
+
+            to {
+                transform: rotate(8deg) scaleY(1.05);
+            }
+        }
+
+        .plant-1 {
+            left: 8%;
+            height: 220px;
+            animation-delay: 0s;
+            width: 60px;
+        }
+
+        .plant-2 {
+            left: 22%;
+            height: 140px;
+            animation-delay: -1.5s;
+            opacity: 0.6;
+        }
+
+        .plant-3 {
+            right: 12%;
+            height: 250px;
+            animation-delay: -3s;
+            width: 70px;
+        }
+
+        .plant-4 {
+            right: 30%;
+            height: 100px;
+            animation-delay: -0.5s;
+            opacity: 0.4;
+        }
+
+        .navbar {
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .navbar.scrolled {
+            background: rgba(0, 18, 25, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container"
+            style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+            <a href="index.html" class="text-gradient"
+                style="font-size: 1.5rem; font-weight: 800; text-decoration: none; letter-spacing: -2px; background: linear-gradient(45deg, #fff, var(--water-light)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">SnaDaily<span
+                    style="color: white; font-weight: 300;">Checker</span></a>
+
+        </div>
+    </nav>
+
+    <div class="god-rays"></div>
+    <div class="marine-snow" id="snowContainer"></div>
+    <div class="bubbles" id="bubbleContainer"></div>
+
+    <!-- defs for gradients -->
+    <svg width="0" height="0" style="position:absolute;">
+        <defs>
+            <linearGradient id="gradBetta" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#ff0054;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#7209b7;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="gradKoi" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="gradAngel" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#4361ee;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#4cc9f0;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- Diverse Fish Components - REFINED ULTRA PREMIUM -->
+
+    <!-- 1. Betta Fish (Cupang) -->
+    <div class="fish-container fish-1">
+        <svg viewBox="0 0 160 100" width="160">
+            <g class="fish-body-group">
+                <path d="M 60 30 C 80 0 130 10 145 35" fill="url(#gradBetta)" opacity="0.4" />
+                <path d="M 60 70 C 80 100 130 90 145 65" fill="url(#gradBetta)" opacity="0.4" />
+                <path d="M 40 50 C 40 35 60 30 90 30 C 120 30 140 40 145 50 C 140 60 120 70 90 70 C 60 70 40 65 40 50 Z"
+                    fill="url(#gradBetta)" />
+                <circle cx="125" cy="45" r="3" fill="black" />
+                <path class="tail" d="M 42 50 C 10 20 0 40 0 50 C 0 60 10 80 42 50 Z" fill="url(#gradBetta)"
+                    opacity="0.8" />
+                <path class="fin" d="M 85 55 C 75 65 70 55 80 50" fill="url(#gradBetta)" opacity="0.6" />
+            </g>
+        </svg>
+    </div>
+
+    <!-- 2. Koi Fish -->
+    <div class="fish-container fish-2">
+        <svg viewBox="0 0 160 80" width="150">
+            <g class="fish-body-group">
+                <path d="M 30 40 C 30 25 50 20 90 20 C 130 20 150 30 155 40 C 150 50 130 60 90 60 C 50 60 30 55 30 40"
+                    fill="url(#gradKoi)" />
+                <path d="M 60 25 C 75 22 85 30 80 40 C 70 45 60 35 60 25" fill="#f94144" opacity="0.9" />
+                <path d="M 100 35 C 115 30 125 45 110 55 C 95 58 90 45 100 35" fill="#f3722c" opacity="0.9" />
+                <circle cx="135" cy="35" r="3" fill="black" />
+                <path class="tail" d="M 32 40 C 10 20 0 30 0 40 C 0 50 10 60 32 40 Z" fill="url(#gradKoi)"
+                    opacity="0.7" />
+            </g>
+        </svg>
+    </div>
+
+    <!-- 3. Angelfish -->
+    <div class="fish-container fish-3">
+        <svg viewBox="0 0 120 140" width="130">
+            <g class="fish-body-group">
+                <path d="M 40 60 C 35 30 50 10 65 0 L 70 55 Z" fill="url(#gradAngel)" />
+                <path
+                    d="M 30 70 C 30 50 50 45 80 50 C 105 55 110 70 105 80 C 110 90 105 105 80 110 C 50 115 30 100 30 70 Z"
+                    fill="url(#gradAngel)" />
+                <path d="M 40 90 C 35 120 50 140 65 150 L 70 105 Z" fill="url(#gradAngel)" />
+                <circle cx="85" cy="70" r="3" fill="black" />
+                <path class="tail" d="M 32 70 C 15 60 5 65 0 70 C 5 75 15 80 32 70 Z" fill="url(#gradAngel)"
+                    opacity="0.8" />
+            </g>
+        </svg>
+    </div>
+
+    <div class="plant plant-1"></div>
+    <div class="plant plant-2"></div>
+    <div class="plant plant-3"></div>
+    <div class="plant plant-4"></div>
+    </div>
+
+    <div class="content">
+        <h1>404</h1>
+        <h2>Ups! Halaman Terlewat...</h2>
+        <p>Maaf, halaman yang Anda cari mungkin telah berenang menjauh atau tidak pernah ada.<br>Mari kembali ke
+            perairan yang lebih aman.</p>
+        <a href="/" class="btn">
+            <i class="ri-home-4-line"></i> Kembali ke Beranda
+        </a>
+    </div>
+
+    <script>
+        // Bubble generator
+        const container = document.getElementById('bubbleContainer');
+        for (let i = 0; i < 25; i++) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble');
+            const size = Math.random() * 12 + 4 + 'px';
+            bubble.style.width = size;
+            bubble.style.height = size;
+            bubble.style.left = Math.random() * 100 + '%';
+            bubble.style.animationDelay = Math.random() * 8 + 's';
+            bubble.style.animationDuration = Math.random() * 4 + 6 + 's';
+            container.appendChild(bubble);
+        }
+
+        // Marine Snow generator
+        const snowContainer = document.getElementById('snowContainer');
+        for (let i = 0; i < 40; i++) {
+            const flake = document.createElement('div');
+            flake.classList.add('snow-flake');
+            const size = Math.random() * 3 + 1 + 'px';
+            flake.style.width = size;
+            flake.style.height = size;
+            flake.style.left = Math.random() * 100 + '%';
+            flake.style.top = Math.random() * 100 + '%';
+            flake.style.animationDelay = Math.random() * 20 + 's';
+            flake.style.animationDuration = Math.random() * 10 + 15 + 's';
+            snowContainer.appendChild(flake);
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+
+        // Mouse Parallax Effect
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 60;
+            const y = (window.innerHeight / 2 - e.pageY) / 60;
+
+            // Parallax for Content Overlay
+            const content = document.querySelector('.content');
+            if (content) {
+                content.style.transform = `translate(${x}px, ${y}px)`;
+            }
+
+            // Parallax for Fish (Stronger)
+            const fish = document.querySelectorAll('.fish-container');
+            fish.forEach((f, idx) => {
+                const depth = (idx + 1) * 25;
+                const fx = (window.innerWidth / 2 - e.pageX) / depth;
+                const fy = (window.innerHeight / 2 - e.pageY) / depth;
+                f.style.transform = `translate(${fx}px, ${fy}px)`;
+            });
+        });
+    </script>
+</body>
+
+</html>
