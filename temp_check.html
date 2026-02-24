@@ -701,7 +701,7 @@
                 <form id="entryForm">
                     <h2><i class="ri-ball-pen-fill"></i> Formulir Registrasi</h2>
 
-                    <input type="hidden" id="eventName" name="eventName" required>
+                    <input type="hidden" id="eventName" name="eventName" value="SnaDaily Contest">
 
 
                     <div class="file-grid" style="margin-bottom: 2rem;">
@@ -974,34 +974,6 @@
                 // Set fixed values for registration
                 document.getElementById('registrationTier').value = 'Entry Gratis';
             }
-
-            try {
-                const res = await fetch('/api/events');
-                const data = await res.json();
-                if (data.success) {
-                    const select = document.getElementById('eventName');
-                    const events = data.data.filter(ev => ev.status !== 'past');
-                    select.innerHTML = '<option value="">Pilih Event Aktif...</option>' +
-                        events.map(ev =>
-                            `<option value="${ev.title}" ${selectedEvent === decodeURIComponent(ev.title) ? 'selected' : ''}>${ev.title}</option>`
-                        ).join('');
-
-                    // Listen for event change
-                    select.addEventListener('change', (e) => {
-                        const targetEvent = events.find(ev => ev.title === e.target.value);
-                        if (targetEvent) updateTierAvailability(targetEvent);
-                    });
-
-                    // Initial load if event pre-selected
-                    if (selectedEvent) {
-                        const targetEvent = events.find(ev => ev.title === decodeURIComponent(selectedEvent));
-                        if (targetEvent) updateTierAvailability(targetEvent);
-                    }
-                }
-            } catch (err) {
-                console.error('Error fetching events:', err);
-                document.getElementById('eventName').innerHTML = '<option value="">Gagal memuat event</option>';
-            }
         });
 
         let currentPrices = { early: 40000, mid: 60000, last: 80000, diamond: 100000 };
@@ -1195,7 +1167,7 @@
         function buildFormData() {
             const tier = document.getElementById('registrationTier').value;
             const formData = new FormData();
-            formData.append('contestName', document.getElementById('eventName').value);
+            formData.append('contestName', 'SnaDaily Contest');
             formData.append('fishName', document.getElementById('fishName').value);
             formData.append('fishType', '-');
             formData.append('contestClass', document.getElementById('contestClass').value);

@@ -701,7 +701,7 @@
                 <form id="entryForm">
                     <h2><i class="ri-ball-pen-fill"></i> Formulir Registrasi</h2>
 
-                    <input type="hidden" id="eventName" name="eventName" required>
+                    <input type="hidden" id="eventName" name="eventName" value="SnaDaily Contest">
 
 
                     <div class="file-grid" style="margin-bottom: 2rem;">
@@ -981,38 +981,8 @@
                     if (payment) payment.style.display = 'none';
                     if (tier) tier.value = 'Entry Gratis';
                 }
-
-                const res = await fetch('/api/events');
-                const data = await res.json();
-
-                if (data.success) {
-                    const eventNameInput = document.getElementById('eventName');
-                    const eventNameDisplay = document.getElementById('eventNameDisplay');
-
-                    if (!selectedEvent) {
-                        if (eventNameDisplay) eventNameDisplay.innerHTML = '<span style="color: var(--error);">❌ Pilih event dulu Cak!</span>';
-                        setTimeout(() => window.location.href = 'events.html', 1500);
-                        return;
-                    }
-
-                    const targetEvent = data.data.find(ev => ev.title === decodeURIComponent(selectedEvent));
-
-                    if (targetEvent) {
-                        if (eventNameDisplay) eventNameDisplay.innerText = targetEvent.title;
-                        if (eventNameInput) eventNameInput.value = targetEvent.title;
-                        updateTierAvailability(targetEvent);
-                    } else {
-                        throw new Error('Event tidak ditemukan atau sudah tidak aktif');
-                    }
-                } else {
-                    throw new Error(data.error || 'Server memberikan respon gagal');
-                }
             } catch (err) {
                 console.error('Initialization Error:', err);
-                const select = document.getElementById('eventName');
-                if (select) {
-                    select.innerHTML = `<option value="">❌ Gagal: ${err.message}</option>`;
-                }
             }
         });
 
@@ -1207,7 +1177,7 @@
         function buildFormData() {
             const tier = document.getElementById('registrationTier').value;
             const formData = new FormData();
-            formData.append('contestName', document.getElementById('eventName').value);
+            formData.append('contestName', 'SnaDaily Contest');
             formData.append('fishName', document.getElementById('fishName').value);
             formData.append('fishType', '-');
             formData.append('contestClass', document.getElementById('contestClass').value);
