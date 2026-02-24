@@ -632,30 +632,9 @@
                 <a href="track.html">Lacak Pesanan</a>
                 <a href="dashboard.html" id="nav-login-link" class="nav-auth-btn">Dashboard</a>
             </div>
-
-            <button class="hamburger-btn mobile-only" onclick="toggleMenu()"
-                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
-                <i class="ri-menu-4-line"></i>
-            </button>
         </div>
     </nav>
 
-    <!-- Nav Overlay (Same as index) -->
-    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
-    <div class="nav-overlay" id="navOverlay">
-        <div class="nav-menu-header">
-            <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">NAVIGASI</span>
-            <button class="hamburger-btn" onclick="toggleMenu()">
-                <i class="ri-close-line"></i>
-            </button>
-        </div>
-        <div class="nav-menu-links">
-            <a href="index.html" class="nav-menu-link"><i class="ri-home-4-line"></i> Beranda</a>
-            <a href="events.html" class="nav-menu-link"><i class="ri-calendar-event-line"></i> Event Kontes</a>
-            <a href="track.html" class="nav-menu-link"><i class="ri-truck-line"></i> Lacak Pesanan</a>
-            <div id="userMenuLinks"></div>
-        </div>
-    </div>
 
     <main class="main-wrapper">
         <div class="premium-card" id="entryPanel">
@@ -1292,6 +1271,31 @@
             await sendRegistration(formData);
         });
     </script>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav"
+        style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 400px; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; padding: 10px 5px; z-index: 10001; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);">
+        <a href="index.html" class="bottom-nav-item" data-page="index"
+            style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; gap: 4px; flex: 1;">
+            <i class="ri-home-5-line" style="font-size: 1.25rem;"></i>
+            <span
+                style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Home</span>
+        </a>
+        <a href="events.html" class="bottom-nav-item" data-page="events"
+            style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; gap: 4px; flex: 1;">
+            <i class="ri-trophy-line" style="font-size: 1.25rem;"></i>
+            <span
+                style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Events</span>
+        </a>
+        <a href="dashboard.html" class="bottom-nav-item" data-page="dashboard"
+            style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; gap: 4px; flex: 1;">
+            <i class="ri-dashboard-line" style="font-size: 1.25rem;"></i>
+            <span
+                style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Dash</span>
+        </a>
+    </nav>
+
+    <script src="js/navigation.js"></script>
 </body>
 
 </html>
