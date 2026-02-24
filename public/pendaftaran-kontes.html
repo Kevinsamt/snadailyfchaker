@@ -4,266 +4,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnaDaily - Pendaftaran Kontes Premium</title>
+    <title>SnaDaily – Form Pendaftaran Kontes</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=1.2">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/seasonal-themes.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap"
+        rel="stylesheet">
     <script src="js/theme-switcher.js" defer></script>
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #00d4ff 0%, #0072ff 100%);
-            --diamond-gradient: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
-            --panel-bg: rgba(15, 23, 42, 0.7);
-            --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        * {
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
             margin: 0;
-            padding: 0;
             min-height: 100vh;
             color: white;
-            overflow-x: hidden;
         }
 
-        .main-wrapper {
+        .page-wrap {
+            min-height: 100vh;
             display: flex;
+            align-items: flex-start;
             justify-content: center;
-            align-items: center;
-            padding: 4rem 1.5rem;
-            min-height: calc(100vh - 80px);
+            padding: 6rem 1rem 3rem;
         }
 
-        .premium-card {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
+        /* ── Main Card ── */
+        .reg-card {
             width: 100%;
-            max-width: 1150px;
-            background: rgba(15, 23, 42, 0.4);
+            max-width: 680px;
+            background: rgba(10, 18, 35, 0.6);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1px solid var(--glass-border-bright);
-            border-radius: var(--radius-lg);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 32px;
             overflow: hidden;
-            box-shadow: var(--shadow-premium), 0 0 100px rgba(0, 0, 0, 0.5);
-            animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-            position: relative;
-        }
-
-        @media (max-width: 968px) {
-            .premium-card {
-                grid-template-columns: 1fr;
-            }
-
-            .info-panel {
-                padding: 2.5rem !important;
-                border-right: none !important;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .form-panel {
-                padding: 2.5rem !important;
-            }
-        }
-
-        /* Side Info Panel */
-        .info-panel {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 114, 255, 0.05));
-            padding: 4rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .step-indicator {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .step-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-        }
-
-        .step-dot.active {
-            background: var(--primary);
-            box-shadow: 0 0 15px var(--primary);
-            width: 30px;
-            border-radius: 10px;
-        }
-
-        /* Form Content */
-        .form-panel {
-            padding: 4rem;
-            position: relative;
-        }
-
-        .form-step {
-            display: none;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .form-step.active {
-            display: block;
-        }
-
-        .input-box {
-            margin-bottom: 1.5rem;
-        }
-
-        .input-box label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .premium-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 1.25rem;
-            border-radius: 16px;
-            color: white;
-            font-family: inherit;
-            transition: all 0.3s;
-        }
-
-        .premium-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
-        }
-
-        /* Tier Grid */
-        .tier-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-
-        .tier-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        .tier-card.active {
-            background: rgba(0, 212, 255, 0.1);
-            border-color: var(--primary);
-            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
-        }
-
-        .tier-card.diamond.active {
-            background: rgba(255, 215, 0, 0.1);
-            border-color: #ffd700;
-            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
-        }
-
-        .tier-badge {
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            display: inline-block;
-        }
-
-        /* File Buttons */
-        .file-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px dashed rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .file-btn:hover {
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .file-btn i {
-            font-size: 1.5rem;
-            color: var(--primary);
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Navigation Buttons */
-        .nav-btns {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn-nav {
-            flex: 1;
-            padding: 1rem;
-            border-radius: 100px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: none;
-        }
-
-        .btn-prev {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-next {
-            background: var(--primary);
-            color: black;
-            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
-        }
-
-        /* Success Overlay */
-        .success-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+            animation: slideUp 0.7s cubic-bezier(0.23, 1, 0.32, 1) both;
         }
 
         @keyframes slideUp {
@@ -278,40 +57,454 @@
             }
         }
 
-        .size-badge {
-            font-size: 0.7rem;
+        /* ── Header Banner ── */
+        .card-header {
+            background: linear-gradient(135deg, #0072ff 0%, #00d4ff 100%);
+            padding: 2.5rem 2.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .event-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: 0.72rem;
             font-weight: 700;
-            color: var(--text-muted);
-            margin-top: 1rem;
-            display: block;
-            text-align: center;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            position: relative;
         }
 
-        .size-badge.warning {
-            color: #ff4d4d;
-            animation: shake 0.5s ease-in-out;
+        .event-badge .dot {
+            width: 7px;
+            height: 7px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
         }
 
-        @keyframes shake {
+        @keyframes pulse {
 
             0%,
             100% {
-                transform: translateX(0);
+                opacity: 1;
+                transform: scale(1);
             }
 
-            25% {
-                transform: translateX(-5px);
+            50% {
+                opacity: 0.5;
+                transform: scale(1.4);
+            }
+        }
+
+        .card-header h1 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 900;
+            margin: 0 0 0.4rem;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        .card-header p {
+            margin: 0;
+            font-size: 0.85rem;
+            opacity: 0.8;
+            position: relative;
+        }
+
+        /* ── Form Body ── */
+        .card-body {
+            padding: 2.5rem;
+        }
+
+        /* ── Section Label ── */
+        .section-label {
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(0, 212, 255, 0.8);
+            margin: 2rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(0, 212, 255, 0.15);
+        }
+
+        .section-label:first-child {
+            margin-top: 0;
+        }
+
+        /* ── Inputs ── */
+        .field {
+            margin-bottom: 1.25rem;
+        }
+
+        .field label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field label i {
+            font-size: 1rem;
+            color: rgba(0, 212, 255, 0.7);
+        }
+
+        .inp {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            padding: 0.95rem 1.2rem;
+            border-radius: 16px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.25s;
+            outline: none;
+        }
+
+        .inp::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .inp:focus {
+            border-color: rgba(0, 212, 255, 0.6);
+            background: rgba(0, 212, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.1);
+        }
+
+        .inp.error {
+            border-color: #ff4d4d;
+            box-shadow: 0 0 0 4px rgba(255, 77, 77, 0.1);
+        }
+
+        textarea.inp {
+            resize: none;
+            height: 100px;
+        }
+
+        select.inp option {
+            background: #0a1223;
+            color: white;
+        }
+
+        /* ── Class Grid ── */
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .class-chip {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: center;
+        }
+
+        .class-chip:hover {
+            border-color: rgba(0, 212, 255, 0.4);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .class-chip.selected {
+            border-color: rgba(0, 212, 255, 0.8);
+            background: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+        }
+
+        .class-chip .code {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: rgba(0, 212, 255, 0.9);
+            display: block;
+        }
+
+        .class-chip .name {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+        }
+
+        /* ── E-Wallet Radio ── */
+        .wallet-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .wallet-opt {
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 14px 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.25s;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .wallet-opt:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .wallet-opt.selected {
+            border-color: rgba(0, 212, 255, 0.7);
+            background: rgba(0, 212, 255, 0.08);
+        }
+
+        .wallet-opt .wlogo {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .wallet-opt .wname {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── QRIS Box ── */
+        .qris-box {
+            background: white;
+            border-radius: 20px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .qris-box img.qr-code {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+        }
+
+        .qris-box .qr-info .label {
+            font-size: 0.65rem;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .qris-box .qr-info .amount {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #0072ff;
+            line-height: 1.1;
+        }
+
+        .qris-box .qr-info .name {
+            font-size: 0.75rem;
+            color: #333;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* ── File Upload ── */
+        .upload-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            background: rgba(0, 212, 255, 0.04);
+        }
+
+        .upload-zone.has-file {
+            border-style: solid;
+            border-color: rgba(0, 212, 255, 0.5);
+            background: rgba(0, 212, 255, 0.06);
+        }
+
+        .upload-zone .icon {
+            font-size: 2rem;
+            color: rgba(0, 212, 255, 0.6);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .upload-zone .hint {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 0.25rem;
+        }
+
+        .upload-zone .file-name {
+            display: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: rgba(0, 212, 255, 0.9);
+            margin-top: 0.5rem;
+        }
+
+        #proofPreviewImg {
+            display: none;
+            max-height: 140px;
+            border-radius: 10px;
+            margin-top: 0.75rem;
+            object-fit: contain;
+        }
+
+        /* ── Submit Button ── */
+        .btn-submit {
+            width: 100%;
+            padding: 1.15rem;
+            border-radius: 100px;
+            background: linear-gradient(135deg, #0072ff, #00d4ff);
+            color: black;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 2rem;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(0, 114, 255, 0.4);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 114, 255, 0.5);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* ── Success Overlay ── */
+        .success-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 12, 25, 0.96);
+            backdrop-filter: blur(20px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success-screen.show {
+            display: flex;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
             }
 
-            75% {
-                transform: translateX(5px);
+            to {
+                opacity: 1;
             }
+        }
+
+        .success-icon {
+            width: 90px;
+            height: 90px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px solid rgba(0, 212, 255, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 3rem;
+            animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .card-header {
+                padding: 2rem 1.5rem 1.75rem;
+            }
+
+            .class-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .wallet-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* spinner animation */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ri-spin {
+            animation: spin 1s linear infinite;
         }
     </style>
 </head>
 
 <body>
-    <!-- Premium Atmosphere -->
     <div class="ocean-background">
         <div class="bubble x1"></div>
         <div class="bubble x2"></div>
@@ -320,11 +513,11 @@
         <div class="bubble x5"></div>
     </div>
 
-    <!-- Navigation -->
+    <!-- Navbar -->
     <nav class="navbar glass">
         <div class="container nav-container">
             <a href="index.html" class="nav-logo text-gradient">SnaDaily<span
-                    style="color: white; font-weight: 300;">Checker</span></a>
+                    style="color:white;font-weight:300">Checker</span></a>
             <div class="desktop-nav-links">
                 <a href="events.html">Event Kontes</a>
                 <a href="dashboard.html">Dashboard</a>
@@ -332,321 +525,255 @@
         </div>
     </nav>
 
-    <main class="main-wrapper">
-        <div class="premium-card">
-            <!-- Side Info -->
-            <div class="info-panel">
-                <div class="step-indicator">
-                    <div class="step-dot active" id="dot1"></div>
-                    <div class="step-dot" id="dot2"></div>
-                    <div class="step-dot" id="dot3"></div>
-                </div>
-                <h1 id="stepTitle">Daftar <span class="text-gradient">Kontes</span></h1>
-                <p id="stepDesc">Masukkan detail ikan kebanggaan Cak untuk mulai berkompetisi.</p>
+    <div class="page-wrap">
+        <div class="reg-card">
 
-                <div id="sidePreview" style="margin-top: auto;">
-                    <div class="file-btn"
-                        style="border-style: solid; height: 180px; display: flex; flex-direction: column; justify-content: center;">
-                        <i class="ri-image-2-line" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                        <img id="imgPreview"
-                            style="display:none; width:100%; height:100%; object-fit:cover; border-radius:12px;">
-                    </div>
+            <!-- Header -->
+            <div class="card-header">
+                <div class="event-badge">
+                    <span class="dot"></span>
+                    <span id="eventBadge">Pendaftaran Aktif</span>
                 </div>
+                <h1>Form Pendaftaran<br><span style="opacity:0.9;">Kontes Ikan</span></h1>
+                <p>Isi data dengan benar dan lengkap. Pendaftaran diproses dalam 1×24 jam.</p>
             </div>
 
-            <!-- Form Content -->
-            <div class="form-panel">
-                <form id="contestForm">
-                    <input type="hidden" id="eventName" name="contestName" value="Daftar Kontes">
+            <!-- Body -->
+            <div class="card-body">
+                <form id="regForm">
+                    <input type="hidden" id="contestName" value="Daftar Kontes">
 
-                    <!-- STEP 1: FISH DETAILS -->
-                    <div class="form-step active" id="step1">
-                        <h2><i class="ri-fish-line"></i> Detail Ikan</h2>
-                        <div class="input-box">
-                            <label>Nama Ikan</label>
-                            <input type="text" id="fishName" class="premium-input"
-                                placeholder="Misal: Blue Galaxy Venom" required>
+                    <!-- IKAN -->
+                    <div class="section-label">Data Ikan</div>
+
+                    <div class="field">
+                        <label><i class="ri-fish-line"></i> Nama Ikan Kebanggaan</label>
+                        <input type="text" id="fishName" class="inp" placeholder="Misal: Blue Galaxy Venom X" required>
+                    </div>
+
+                    <!-- KATEGORI / KELAS -->
+                    <div class="section-label">Kategori Kelas</div>
+
+                    <div class="field">
+                        <div class="class-grid" id="classGrid">
+                            <div class="class-chip selected" data-val="A1" onclick="selectClass(this)">
+                                <span class="code">A1</span>
+                                <span class="name">Plakat Basic</span>
+                            </div>
+                            <div class="class-chip" data-val="A2" onclick="selectClass(this)">
+                                <span class="code">A2</span>
+                                <span class="name">Multicolor</span>
+                            </div>
+                            <div class="class-chip" data-val="A3" onclick="selectClass(this)">
+                                <span class="code">A3</span>
+                                <span class="name">Rim Series</span>
+                            </div>
+                            <div class="class-chip" data-val="B1" onclick="selectClass(this)">
+                                <span class="code">B1</span>
+                                <span class="name">HM Basic</span>
+                            </div>
+                            <div class="class-chip" data-val="B2" onclick="selectClass(this)">
+                                <span class="code">B2</span>
+                                <span class="name">HM Multi</span>
+                            </div>
+                            <div class="class-chip" data-val="C1" onclick="selectClass(this)">
+                                <span class="code">C1</span>
+                                <span class="name">FM Open</span>
+                            </div>
+                            <div class="class-chip" data-val="C2" onclick="selectClass(this)">
+                                <span class="code">C2</span>
+                                <span class="name">Longfin VT</span>
+                            </div>
+                            <div class="class-chip" data-val="C3" onclick="selectClass(this)">
+                                <span class="code">C3</span>
+                                <span class="name">PK Dumbo</span>
+                            </div>
+                            <div class="class-chip" data-val="C4" onclick="selectClass(this)">
+                                <span class="code">C4</span>
+                                <span class="name">HMPK</span>
+                            </div>
                         </div>
-                        <div class="input-box">
-                            <label>Tim / Handle</label>
-                            <input type="text" id="teamName" class="premium-input" placeholder="Nama Tim (Opsional)">
+                        <input type="hidden" id="contestClass" value="A1">
+                    </div>
+
+                    <!-- PEMBAYARAN E-WALLET -->
+                    <div class="section-label">Entry Pembayaran</div>
+
+                    <div class="field">
+                        <label><i class="ri-wallet-3-line"></i> Pilih Metode E-Wallet</label>
+                        <div class="wallet-grid" id="walletGrid">
+                            <div class="wallet-opt selected" data-wallet="DANA" onclick="selectWallet(this)">
+                                <span class="wlogo">💙</span>
+                                <span class="wname">DANA</span>
+                            </div>
+                            <div class="wallet-opt" data-wallet="GoPay" onclick="selectWallet(this)">
+                                <span class="wlogo">💚</span>
+                                <span class="wname">GoPay</span>
+                            </div>
+                            <div class="wallet-opt" data-wallet="OVO" onclick="selectWallet(this)">
+                                <span class="wlogo">💜</span>
+                                <span class="wname">OVO</span>
+                            </div>
+                            <div class="wallet-opt" data-wallet="ShopeePay" onclick="selectWallet(this)">
+                                <span class="wlogo">🧡</span>
+                                <span class="wname">ShopeePay</span>
+                            </div>
+                            <div class="wallet-opt" data-wallet="QRIS" onclick="selectWallet(this)">
+                                <span class="wlogo">📱</span>
+                                <span class="wname">QRIS</span>
+                            </div>
+                            <div class="wallet-opt" data-wallet="Transfer Bank" onclick="selectWallet(this)">
+                                <span class="wlogo">🏦</span>
+                                <span class="wname">Transfer</span>
+                            </div>
                         </div>
-                        <div class="input-box">
-                            <label>WhatsApp Aktif</label>
-                            <input type="tel" id="waNumber" class="premium-input" placeholder="08xxxxxxx" required>
-                        </div>
-                        <div class="input-box">
-                            <label>Alamat Lengkap (Untuk Hadiah)</label>
-                            <textarea id="fullAddress" class="premium-input" style="height: 80px; resize: none;"
-                                placeholder="Tulis alamat detail..." required></textarea>
+                        <input type="hidden" id="paymentMethod" value="DANA">
+                    </div>
+
+                    <!-- QRIS / Rekening Info -->
+                    <div class="qris-box" id="qrisBox">
+                        <img class="qr-code" src="img/qrispyment.png" alt="QRIS"
+                            onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png'">
+                        <div class="qr-info">
+                            <div class="label">Nomor Rekening / QRIS</div>
+                            <div class="amount" id="paymentAmount">Rp 40.000</div>
+                            <div class="name">A.N Terra Arries Pesada</div>
+                            <div style="font-size:0.7rem;color:#888;margin-top:4px;">No. 08xxxxxxxxxx (DANA / QRIS)
+                            </div>
                         </div>
                     </div>
 
-                    <!-- STEP 2: CLASS & TIER -->
-                    <div class="form-step" id="step2">
-                        <h2><i class="ri-trophy-line"></i> Kelas & Tier</h2>
-                        <div class="input-box">
-                            <label>Kategori Kelas</label>
-                            <select id="contestClass" class="premium-input" required>
-                                <optgroup label="Kelas A - Plakat Series">
-                                    <option value="A1">A1 - Plakat Basic</option>
-                                    <option value="A2">A2 - Multicolor</option>
-                                    <option value="A3">A3 - Rim Series</option>
-                                </optgroup>
-                                <optgroup label="Kelas B - Halfmoon Series">
-                                    <option value="B1">B1 - HM Basic</option>
-                                    <option value="B2">B2 - HM Multi</option>
-                                </optgroup>
-                                <optgroup label="Kelas C - Special Class">
-                                    <option value="C1">C1 - FM Open</option>
-                                    <option value="C2">C2 - Longfin VT</option>
-                                    <option value="C3">C3 - PK Dumbo</option>
-                                    <option value="C4">C4 - HMPK</option>
-                                </optgroup>
-                            </select>
-                        </div>
+                    <!-- BUKTI TRANSFER -->
+                    <div class="section-label" style="margin-top:1.75rem;">Bukti Transfer</div>
 
-                        <label
-                            style="display: block; font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem; text-transform: uppercase;">Pilih
-                            Registration Tier</label>
-                        <div class="tier-grid">
-                            <div class="tier-card active" onclick="setTier('Early', 40000, this)">
-                                <div class="tier-badge" style="background: rgba(0,212,255,0.1); color: #00d4ff;">EARLY
-                                    BIRD</div>
-                                <div style="font-weight: 800; font-size: 1.2rem;">Rp 40.000</div>
-                                <div style="font-size: 0.7rem; opacity: 0.6;">Batch Pertama</div>
-                            </div>
-                            <div class="tier-card diamond" onclick="setTier('Diamond', 10000, this)">
-                                <div class="tier-badge" style="background: rgba(255,215,0,0.15); color: #ffd700;">
-                                    DIAMOND</div>
-                                <div style="font-weight: 800; font-size: 1.2rem; color: #ffd700;">Rp 10.000</div>
-                                <div style="font-size: 0.7rem; color: #ffd700; opacity: 0.8;">Extra Diamond Spin</div>
-                            </div>
+                    <div class="field">
+                        <label><i class="ri-image-2-line"></i> Lampirkan Bukti Transfer</label>
+                        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('proofFile').click()">
+                            <i class="ri-upload-cloud-2-line icon"></i>
+                            <div style="font-weight:700;font-size:0.9rem;">Klik untuk upload foto bukti</div>
+                            <div class="hint">JPG / PNG / WEBP • Maks 4 MB</div>
+                            <div class="file-name" id="proofFileName"></div>
+                            <img id="proofPreviewImg" alt="Preview bukti transfer">
                         </div>
-                        <input type="hidden" id="registrationTier" value="Early">
-                        <input type="hidden" id="paymentAmount" value="40000">
+                        <input type="file" id="proofFile" hidden accept="image/*" required>
                     </div>
 
-                    <!-- STEP 3: UPLOAD & PAY -->
-                    <div class="form-step" id="step3">
-                        <h2><i class="ri-bank-card-line"></i> Upload & Bayar</h2>
+                    <!-- ALAMAT -->
+                    <div class="section-label">Hadiah & Kontak</div>
 
-                        <div class="grid grid-2" style="gap: 1rem; margin-bottom: 2rem;">
-                            <div class="file-btn" onclick="document.getElementById('fishPhoto').click()">
-                                <i class="ri-camera-lens-line"></i>
-                                <span id="photoName">Foto Ikan</span>
-                            </div>
-                            <div class="file-btn" onclick="document.getElementById('fishVideo').click()">
-                                <i class="ri-video-line"></i>
-                                <span id="videoName">Video Ikan</span>
-                            </div>
-                        </div>
-
-                        <div id="paymentArea"
-                            style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
-                            <div style="text-align: center; margin-bottom: 1rem;">
-                                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">
-                                    Total Tagihan</div>
-                                <div id="totalBill" style="font-size: 1.8rem; font-weight: 900; color: var(--primary);">
-                                    Rp 40.000</div>
-                            </div>
-
-                            <div
-                                style="background: white; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem; color: black; margin-bottom: 1.5rem;">
-                                <img src="img/qrispyment.png" style="width: 50px; border: 1px solid #ddd;" alt="QRIS"
-                                    onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png'">
-                                <div>
-                                    <div style="font-weight: 800; font-size: 0.9rem;">QRIS SNADAILY</div>
-                                    <div style="font-size: 0.7rem;">A.N TERRA ARRIES PESADA</div>
-                                </div>
-                            </div>
-
-                            <div class="file-btn"
-                                style="padding: 1rem; border-style: solid; background: rgba(0,212,255,0.05);"
-                                onclick="document.getElementById('paymentProof').click()">
-                                <i class="ri-file-list-3-line" style="font-size: 1.2rem;"></i>
-                                <span id="proofName" style="font-size: 0.8rem;">Upload Bukti Bayar</span>
-                            </div>
-                        </div>
-
-                        <span id="sizeBadge" class="size-badge">Total file: 0 MB / 4.5 MB</span>
+                    <div class="field">
+                        <label><i class="ri-map-pin-2-line"></i> Alamat Pengiriman Hadiah</label>
+                        <textarea id="shippingAddress" class="inp"
+                            placeholder="Tulis alamat lengkap: Jl., No., RT/RW, Kel., Kec., Kota, Prov., Kode Pos"
+                            required></textarea>
                     </div>
 
-                    <input type="file" id="fishPhoto" hidden accept="image/*" required>
-                    <input type="file" id="fishVideo" hidden accept="video/*" required>
-                    <input type="file" id="paymentProof" hidden accept="image/*" required>
-
-                    <div class="nav-btns">
-                        <button type="button" class="btn-nav btn-prev" id="btnPrev" style="visibility: hidden;">
-                            <i class="ri-arrow-left-s-line"></i> KEMBALI
-                        </button>
-                        <button type="button" class="btn-nav btn-next" id="btnNext">
-                            LANJUT <i class="ri-arrow-right-s-line"></i>
-                        </button>
-                        <button type="submit" class="btn-nav btn-next" id="btnSubmit" style="display: none;">
-                            <i class="ri-rocket-2-fill"></i> DAFTAR SEKARANG
-                        </button>
+                    <div class="field">
+                        <label><i class="ri-whatsapp-line"></i> Nomor WhatsApp Aktif</label>
+                        <input type="tel" id="waNumber" class="inp" placeholder="08xxxxxxxxxx" required>
                     </div>
+
+                    <button type="submit" class="btn-submit" id="btnSubmit">
+                        <i class="ri-send-plane-fill"></i> DAFTAR SEKARANG
+                    </button>
                 </form>
-            </div>
+            </div><!-- /card-body -->
         </div>
-    </main>
+    </div><!-- /page-wrap -->
 
-    <div id="successOverlay" class="success-overlay">
-        <div class="glass-panel" style="padding: 3rem; border-radius: 32px; max-width: 450px;">
-            <div
-                style="width: 80px; height: 80px; background: rgba(0,212,255,0.1); border-radius: 50%; display: grid; place-items: center; margin: 0 auto 1.5rem; border: 2px solid var(--primary);">
-                <i class="ri-checkbox-circle-fill" style="font-size: 3rem; color: var(--primary);"></i>
-            </div>
-            <h2 style="font-weight: 800; font-size: 2rem; margin-bottom: 0.5rem;">Berhasil!</h2>
-            <p style="opacity: 0.7; margin-bottom: 2rem;">Pendaftaran Cak sedang diproses. Cek statusnya di Dashboard
-                ya!</p>
-            <a href="dashboard.html" class="btn-nav btn-next" style="text-decoration: none;">MENU DASHBOARD</a>
-        </div>
+    <!-- Success Screen -->
+    <div class="success-screen" id="successScreen">
+        <div class="success-icon">🏆</div>
+        <h2 style="font-size:2rem;font-weight:900;margin:0 0 0.75rem;">Berhasil Daftar!</h2>
+        <p style="opacity:0.7;max-width:320px;margin:0 auto 2rem;">Pendaftaran Cak sedang diproses admin. Cek status di
+            Dashboard ya!</p>
+        <a href="dashboard.html"
+            style="background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.4);color:#00d4ff;padding:14px 32px;border-radius:100px;font-weight:800;text-decoration:none;font-size:0.9rem;">
+            <i class="ri-layout-grid-line"></i> Dashboard Saya
+        </a>
     </div>
 
     <script>
-        let currentStep = 1;
-        const totalSteps = 3;
-        const steps = {
-            1: { title: 'Daftar <span class="text-gradient">Kontes</span>', desc: 'Masukkan detail ikan kebanggaan Cak untuk mulai berkompetisi.' },
-            2: { title: 'Pilih <span class="text-gradient">Kategori</span>', desc: 'Tentukan kelas perlombaan dan tier pendaftaran yang Cak inginkan.' },
-            3: { title: 'Selesaikan <span class="text-gradient">Pembayaran</span>', desc: 'Upload file ikan dan bukti bayar untuk konfirmasi pendaftaran.' }
-        };
+        // ── Auth Guard ──
+        const token = localStorage.getItem('sna_user_token');
+        if (!token) window.location.href = 'login.html';
 
-        function updateStepUI() {
-            document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
-            document.getElementById(`step${currentStep}`).classList.add('active');
+        // ── Set Event Name from URL ──
+        const params = new URLSearchParams(window.location.search);
+        const eventName = params.get('event') || 'Daftar Kontes';
+        document.getElementById('contestName').value = eventName;
+        document.getElementById('eventBadge').textContent = eventName;
 
-            document.querySelectorAll('.step-dot').forEach((d, i) => {
-                d.classList.toggle('active', i + 1 === currentStep);
-            });
-
-            const header = steps[currentStep];
-            document.getElementById('stepTitle').innerHTML = header.title;
-            document.getElementById('stepDesc').innerText = header.desc;
-
-            document.getElementById('btnPrev').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
-
-            if (currentStep === totalSteps) {
-                document.getElementById('btnNext').style.display = 'none';
-                document.getElementById('btnSubmit').style.display = 'flex';
-            } else {
-                document.getElementById('btnNext').style.display = 'flex';
-                document.getElementById('btnSubmit').style.display = 'none';
-            }
+        // ── Class Selection ──
+        function selectClass(el) {
+            document.querySelectorAll('.class-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('contestClass').value = el.dataset.val;
         }
 
-        function setTier(name, price, el) {
-            document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById('registrationTier').value = name;
-            document.getElementById('paymentAmount').value = price;
-            document.getElementById('totalBill').innerText = `Rp ${price.toLocaleString('id-ID')}`;
+        // ── Wallet Selection ──
+        function selectWallet(el) {
+            document.querySelectorAll('.wallet-opt').forEach(w => w.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('paymentMethod').value = el.dataset.wallet;
         }
 
-        document.getElementById('btnNext').onclick = () => {
-            if (validateStep(currentStep)) {
-                currentStep++;
-                updateStepUI();
-            }
-        };
-
-        document.getElementById('btnPrev').onclick = () => {
-            currentStep--;
-            updateStepUI();
-        };
-
-        function validateStep(step) {
-            const currentStepEl = document.getElementById(`step${step}`);
-            const inputs = currentStepEl.querySelectorAll('input[required], textarea[required], select[required]');
-            let valid = true;
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    input.style.borderColor = '#ff4d4d';
-                    valid = false;
-                } else {
-                    input.style.borderColor = '';
-                }
-            });
-            if (!valid) alert('Lengkapi data dulu ya Cak!');
-            return valid;
-        }
-
-        const fileSizes = { photo: 0, video: 0, proof: 0 };
-        const MAX_TOTAL_SIZE = 4.5 * 1024 * 1024; // 4.5MB
-
-        function updateSizeBadge() {
-            const total = fileSizes.photo + fileSizes.video + fileSizes.proof;
-            const badge = document.getElementById('sizeBadge');
-            const mb = (total / (1024 * 1024)).toFixed(2);
-            badge.innerText = `Total file: ${mb} MB / 4.5 MB`;
-            badge.classList.toggle('warning', total > MAX_TOTAL_SIZE);
-        }
-
-        document.getElementById('fishPhoto').onchange = function (e) {
+        // ── File Upload Preview ──
+        document.getElementById('proofFile').addEventListener('change', function (e) {
             const file = e.target.files[0];
-            if (file) {
-                fileSizes.photo = file.size;
-                document.getElementById('photoName').innerText = file.name;
-                const reader = new FileReader();
-                reader.onload = e => {
-                    document.getElementById('imgPreview').src = e.target.result;
-                    document.getElementById('imgPreview').style.display = 'block';
-                    document.querySelector('.ri-image-2-line').style.display = 'none';
-                }
-                reader.readAsDataURL(file);
-                updateSizeBadge();
-            }
-        };
+            if (!file) return;
 
-        document.getElementById('fishVideo').onchange = function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                fileSizes.video = file.size;
-                document.getElementById('videoName').innerText = file.name;
-                updateSizeBadge();
+            if (file.size > 4 * 1024 * 1024) {
+                alert('Ukuran file terlalu besar! Maksimal 4 MB ya Cak.');
+                this.value = '';
+                return;
             }
-        };
 
-        document.getElementById('paymentProof').onchange = function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                fileSizes.proof = file.size;
-                document.getElementById('proofName').innerText = file.name;
-                updateSizeBadge();
-            }
-        };
+            const zone = document.getElementById('uploadZone');
+            zone.classList.add('has-file');
 
-        document.getElementById('contestForm').onsubmit = async (e) => {
+            document.getElementById('proofFileName').style.display = 'block';
+            document.getElementById('proofFileName').textContent = '✓ ' + file.name;
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById('proofPreviewImg');
+                img.src = e.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ── Form Submit ──
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const totalSize = fileSizes.photo + fileSizes.video + fileSizes.proof;
-            if (totalSize > MAX_TOTAL_SIZE) {
-                alert('Waduh Cak, total file kegedean! Harus di bawah 4.5MB ya.');
+            const proofFile = document.getElementById('proofFile').files[0];
+            if (!proofFile) {
+                alert('Upload bukti transfer dulu ya Cak!');
                 return;
             }
 
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> MENGIRIM...';
-
-            const formData = new FormData();
-            formData.append('contestName', document.getElementById('eventName').value);
-            formData.append('fishName', document.getElementById('fishName').value);
-            formData.append('teamName', document.getElementById('teamName').value);
-            formData.append('waNumber', document.getElementById('waNumber').value);
-            formData.append('fullAddress', document.getElementById('fullAddress').value);
-            formData.append('contestClass', document.getElementById('contestClass').value);
-            formData.append('registrationTier', document.getElementById('registrationTier').value);
-            formData.append('paymentAmount', document.getElementById('paymentAmount').value);
-
-            formData.append('fishPhoto', document.getElementById('fishPhoto').files[0]);
-            formData.append('fishVideo', document.getElementById('fishVideo').files[0]);
-            formData.append('paymentProof', document.getElementById('paymentProof').files[0]);
+            btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Mengirim...';
 
             try {
-                const token = localStorage.getItem('sna_user_token');
+                const formData = new FormData();
+                formData.append('contestName', document.getElementById('contestName').value);
+                formData.append('fishName', document.getElementById('fishName').value);
+                formData.append('fishType', document.getElementById('contestClass').value);
+                formData.append('contestClass', document.getElementById('contestClass').value);
+                formData.append('paymentMethod', document.getElementById('paymentMethod').value);
+                formData.append('fullAddress', document.getElementById('shippingAddress').value);
+                formData.append('waNumber', document.getElementById('waNumber').value);
+                formData.append('paymentAmount', 40000);
+                formData.append('registrationTier', 'Early');
+                formData.append('paymentProof', proofFile);
+
+                // Dummy photo (required by server) — use proof as placeholder if no photo
+                formData.append('fishPhoto', proofFile);
+
                 const res = await fetch('/api/contest/register', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
@@ -654,26 +781,17 @@
                 });
 
                 if (res.ok) {
-                    document.getElementById('successOverlay').style.display = 'flex';
+                    document.getElementById('successScreen').classList.add('show');
                 } else {
-                    const data = await res.json();
-                    throw new Error(data.error || 'Terjadi kesalahan sistem');
+                    const err = await res.json();
+                    throw new Error(err.error || 'Terjadi kesalahan');
                 }
             } catch (err) {
                 alert('Gagal daftar: ' + err.message);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="ri-rocket-2-fill"></i> DAFTAR SEKARANG';
+                btn.innerHTML = '<i class="ri-send-plane-fill"></i> DAFTAR SEKARANG';
             }
-        };
-
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('event')) {
-            document.getElementById('eventName').value = params.get('event');
-        }
-
-        if (!localStorage.getItem('sna_user_token')) {
-            window.location.href = 'login.html';
-        }
+        });
     </script>
 </body>
 
