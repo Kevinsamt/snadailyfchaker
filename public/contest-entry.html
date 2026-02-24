@@ -945,47 +945,54 @@
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
             const userMenuLinks = document.getElementById('userMenuLinks');
 
-            if (userMenuLinks) {
-                if (userData) {
-                    userMenuLinks.innerHTML = `
-                        <a href="dashboard.html" class="nav-menu-link">
-                            <i class="ri-dashboard-line"></i> Dashboard
-                        </a>
-                        <a href="#" onclick="logout()" class="nav-menu-link" style="color: var(--error);">
-                            <i class="ri-logout-box-r-line"></i> Logout
-                        </a>
-                    `;
-                } else {
-                    userMenuLinks.innerHTML = `
-                        <a href="login.html" class="nav-menu-link">
-                            <i class="ri-user-line"></i> Login
-                        </a>
-                        <a href="register.html" class="nav-menu-link" style="color: var(--secondary);">
-                            <i class="ri-user-add-line"></i> Daftar Akun
-                        </a>
-                    `;
-                }
-            }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const selectedEvent = urlParams.get('event');
-            const isFreeEntry = urlParams.get('claim') === 'free_entry';
-
-            if (isFreeEntry) {
-                document.getElementById('freeEntryBadge').style.display = 'flex';
-                document.getElementById('standardTierGrid').style.display = 'none';
-                document.getElementById('freeEntryPrizeCard').style.display = 'block';
-                document.getElementById('directPaymentArea').style.display = 'none';
-
-                // Set fixed values for registration
-                document.getElementById('registrationTier').value = 'Entry Gratis';
-            }
-
             try {
+                if (userMenuLinks) {
+                    if (userData) {
+                        userMenuLinks.innerHTML = `
+                            <a href="dashboard.html" class="nav-menu-link">
+                                <i class="ri-dashboard-line"></i> Dashboard
+                            </a>
+                            <a href="#" onclick="logout()" class="nav-menu-link" style="color: var(--error);">
+                                <i class="ri-logout-box-r-line"></i> Logout
+                            </a>
+                        `;
+                    } else {
+                        userMenuLinks.innerHTML = `
+                            <a href="login.html" class="nav-menu-link">
+                                <i class="ri-user-line"></i> Login
+                            </a>
+                            <a href="register.html" class="nav-menu-link" style="color: var(--secondary);">
+                                <i class="ri-user-add-line"></i> Daftar Akun
+                            </a>
+                        `;
+                    }
+                }
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const selectedEvent = urlParams.get('event');
+                const isFreeEntry = urlParams.get('claim') === 'free_entry';
+
+                if (isFreeEntry) {
+                    const badge = document.getElementById('freeEntryBadge');
+                    const grid = document.getElementById('standardTierGrid');
+                    const card = document.getElementById('freeEntryPrizeCard');
+                    const payment = document.getElementById('directPaymentArea');
+                    const tier = document.getElementById('registrationTier');
+
+                    if (badge) badge.style.display = 'flex';
+                    if (grid) grid.style.display = 'none';
+                    if (card) card.style.display = 'block';
+                    if (payment) payment.style.display = 'none';
+                    if (tier) tier.value = 'Entry Gratis';
+                }
+
                 const res = await fetch('/api/events');
                 const data = await res.json();
+
                 if (data.success) {
                     const select = document.getElementById('eventName');
+                    if (!select) return;
+
                     const events = data.data.filter(ev => ev.status !== 'past');
 
                     if (events.length === 0) {
@@ -1013,8 +1020,11 @@
                     throw new Error(data.error || 'Server memberikan respon gagal');
                 }
             } catch (err) {
-                console.error('Error fetching events:', err);
-                document.getElementById('eventName').innerHTML = `<option value="">❌ Gagal: ${err.message}</option>`;
+                console.error('Initialization Error:', err);
+                const select = document.getElementById('eventName');
+                if (select) {
+                    select.innerHTML = `<option value="">❌ Gagal: ${err.message}</option>`;
+                }
             }
         });
 
