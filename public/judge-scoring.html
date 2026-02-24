@@ -263,7 +263,6 @@
             </div>
 
         </div>
-        </div>
     </nav>
 
 
@@ -456,7 +455,6 @@
         </aside>
     </main>
 
-    <script src="js/navigation.js"></script>
     <script>
         let currentEventId = new URLSearchParams(window.location.search).get('eventId');
         let allEntries = [];
@@ -1020,6 +1018,21 @@
 
 
     </script>
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="index.html" class="bottom-nav-item">
+            <i class="ri-home-5-line"></i>
+            <span>Beranda</span>
+        </a>
+        <a href="judge.html" class="bottom-nav-item active">
+            <i class="ri-dashboard-3-line"></i>
+            <span>Panel Juri</span>
+        </a>
+        <a href="#" class="bottom-nav-item" onclick="logout()">
+            <i class="ri-logout-box-r-line"></i>
+            <span>Logout</span>
+        </a>
+    </nav>
     <script src="js/navigation.js"></script>
 </body>
 

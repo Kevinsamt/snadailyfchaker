@@ -115,7 +115,6 @@
             </div>
 
         </div>
-        </div>
     </nav>
 
 
@@ -176,7 +175,6 @@
         </div>
     </main>
 
-    <script src="js/navigation.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
@@ -271,6 +269,21 @@
             window.location.href = 'login.html';
         }
     </script>
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="index.html" class="bottom-nav-item">
+            <i class="ri-home-5-line"></i>
+            <span>Beranda</span>
+        </a>
+        <a href="judge.html" class="bottom-nav-item active">
+            <i class="ri-dashboard-3-line"></i>
+            <span>Panel Juri</span>
+        </a>
+        <a href="#" class="bottom-nav-item" onclick="logout()">
+            <i class="ri-logout-box-r-line"></i>
+            <span>Logout</span>
+        </a>
+    </nav>
     <script src="js/navigation.js"></script>
 </body>
 
