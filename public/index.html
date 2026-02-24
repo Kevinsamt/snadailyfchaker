@@ -159,6 +159,12 @@
                 height: 45px;
             }
         }
+
+        @media (max-width: 768px) {
+            .mobile-bottom-nav {
+                display: flex !important;
+            }
+        }
     </style>
 </head>
 
@@ -296,7 +302,7 @@
 
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav"
-        style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 400px; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; justify-content: space-around; align-items: center; padding: 10px 5px; z-index: 10001; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);">
+        style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 400px; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; display: none; justify-content: space-around; align-items: center; padding: 10px 5px; z-index: 10001; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);">
         <a href="index.html" class="bottom-nav-item active" data-page="index"
             style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #00d4ff; gap: 4px; flex: 1; background: rgba(0, 212, 255, 0.1); border-radius: 12px; padding: 8px 0;">
             <i class="ri-home-5-line" style="font-size: 1.25rem;"></i>
