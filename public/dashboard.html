@@ -1022,17 +1022,6 @@
             }
         });
 
-        function toggleMenu() {
-            const navOverlay = document.getElementById('navOverlay');
-            const navBackdrop = document.getElementById('navBackdrop');
-            navOverlay.classList.toggle('active');
-            navBackdrop.classList.toggle('active');
-        }
-
-        // Hamburger button event listener (fix for multiple elements)
-        document.querySelectorAll('.hamburger-btn').forEach(btn => {
-            btn.onclick = toggleMenu;
-        });
 
         async function initWheel() {
             const wheel = document.getElementById('wheel');

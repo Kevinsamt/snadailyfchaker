@@ -262,37 +262,10 @@
                     UTAMA</a>
             </div>
 
-            <button class="hamburger-btn mobile-only"
-                style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px;">
-                <i class="ri-menu-4-line"></i>
-            </button>
+        </div>
         </div>
     </nav>
 
-    <div class="nav-overlay-backdrop" id="navBackdrop" onclick="toggleMenu()"></div>
-    <div class="nav-overlay" id="navOverlay">
-        <div class="nav-menu-header">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div
-                    style="width: 32px; height: 32px; background: var(--secondary); border-radius: 8px; display: grid; place-items: center; color: #000;">
-                    <i class="ri-star-fill"></i>
-                </div>
-                <span class="text-gradient" style="font-weight: 800; font-size: 1.25rem;">JUDGE MENU</span>
-            </div>
-            <button class="hamburger-btn" onclick="toggleMenu()">
-                <i class="ri-close-line"></i>
-            </button>
-        </div>
-        <div class="nav-menu-links">
-            <a href="index.html" class="nav-menu-link">
-                <i class="ri-home-4-line"></i> Beranda Utama
-            </a>
-            <a href="judge.html" class="nav-menu-link">
-                <i class="ri-dashboard-3-line"></i> Judge Dashboard
-            </a>
-            <div id="userMenuLinks"></div>
-        </div>
-    </div>
 
     <main class="container judge-scoring-main">
         <!-- Left: Contestant List -->
@@ -1045,17 +1018,6 @@
             }
         });
 
-        function toggleMenu() {
-            const navOverlay = document.getElementById('navOverlay');
-            const navBackdrop = document.getElementById('navBackdrop');
-            navOverlay.classList.toggle('active');
-            navBackdrop.classList.toggle('active');
-        }
-
-        // Hamburger button event listener (fix for multiple elements)
-        document.querySelectorAll('.hamburger-btn').forEach(btn => {
-            btn.onclick = toggleMenu;
-        });
 
     </script>
     <script src="js/navigation.js"></script>
