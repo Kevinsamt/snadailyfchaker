@@ -473,7 +473,6 @@
             <!-- Desktop Links -->
             <div class="desktop-nav-links">
                 <a href="index.html">Beranda</a>
-                <a href="events.html">Event Kontes</a>
                 <a href="dashboard.html" class="active">Dashboard</a>
             </div>
 
@@ -526,57 +525,15 @@
 
             <!-- Main Content -->
             <main>
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 5px;"
-                    class="hide-scrollbar">
-                    <button id="tabContests" onclick="switchDashboardTab('contests')" class="tab-btn active"
-                        style="flex: 1; min-width: 140px;">
-                        <i class="ri-history-line"></i> Riwayat Kontes
-                    </button>
-                    <button id="tabPrizes" onclick="switchDashboardTab('prizes')" class="tab-btn"
-                        style="flex: 1; min-width: 140px;">
-                        <i class="ri-gift-line"></i> Hadiah Saya
-                    </button>
-                </div>
-
-                <!-- Contests Section -->
-                <div id="sectionContests" class="tab-section active animate-fade-in">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div
-                                style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px; box-shadow: 0 0 10px var(--primary);">
-                            </div>
-                            <h2 style="font-size: 1.5rem; font-weight: 800;">Riwayat <span
-                                    class="text-gradient">Kontes</span></h2>
-                        </div>
-                        <button onclick="printBatchCards()" class="btn-primary"
-                            style="padding: 10px 20px; font-size: 0.85rem; background: var(--primary); color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,212,255,0.3);">
-                            <i class="ri-printer-line"></i> CETAK PILIHAN
-                        </button>
-                    </div>
-                    <div id="registrationList" class="grid" style="grid-template-columns: 1fr; gap: 1rem;">
-                        <div style="text-align: center; padding: 5rem; color: var(--text-muted);">
-                            <i class="ri-loader-3-line ri-spin"
-                                style="font-size: 2.5rem; color: var(--primary); display: block; margin-bottom: 1rem;"></i>
-                            Memuat riwayat pendaftaran...
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Prizes Section -->
-                <div id="sectionPrizes" class="tab-section animate-fade-in" style="display: none;">
+                <!-- Profile Info -->
+                <div class="glass-panel animate-fade-in" style="padding: 2rem; border-radius: 24px;">
                     <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-                        <div style="width: 4px; height: 24px; background: #ffd700; border-radius: 10px;"></div>
-                        <h2 style="font-size: 1.5rem; font-weight: 800;">Hadiah <span class="text-gradient"
-                                style="background: linear-gradient(135deg, #ffd700, #fff);">Saya</span></h2>
+                        <div style="width: 4px; height: 24px; background: var(--primary); border-radius: 10px;"></div>
+                        <h2 style="font-size: 1.5rem; font-weight: 800;">Akun <span class="text-gradient">Saya</span>
+                        </h2>
                     </div>
-                    <div id="prizeList" class="grid" style="grid-template-columns: 1fr; gap: 1rem;">
-                        <div style="text-align: center; padding: 5rem; color: var(--text-muted);">
-                            <i class="ri-loader-3-line ri-spin"
-                                style="font-size: 2.5rem; color: #ffd700; display: block; margin-bottom: 1rem;"></i>
-                            Memuat daftar hadiah...
-                        </div>
-                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">Kelola profil dan
+                        informasi akun Anda di sini.</p>
                 </div>
             </main>
         </div>
@@ -1540,12 +1497,6 @@
             <i class="ri-home-5-line" style="font-size: 1.25rem;"></i>
             <span
                 style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Home</span>
-        </a>
-        <a href="events.html" class="bottom-nav-item" data-page="events"
-            style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; gap: 4px; flex: 1;">
-            <i class="ri-trophy-line" style="font-size: 1.25rem;"></i>
-            <span
-                style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Events</span>
         </a>
         <a href="dashboard.html" class="bottom-nav-item active" data-page="dashboard"
             style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #00d4ff; gap: 4px; flex: 1; background: rgba(0, 212, 255, 0.1); border-radius: 12px; padding: 8px 0;">
