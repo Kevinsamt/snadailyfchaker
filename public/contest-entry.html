@@ -985,6 +985,12 @@
                 if (data.success) {
                     const select = document.getElementById('eventName');
                     const events = data.data.filter(ev => ev.status !== 'past');
+
+                    if (events.length === 0) {
+                        select.innerHTML = '<option value="">Belum ada event aktif</option>';
+                        return;
+                    }
+
                     select.innerHTML = '<option value="">Pilih Event Aktif...</option>' +
                         events.map(ev =>
                             `<option value="${ev.title}" ${selectedEvent === decodeURIComponent(ev.title) ? 'selected' : ''}>${ev.title}</option>`
@@ -1001,10 +1007,12 @@
                         const targetEvent = events.find(ev => ev.title === decodeURIComponent(selectedEvent));
                         if (targetEvent) updateTierAvailability(targetEvent);
                     }
+                } else {
+                    throw new Error(data.error || 'Server memberikan respon gagal');
                 }
             } catch (err) {
                 console.error('Error fetching events:', err);
-                document.getElementById('eventName').innerHTML = '<option value="">Gagal memuat event</option>';
+                document.getElementById('eventName').innerHTML = `<option value="">❌ Gagal: ${err.message}</option>`;
             }
         });
 
