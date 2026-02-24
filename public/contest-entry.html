@@ -702,6 +702,9 @@
                     <h2><i class="ri-ball-pen-fill"></i> Formulir Registrasi</h2>
 
                     <input type="hidden" id="eventName" name="eventName" required>
+                    <div id="eventNameDisplay"
+                        style="display:none; font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-bottom: 1rem;">
+                    </div>
 
 
                     <div class="file-grid" style="margin-bottom: 2rem;">
@@ -1009,10 +1012,8 @@
                 }
             } catch (err) {
                 console.error('Initialization Error:', err);
-                const select = document.getElementById('eventName');
-                if (select) {
-                    select.innerHTML = `<option value="">❌ Gagal: ${err.message}</option>`;
-                }
+                alert('❌ Gagal memuat event: ' + err.message + '\nKamu akan diarahkan ke halaman events.');
+                window.location.href = 'events.html';
             }
         });
 
