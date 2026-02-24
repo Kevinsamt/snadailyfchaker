@@ -142,7 +142,47 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 // SECURITY MIDDLEWARES
 app.use(helmet({
-    contentSecurityPolicy: false, // Disabled for simplicity with external scripts like Midtrans
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "'unsafe-eval'",
+                "https://cdn.jsdelivr.net",
+                "https://app.sandbox.midtrans.com",
+                "https://app.midtrans.com",
+                "https://rajaongkir.komerce.id"
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://cdn.jsdelivr.net",
+                "https://fonts.googleapis.com"
+            ],
+            imgSrc: [
+                "'self'",
+                "data:",
+                "https:",
+                "*.supabase.co",
+                "*.midtrans.com",
+                "logodownload.org",
+                "img.icons8.com"
+            ],
+            connectSrc: [
+                "'self'",
+                "https:",
+                "*.supabase.co",
+                "https://app.sandbox.midtrans.com",
+                "https://app.midtrans.com",
+                "https://rajaongkir.komerce.id"
+            ],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: [],
+        }
+    },
+    referrerPolicy: { policy: 'no-referrer-when-downgrade' }
 }));
 
 // Rate Limiting: Prevent Brute Force on Login
