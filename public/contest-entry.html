@@ -945,24 +945,26 @@
             const userData = JSON.parse(localStorage.getItem('sna_user_data'));
             const userMenuLinks = document.getElementById('userMenuLinks');
 
-            if (userData) {
-                userMenuLinks.innerHTML = `
-                    <a href="dashboard.html" class="nav-menu-link">
-                        <i class="ri-dashboard-line"></i> Dashboard
-                    </a>
-                    <a href="#" onclick="logout()" class="nav-menu-link" style="color: var(--error);">
-                        <i class="ri-logout-box-r-line"></i> Logout
-                    </a>
-                `;
-            } else {
-                userMenuLinks.innerHTML = `
-                    <a href="login.html" class="nav-menu-link">
-                        <i class="ri-user-line"></i> Login
-                    </a>
-                    <a href="register.html" class="nav-menu-link" style="color: var(--secondary);">
-                        <i class="ri-user-add-line"></i> Daftar Akun
-                    </a>
-                `;
+            if (userMenuLinks) {
+                if (userData) {
+                    userMenuLinks.innerHTML = `
+                        <a href="dashboard.html" class="nav-menu-link">
+                            <i class="ri-dashboard-line"></i> Dashboard
+                        </a>
+                        <a href="#" onclick="logout()" class="nav-menu-link" style="color: var(--error);">
+                            <i class="ri-logout-box-r-line"></i> Logout
+                        </a>
+                    `;
+                } else {
+                    userMenuLinks.innerHTML = `
+                        <a href="login.html" class="nav-menu-link">
+                            <i class="ri-user-line"></i> Login
+                        </a>
+                        <a href="register.html" class="nav-menu-link" style="color: var(--secondary);">
+                            <i class="ri-user-add-line"></i> Daftar Akun
+                        </a>
+                    `;
+                }
             }
 
             const urlParams = new URLSearchParams(window.location.search);
