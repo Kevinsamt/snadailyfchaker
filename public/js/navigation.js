@@ -1,29 +1,25 @@
 /**
- * Global Navigation & UI Logic
- * Handles hamburger menu and common UI interactions
+ * Highlight Active Page in Mobile Bottom Nav
  */
+function updateActiveBottomNav() {
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const cleanPage = currentPage.replace('.html', '');
 
-function toggleMenu() {
-    const overlay = document.getElementById('navOverlay');
-    const backdrop = document.getElementById('navBackdrop');
-
-    if (!overlay || !backdrop) return;
-
-    overlay.classList.toggle('active');
-    backdrop.classList.toggle('active');
-
-    // Prevent body scroll when menu is open
-    if (overlay.classList.contains('active')) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = '';
-    }
+    document.querySelectorAll('.bottom-nav-item').forEach(item => {
+        const itemPage = item.getAttribute('data-page');
+        if (cleanPage.includes(itemPage) || (cleanPage === 'index' && itemPage === 'index')) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
 }
 
 // Global Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Initialize Navigation Menu (User data / Links)
     updateNavigationMenu();
+    updateActiveBottomNav();
 
     // 2. Auto-attach Toggle Function to all Hamburger Buttons
     document.querySelectorAll('.hamburger-btn').forEach(btn => {
