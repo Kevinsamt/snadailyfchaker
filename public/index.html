@@ -186,7 +186,6 @@
 
             <!-- Desktop Links -->
             <div class="desktop-nav-links">
-                <a href="events.html">Event Kontes</a>
                 <a href="login.html" id="nav-login-link" class="nav-auth-btn">Login</a>
             </div>
 
@@ -309,12 +308,7 @@
             <span
                 style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Home</span>
         </a>
-        <a href="events.html" class="bottom-nav-item" data-page="events"
-            style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; gap: 4px; flex: 1;">
-            <i class="ri-trophy-line" style="font-size: 1.25rem;"></i>
-            <span
-                style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Events</span>
-        </a>
+
         <a href="dashboard.html" class="bottom-nav-item" data-page="dashboard"
             style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; gap: 4px; flex: 1;">
             <i class="ri-dashboard-line" style="font-size: 1.25rem;"></i>
@@ -332,7 +326,7 @@
         const userData = JSON.parse(localStorage.getItem('sna_user_data'));
         if (userData && loginLink) {
             loginLink.innerText = 'Dashboard';
-            loginLink.href = userData.role === 'judge' ? 'judge.html' : 'dashboard.html';
+            loginLink.href = 'dashboard.html';
         }
     </script>
 </body>
