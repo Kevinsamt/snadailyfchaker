@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SnaDaily - Betta Contest Events</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=1.2">
     <link rel="stylesheet" href="css/seasonal-themes.css">
     <script src="js/theme-switcher.js" defer></script>
     <style>
@@ -251,67 +251,6 @@
         .logo-bronze:hover {
             opacity: 1;
             border-color: rgba(205, 127, 50, 0.3);
-        }
-
-        /* Mobile Bottom Nav Fix */
-        .mobile-bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: rgba(13, 17, 23, 0.95);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            display: none;
-            justify-content: space-around;
-            align-items: center;
-            padding: 12px 10px;
-            z-index: 10001;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 212, 255, 0.15);
-        }
-
-        .bottom-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none !important;
-            color: #94a3b8 !important;
-            background: transparent;
-            transition: all 0.3s ease;
-            gap: 4px;
-            padding: 8px;
-            border-radius: 12px;
-            flex: 1;
-        }
-
-        .bottom-nav-item i {
-            font-size: 1.4rem;
-        }
-
-        .bottom-nav-item span {
-            font-size: 0.6rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .bottom-nav-item.active {
-            color: #00d4ff !important;
-            background: rgba(0, 212, 255, 0.1);
-        }
-
-        @media (max-width: 768px) {
-            .mobile-bottom-nav {
-                display: flex;
-            }
-
-            body {
-                padding-bottom: 110px !important;
-            }
         }
     </style>
 </head>
@@ -645,18 +584,25 @@
         }
     </script>
     <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav">
-        <a href="index.html" class="bottom-nav-item" data-page="index">
-            <i class="ri-home-5-line"></i>
-            <span>Home</span>
+    <nav class="mobile-bottom-nav"
+        style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 400px; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; padding: 10px 5px; z-index: 10001; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);">
+        <a href="index.html" class="bottom-nav-item" data-page="index"
+            style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; gap: 4px; flex: 1;">
+            <i class="ri-home-5-line" style="font-size: 1.25rem;"></i>
+            <span
+                style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Home</span>
         </a>
-        <a href="events.html" class="bottom-nav-item" data-page="events">
-            <i class="ri-trophy-line"></i>
-            <span>Events</span>
+        <a href="events.html" class="bottom-nav-item active" data-page="events"
+            style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #00d4ff; gap: 4px; flex: 1; background: rgba(0, 212, 255, 0.1); border-radius: 12px; padding: 8px 0;">
+            <i class="ri-trophy-line" style="font-size: 1.25rem;"></i>
+            <span
+                style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Events</span>
         </a>
-        <a href="dashboard.html" class="bottom-nav-item" data-page="dashboard">
-            <i class="ri-dashboard-line"></i>
-            <span>Dash</span>
+        <a href="dashboard.html" class="bottom-nav-item" data-page="dashboard"
+            style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; gap: 4px; flex: 1;">
+            <i class="ri-dashboard-line" style="font-size: 1.25rem;"></i>
+            <span
+                style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Dash</span>
         </a>
     </nav>
 </body>
