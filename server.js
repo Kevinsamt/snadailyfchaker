@@ -1642,6 +1642,30 @@ app.patch('/api/admin/events/:id', adminAuthMiddleware, async (req, res) => {
     }
 });
 
+// Delete Single Event
+app.delete('/api/admin/events/:id', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query('DELETE FROM events WHERE id = $1 RETURNING id', [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Event tidak ditemukan' });
+        }
+        res.json({ success: true, message: `Event ID ${id} berhasil dihapus` });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete ALL Events
+app.delete('/api/admin/events', adminAuthMiddleware, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM events');
+        res.json({ success: true, message: 'Semua event berhasil dihapus' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 
 // --- SUPPORT LOGOS API ---

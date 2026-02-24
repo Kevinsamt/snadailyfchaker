@@ -679,7 +679,16 @@
                 </div>
                 <div>
                     <div class="glass-panel animate-fade-in">
-                        <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Daftar Event</h2>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2 style="font-size: 1.25rem;">Daftar Event</h2>
+                            <button onclick="deleteAllEvents()"
+                                style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #ef4444; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.background='rgba(239,68,68,0.3)'"
+                                onmouseout="this.style.background='rgba(239,68,68,0.15)'">
+                                <i class="ri-delete-bin-2-line"></i> Hapus Semua
+                            </button>
+                        </div>
                         <div id="eventList" style="max-height: 600px; overflow-y: auto;">
                             <!-- Injected by JS -->
                         </div>
@@ -1119,6 +1128,44 @@
                     `).join('');
                 }
             } catch (err) { console.error(err); }
+        }
+
+        async function deleteEvent(id) {
+            if (!confirm('Yakin mau hapus event ini? Data registrasi yang terkait juga akan terhapus.')) return;
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch(`/api/admin/events/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    fetchEvents();
+                    fetchStats();
+                } else {
+                    alert('Gagal hapus event: ' + data.error);
+                }
+            } catch (err) { alert('Error: ' + err.message); }
+        }
+
+        async function deleteAllEvents() {
+            if (!confirm('⚠️ HAPUS SEMUA EVENT?\n\nSemua data event akan dihapus permanen dari database. Yakin?')) return;
+            if (!confirm('Konfirmasi sekali lagi: Hapus SEMUA event sekarang?')) return;
+            const token = sessionStorage.getItem('sna_admin_token');
+            try {
+                const res = await fetch('/api/admin/events', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Semua event berhasil dihapus!');
+                    fetchEvents();
+                    fetchStats();
+                } else {
+                    alert('Gagal: ' + data.error);
+                }
+            } catch (err) { alert('Error: ' + err.message); }
         }
 
         async function openJudgeAssignment(eventId) {
